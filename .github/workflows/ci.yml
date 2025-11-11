@@ -1,0 +1,315 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop, claude/** ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+env:
+  PYTHON_VERSION: '3.10'
+  NODE_VERSION: '18'
+
+jobs:
+  # ============================================================================
+  # Python Linting and Type Checking
+  # ============================================================================
+  python-quality:
+    name: Python Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Black (Check Only)
+        run: |
+          black --check iodd_manager.py api.py start.py
+        continue-on-error: true
+
+      - name: Run Ruff
+        run: |
+          ruff check iodd_manager.py api.py start.py
+        continue-on-error: true
+
+      - name: Run Pylint
+        run: |
+          pylint iodd_manager.py api.py start.py --exit-zero
+        continue-on-error: true
+
+      - name: Run MyPy
+        run: |
+          mypy iodd_manager.py api.py start.py
+        continue-on-error: true
+
+      - name: Run Bandit Security Scan
+        run: |
+          bandit -c pyproject.toml -r iodd_manager.py api.py start.py
+        continue-on-error: true
+
+  # ============================================================================
+  # Frontend Linting
+  # ============================================================================
+  frontend-quality:
+    name: Frontend Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Run ESLint
+        run: |
+          cd frontend
+          npx eslint "**/*.{js,jsx}" --max-warnings=50
+        continue-on-error: true
+
+      - name: Run Prettier Check
+        run: |
+          cd frontend
+          npx prettier --check "**/*.{js,jsx,json,css,md}"
+        continue-on-error: true
+
+  # ============================================================================
+  # Python Tests
+  # ============================================================================
+  python-tests:
+    name: Python Tests
+    runs-on: ubuntu-latest
+    needs: [python-quality]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run pytest
+        run: |
+          pytest tests/ -v --tb=short --maxfail=5
+        continue-on-error: false
+
+      - name: Run pytest with coverage
+        if: success()
+        run: |
+          pytest tests/ --cov=. --cov-report=xml --cov-report=term --cov-report=html
+
+      - name: Upload coverage to artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: htmlcov/
+          retention-days: 7
+
+      - name: Coverage comment
+        if: github.event_name == 'pull_request'
+        uses: py-cov-action/python-coverage-comment-action@v3
+        with:
+          GITHUB_TOKEN: ${{ github.token }}
+        continue-on-error: true
+
+  # ============================================================================
+  # Build Verification
+  # ============================================================================
+  build-verification:
+    name: Build Verification
+    runs-on: ubuntu-latest
+    needs: [python-tests, frontend-quality]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Verify Python imports
+        run: |
+          python -c "import iodd_manager; print('iodd_manager imported successfully')"
+          python -c "import api; print('api imported successfully')"
+          python -c "import start; print('start imported successfully')"
+
+      - name: Check database initialization
+        run: |
+          python -c "
+          from iodd_manager import StorageManager
+          import tempfile
+          import os
+          tmp = tempfile.NamedTemporaryFile(suffix='.db', delete=False)
+          tmp.close()
+          storage = StorageManager(tmp.name)
+          print('Database initialized successfully')
+          os.unlink(tmp.name)
+          "
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build frontend (if configured)
+        run: |
+          cd frontend
+          if [ -f "vite.config.js" ]; then
+            npm run build
+          else
+            echo "No build configuration found, skipping frontend build"
+          fi
+        continue-on-error: true
+
+  # ============================================================================
+  # Security Scanning
+  # ============================================================================
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install safety pip-audit
+
+      - name: Run Safety check
+        run: |
+          safety check --json || true
+        continue-on-error: true
+
+      - name: Run pip-audit
+        run: |
+          pip-audit --desc || true
+        continue-on-error: true
+
+      - name: Run Bandit
+        run: |
+          bandit -c pyproject.toml -r . -f json -o bandit-report.json || true
+        continue-on-error: true
+
+      - name: Upload security reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            bandit-report.json
+          retention-days: 7
+
+  # ============================================================================
+  # Matrix Testing (Multiple Python Versions)
+  # ============================================================================
+  matrix-tests:
+    name: Test Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: |
+          pytest tests/ -v --tb=line --maxfail=3
+        continue-on-error: false
+
+  # ============================================================================
+  # Status Check Summary
+  # ============================================================================
+  ci-success:
+    name: CI Success
+    runs-on: ubuntu-latest
+    needs: [python-quality, frontend-quality, python-tests, build-verification, security-scan]
+    if: always()
+
+    steps:
+      - name: Check job results
+        run: |
+          echo "Python Quality: ${{ needs.python-quality.result }}"
+          echo "Frontend Quality: ${{ needs.frontend-quality.result }}"
+          echo "Python Tests: ${{ needs.python-tests.result }}"
+          echo "Build Verification: ${{ needs.build-verification.result }}"
+          echo "Security Scan: ${{ needs.security-scan.result }}"
+
+      - name: Verify critical jobs
+        if: |
+          needs.python-tests.result != 'success' ||
+          needs.build-verification.result != 'success'
+        run: |
+          echo "Critical jobs failed!"
+          exit 1
+
+      - name: Success message
+        run: |
+          echo "✅ All CI checks completed successfully!"

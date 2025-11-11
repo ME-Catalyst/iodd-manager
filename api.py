@@ -18,9 +18,10 @@ from pydantic import BaseModel, Field
 import uvicorn
 
 from iodd_manager import (
-    IODDManager, DeviceProfile, Parameter, 
+    IODDManager, DeviceProfile, Parameter,
     IODDDataType, AccessRights
 )
+import config
 
 # ============================================================================
 # API Models
@@ -80,17 +81,19 @@ class ErrorResponse(BaseModel):
 # ============================================================================
 
 app = FastAPI(
-    title="IODD Manager API",
+    title=config.APP_NAME + " API",
     description="API for managing IODD files and generating device adapters",
-    version="1.0.0"
+    version=config.APP_VERSION,
+    docs_url="/docs" if config.ENABLE_DOCS else None,
+    redoc_url="/redoc" if config.ENABLE_DOCS else None,
 )
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origins=config.CORS_ORIGINS,
+    allow_credentials=config.CORS_CREDENTIALS,
+    allow_methods=config.CORS_METHODS,
     allow_headers=["*"],
 )
 
@@ -120,7 +123,7 @@ async def root():
 # IODD Management Endpoints
 # -----------------------------------------------------------------------------
 
-@app.post("/api/iodd/upload", 
+@app.post("/api/iodd/upload",
           response_model=UploadResponse,
           tags=["IODD Management"])
 async def upload_iodd(
@@ -129,21 +132,66 @@ async def upload_iodd(
 ):
     """
     Upload and import an IODD file or package
-    
+
     Accepts:
     - .xml files (standalone IODD)
     - .iodd files (IODD packages)
+
+    Limits:
+    - Maximum file size: 10MB
     """
     # Validate file extension
-    if not file.filename.endswith(('.xml', '.iodd')):
+    if not file.filename:
+        raise HTTPException(
+            status_code=400,
+            detail="No filename provided"
+        )
+
+    if not file.filename.lower().endswith(('.xml', '.iodd')):
         raise HTTPException(
             status_code=400,
             detail="File must be .xml or .iodd format"
         )
-    
+
+    # Read file content with size limit (10MB)
+    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB in bytes
+    content = b""
+    total_size = 0
+
+    while chunk := await file.read(1024 * 1024):  # Read 1MB at a time
+        total_size += len(chunk)
+        if total_size > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=413,
+                detail=f"File too large. Maximum size is {MAX_FILE_SIZE / (1024*1024)}MB"
+            )
+        content += chunk
+
+    # Validate content is not empty
+    if len(content) == 0:
+        raise HTTPException(
+            status_code=400,
+            detail="File is empty"
+        )
+
+    # Basic XML validation for .xml files
+    if file.filename.lower().endswith('.xml'):
+        try:
+            content_str = content.decode('utf-8')
+            # Check if it looks like XML
+            if not content_str.strip().startswith('<'):
+                raise HTTPException(
+                    status_code=400,
+                    detail="File does not appear to be valid XML"
+                )
+        except UnicodeDecodeError:
+            raise HTTPException(
+                status_code=400,
+                detail="File encoding is not valid UTF-8"
+            )
+
     # Save uploaded file temporarily
     with tempfile.NamedTemporaryFile(delete=False, suffix=file.filename) as tmp_file:
-        content = await file.read()
         tmp_file.write(content)
         tmp_path = tmp_file.name
     
@@ -557,10 +605,11 @@ def main():
     """Run the API server"""
     uvicorn.run(
         "api:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
-        log_level="info"
+        host=config.API_HOST,
+        port=config.API_PORT,
+        reload=config.API_RELOAD and config.ENVIRONMENT == 'development',
+        log_level=config.LOG_LEVEL.lower(),
+        workers=config.API_WORKERS if config.ENVIRONMENT == 'production' else 1
     )
 
 if __name__ == "__main__":

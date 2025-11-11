@@ -35,8 +35,7 @@
     "react-syntax-highlighter": "^15.5.0",
     "tailwind-merge": "^2.0.0",
     "tailwindcss-animate": "^1.0.7",
-    "three": "^0.158.0",
-    "vue": "^3.3.0"
+    "three": "^0.158.0"
   },
   "devDependencies": {
     "@types/node": "^20.8.0",
@@ -55,7 +54,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "serve:vue": "python -m http.server 3000 --directory .",
+    "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "format": "prettier --write \"src/**/*.{js,jsx,json,css,md}\"",
     "api": "cd .. && python api.py"
   },
   "browserslist": {

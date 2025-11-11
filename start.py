@@ -15,9 +15,11 @@ from pathlib import Path
 import logging
 import signal
 
+import config
+
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=getattr(logging, config.LOG_LEVEL),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger('IODD-Manager')
@@ -29,8 +31,8 @@ class IODDManagerLauncher:
         self.processes = []
         self.project_root = Path(__file__).parent
         self.frontend_dir = self.project_root / 'frontend'
-        self.api_port = 8000
-        self.frontend_port = 3000
+        self.api_port = config.API_PORT
+        self.frontend_port = config.FRONTEND_PORT
         
     def check_dependencies(self):
         """Check if required dependencies are installed"""
@@ -116,11 +118,16 @@ class IODDManagerLauncher:
     def open_browser(self):
         """Open the web interface in the default browser"""
         url = f"http://localhost:{self.frontend_port}"
+
+        if not config.AUTO_OPEN_BROWSER:
+            logger.info(f"Auto-open browser disabled. Please open your browser and navigate to: {url}")
+            return
+
         logger.info(f"Opening browser at {url}")
-        
+
         # Wait a bit for servers to fully initialize
         time.sleep(2)
-        
+
         try:
             webbrowser.open(url)
             logger.info("✅ Browser opened successfully")

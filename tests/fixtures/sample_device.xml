@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<IODevice xmlns="http://www.io-link.com/IODD/2010/10"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.io-link.com/IODD/2010/10 IODD1.1.xsd">
+
+    <DocumentInfo version="1.0" releaseDate="2024-01-01"/>
+
+    <ProfileHeader>
+        <ProfileIdentification>IO Device Profile</ProfileIdentification>
+        <ProfileRevision>1.1</ProfileRevision>
+        <ProfileName>Device</ProfileName>
+        <ProfileSource>IO-Link Consortium</ProfileSource>
+        <ProfileClassID>Device</ProfileClassID>
+        <ISO15745Reference>
+            <ISO15745Part>1</ISO15745Part>
+            <ISO15745Edition>1</ISO15745Edition>
+            <ProfileTechnology>IODD</ProfileTechnology>
+        </ISO15745Reference>
+    </ProfileHeader>
+
+    <ProfileBody>
+        <DeviceIdentity vendorId="42" deviceId="1234">
+            <VendorName>Test Manufacturer</VendorName>
+            <VendorText>Test Manufacturer Inc.</VendorText>
+            <VendorUrl>https://example.com</VendorUrl>
+            <VendorLogo>logo.png</VendorLogo>
+            <DeviceName>Test Sensor Device</DeviceName>
+            <DeviceFamily>Sensors</DeviceFamily>
+            <DeviceVariantCollection>
+                <DeviceVariant productId="TEST-001">
+                    <Name>Standard Version</Name>
+                </DeviceVariant>
+            </DeviceVariantCollection>
+        </DeviceIdentity>
+
+        <DeviceFunction>
+            <Features blockParameter="true" dataStorage="true"/>
+
+            <VariableCollection>
+                <StdVariableRef id="V_DirectParameters_1" />
+                <StdVariableRef id="V_SystemCommand" />
+            </VariableCollection>
+
+            <ProcessDataCollection>
+                <ProcessData id="PD_1">
+                    <ProcessDataIn id="PDI_1" bitLength="16">
+                        <Name>Process Input</Name>
+                        <Datatype xsi:type="IntegerT" bitLength="16">
+                            <ValueRange lowerValue="0" upperValue="65535"/>
+                        </Datatype>
+                    </ProcessDataIn>
+                    <ProcessDataOut id="PDO_1" bitLength="8">
+                        <Name>Process Output</Name>
+                        <Datatype xsi:type="IntegerT" bitLength="8">
+                            <ValueRange lowerValue="0" upperValue="255"/>
+                        </Datatype>
+                    </ProcessDataOut>
+                </ProcessData>
+            </ProcessDataCollection>
+
+            <ParameterCollection>
+                <Parameter id="P_Temperature" index="1">
+                    <Name>Temperature Threshold</Name>
+                    <Description>Temperature threshold for alarm</Description>
+                    <Datatype xsi:type="IntegerT" bitLength="16">
+                        <ValueRange lowerValue="-50" upperValue="150"/>
+                    </Datatype>
+                    <RecordItem subindex="0" bitOffset="0"/>
+                    <DefaultValue>25</DefaultValue>
+                </Parameter>
+
+                <Parameter id="P_SampleRate" index="2">
+                    <Name>Sample Rate</Name>
+                    <Description>Sampling rate in Hz</Description>
+                    <Datatype xsi:type="IntegerT" bitLength="8">
+                        <ValueRange lowerValue="1" upperValue="100"/>
+                    </Datatype>
+                    <RecordItem subindex="0" bitOffset="0"/>
+                    <DefaultValue>10</DefaultValue>
+                </Parameter>
+
+                <Parameter id="P_DeviceName" index="3">
+                    <Name>Device Name</Name>
+                    <Description>User-defined device name</Description>
+                    <Datatype xsi:type="StringT" fixedLength="32"/>
+                    <RecordItem subindex="0" bitOffset="0"/>
+                    <DefaultValue>Test Device</DefaultValue>
+                </Parameter>
+            </ParameterCollection>
+        </DeviceFunction>
+
+        <ExternalTextCollection>
+            <PrimaryLanguage>en</PrimaryLanguage>
+            <Text id="T_VendorText" value="Test Manufacturer Inc."/>
+            <Text id="T_DeviceName" value="Test Sensor Device"/>
+        </ExternalTextCollection>
+    </ProfileBody>
+
+    <CommNetworkProfile xsi:type="IOLinkCommNetworkProfileT" iolinkRevision="1.1">
+        <TransportLayers>
+            <PhysicalLayer bitrate="COM2" minCycleTime="5" sioSupported="false" mSequenceCapability="0"/>
+        </TransportLayers>
+        <IOLinkProfile>
+            <ProductId>TEST-001</ProductId>
+            <VendorName>Test Manufacturer</VendorName>
+        </IOLinkProfile>
+    </CommNetworkProfile>
+
+</IODevice>

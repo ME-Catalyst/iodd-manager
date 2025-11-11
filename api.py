@@ -300,34 +300,84 @@ async def delete_device(device_id: int):
 
 @app.get("/api/iodd/{device_id}/export",
          tags=["IODD Management"])
-async def export_iodd(device_id: int):
-    """Export the original IODD XML file"""
+async def export_iodd(device_id: int, format: str = "zip"):
+    """Export the IODD file with all assets
+
+    Args:
+        device_id: The device ID to export
+        format: Export format - 'zip' for full package (default), 'xml' for XML only
+
+    Returns:
+        ZIP file with all IODD files or just the XML file
+    """
     import sqlite3
-    
+    import zipfile
+    import io
+
     conn = sqlite3.connect(manager.storage.db_path)
     cursor = conn.cursor()
-    
+
+    # Get device info
+    cursor.execute("SELECT product_name FROM devices WHERE id = ?", (device_id,))
+    device = cursor.fetchone()
+    if not device:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Device not found")
+
+    product_name = device[0]
+
+    # Get all assets for this device
     cursor.execute(
-        "SELECT xml_content, file_name FROM iodd_files WHERE device_id = ?",
+        "SELECT file_name, file_content, file_type FROM iodd_assets WHERE device_id = ?",
         (device_id,)
     )
-    result = cursor.fetchone()
+    assets = cursor.fetchall()
     conn.close()
-    
-    if not result:
-        raise HTTPException(status_code=404, detail="IODD file not found")
-    
-    xml_content, file_name = result
-    
-    # Create temporary file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.xml', delete=False) as tmp_file:
-        tmp_file.write(xml_content)
+
+    if not assets:
+        raise HTTPException(status_code=404, detail="No files found for this device")
+
+    # If XML only format requested
+    if format == "xml":
+        # Find the XML file
+        xml_asset = next((a for a in assets if a[2] == 'xml'), None)
+        if not xml_asset:
+            raise HTTPException(status_code=404, detail="XML file not found")
+
+        file_name, file_content, _ = xml_asset
+
+        # Create temporary file
+        with tempfile.NamedTemporaryFile(mode='wb', suffix='.xml', delete=False) as tmp_file:
+            tmp_file.write(file_content if isinstance(file_content, bytes) else file_content.encode())
+            tmp_path = tmp_file.name
+
+        return FileResponse(
+            path=tmp_path,
+            media_type="application/xml",
+            filename=file_name or f"{product_name}.xml"
+        )
+
+    # Create ZIP package with all assets
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        for file_name, file_content, file_type in assets:
+            # Write each file to the ZIP
+            zip_file.writestr(file_name, file_content)
+
+    zip_buffer.seek(0)
+
+    # Create temporary file for the ZIP
+    with tempfile.NamedTemporaryFile(suffix='.iodd', delete=False) as tmp_file:
+        tmp_file.write(zip_buffer.getvalue())
         tmp_path = tmp_file.name
-    
+
+    # Clean filename for download
+    safe_product_name = "".join(c for c in product_name if c.isalnum() or c in (' ', '-', '_')).strip()
+
     return FileResponse(
         path=tmp_path,
-        media_type="application/xml",
-        filename=file_name or f"device_{device_id}.xml"
+        media_type="application/zip",
+        filename=f"{safe_product_name}.iodd"
     )
 
 # -----------------------------------------------------------------------------

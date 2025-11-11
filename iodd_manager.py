@@ -8,7 +8,7 @@ import json
 import zipfile
 import hashlib
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Union
+from typing import List, Dict, Any, Optional, Union, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 from abc import ABC, abstractmethod
@@ -277,47 +277,104 @@ class IODDParser:
 
 class IODDIngester:
     """Ingest and process IODD files and packages"""
-    
+
     def __init__(self, storage_path: Path = Path("./iodd_storage")):
         self.storage_path = storage_path
         self.storage_path.mkdir(exist_ok=True)
-        
-    def ingest_file(self, file_path: Union[str, Path]) -> DeviceProfile:
-        """Ingest a single IODD file or package"""
+        self.asset_files = []  # Store asset files during ingestion
+
+    def ingest_file(self, file_path: Union[str, Path]) -> Tuple[DeviceProfile, List[Dict[str, Any]]]:
+        """Ingest a single IODD file or package
+
+        Returns:
+            Tuple of (DeviceProfile, list of asset files)
+            Asset files are dicts with keys: file_name, file_type, file_content, file_path
+        """
         file_path = Path(file_path)
         logger.info(f"Ingesting IODD file: {file_path}")
-        
-        if file_path.suffix.lower() == '.iodd':
+        self.asset_files = []  # Reset asset files
+
+        if file_path.suffix.lower() in ['.iodd', '.zip']:
             return self._ingest_package(file_path)
         elif file_path.suffix.lower() == '.xml':
             return self._ingest_xml(file_path)
         else:
             raise ValueError(f"Unsupported file type: {file_path.suffix}")
-    
-    def _ingest_package(self, package_path: Path) -> DeviceProfile:
-        """Ingest IODD package (zip file)"""
+
+    def _ingest_package(self, package_path: Path) -> Tuple[DeviceProfile, List[Dict[str, Any]]]:
+        """Ingest IODD package (zip file)
+
+        Returns:
+            Tuple of (DeviceProfile, list of asset files)
+        """
+        asset_files = []
+
         with zipfile.ZipFile(package_path, 'r') as zip_file:
             # Find main IODD XML file
             xml_files = [f for f in zip_file.namelist() if f.endswith('.xml')]
             if not xml_files:
                 raise ValueError("No XML files found in IODD package")
-            
+
             # Extract and parse main XML
             main_xml = xml_files[0]  # Assuming first XML is main IODD
             xml_content = zip_file.read(main_xml).decode('utf-8')
-            
-            # Store extracted files
+
+            # Store all files from the package
+            for file_info in zip_file.filelist:
+                if file_info.is_dir():
+                    continue
+
+                file_name = file_info.filename
+                file_content = zip_file.read(file_name)
+
+                # Determine file type
+                file_ext = Path(file_name).suffix.lower()
+                if file_ext in ['.png', '.jpg', '.jpeg', '.gif', '.svg']:
+                    file_type = 'image'
+                elif file_ext == '.xml':
+                    file_type = 'xml'
+                else:
+                    file_type = 'other'
+
+                asset_files.append({
+                    'file_name': file_name,
+                    'file_type': file_type,
+                    'file_content': file_content,
+                    'file_path': file_name
+                })
+
+                logger.debug(f"Extracted asset: {file_name} ({file_type})")
+
+            # Store extracted files to filesystem as well (for backwards compatibility)
             device_dir = self.storage_path / package_path.stem
             device_dir.mkdir(exist_ok=True)
             zip_file.extractall(device_dir)
-            
-        return self._parse_xml_content(xml_content)
-    
-    def _ingest_xml(self, xml_path: Path) -> DeviceProfile:
-        """Ingest standalone IODD XML file"""
+
+        profile = self._parse_xml_content(xml_content)
+        return profile, asset_files
+
+    def _ingest_xml(self, xml_path: Path) -> Tuple[DeviceProfile, List[Dict[str, Any]]]:
+        """Ingest standalone IODD XML file
+
+        Returns:
+            Tuple of (DeviceProfile, empty list since no assets)
+        """
         with open(xml_path, 'r', encoding='utf-8') as f:
             xml_content = f.read()
-        return self._parse_xml_content(xml_content)
+
+        # For standalone XML, also store it as an asset
+        with open(xml_path, 'rb') as f:
+            file_content = f.read()
+
+        asset_files = [{
+            'file_name': xml_path.name,
+            'file_type': 'xml',
+            'file_content': file_content,
+            'file_path': xml_path.name
+        }]
+
+        profile = self._parse_xml_content(xml_content)
+        return profile, asset_files
     
     def _parse_xml_content(self, xml_content: str) -> DeviceProfile:
         """Parse XML content into DeviceProfile"""
@@ -397,7 +454,19 @@ class StorageManager:
                 FOREIGN KEY (device_id) REFERENCES devices (id)
             )
         """)
-        
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS iodd_assets (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                device_id INTEGER,
+                file_name TEXT,
+                file_type TEXT,
+                file_content BLOB,
+                file_path TEXT,
+                FOREIGN KEY (device_id) REFERENCES devices (id)
+            )
+        """)
+
         conn.commit()
         conn.close()
     
@@ -469,7 +538,49 @@ class StorageManager:
         
         logger.info(f"Saved device with ID: {device_id}")
         return device_id
-    
+
+    def save_assets(self, device_id: int, assets: List[Dict[str, Any]]) -> None:
+        """Save asset files for a device
+
+        Args:
+            device_id: The device ID to associate assets with
+            assets: List of dicts with keys: file_name, file_type, file_content, file_path
+        """
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        for asset in assets:
+            cursor.execute("""
+                INSERT INTO iodd_assets (device_id, file_name, file_type, file_content, file_path)
+                VALUES (?, ?, ?, ?, ?)
+            """, (
+                device_id,
+                asset['file_name'],
+                asset['file_type'],
+                asset['file_content'],
+                asset['file_path']
+            ))
+
+        conn.commit()
+        conn.close()
+        logger.info(f"Saved {len(assets)} asset file(s) for device {device_id}")
+
+    def get_assets(self, device_id: int) -> List[Dict[str, Any]]:
+        """Retrieve all asset files for a device
+
+        Returns:
+            List of dicts with keys: id, file_name, file_type, file_content, file_path
+        """
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM iodd_assets WHERE device_id = ?", (device_id,))
+        assets = [dict(row) for row in cursor.fetchall()]
+
+        conn.close()
+        return assets
+
     def get_device(self, device_id: int) -> Optional[Dict[str, Any]]:
         """Retrieve device information from database"""
         conn = sqlite3.connect(self.db_path)
@@ -832,9 +943,10 @@ class IODDManager:
         
     def import_iodd(self, file_path: str) -> int:
         """Import an IODD file or package"""
-        profile = self.ingester.ingest_file(file_path)
+        profile, assets = self.ingester.ingest_file(file_path)
         device_id = self.storage.save_device(profile)
-        logger.info(f"Successfully imported IODD for {profile.device_info.product_name}")
+        self.storage.save_assets(device_id, assets)
+        logger.info(f"Successfully imported IODD for {profile.device_info.product_name} with {len(assets)} asset file(s)")
         return device_id
     
     def generate_adapter(self, device_id: int, platform: str, output_path: str = "./generated"):

@@ -6,7 +6,8 @@ Create Date: 2025-11-11 18:30:00.000000
 
 """
 from alembic import op
-import sqlite3
+import sqlalchemy as sa
+from sqlalchemy import text
 
 
 # revision identifiers, used by Alembic.
@@ -21,9 +22,9 @@ def upgrade():
     # Use raw SQLite connection since Alembic's ALTER is limited
     conn = op.get_bind()
 
-    # Add new columns
-    conn.execute('ALTER TABLE parameters ADD COLUMN enumeration_values TEXT')
-    conn.execute('ALTER TABLE parameters ADD COLUMN bit_length INTEGER')
+    # Add new columns (wrapped in text() for SQLAlchemy 2.0+)
+    conn.execute(text('ALTER TABLE parameters ADD COLUMN enumeration_values TEXT'))
+    conn.execute(text('ALTER TABLE parameters ADD COLUMN bit_length INTEGER'))
 
 
 def downgrade():

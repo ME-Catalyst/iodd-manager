@@ -5,6 +5,69 @@ All notable changes to IODD Manager will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2025-11-12
+
+### Repository Audit and Documentation Update
+
+This release focuses on repository structure, documentation completeness, and legal clarity.
+
+### Added
+
+#### Documentation
+- Added `LICENSE.md` with MIT license and ME-Catalyst copyright (© 2025)
+- Added comprehensive `ROADMAP.md` with versioned milestones (v1.0-v3.0 and future considerations)
+- Added complete `USER_MANUAL.md` (installation, quick start, configuration, usage, advanced features)
+- Added detailed `DEVELOPER_REFERENCE.md` (architecture, API, frontend, database, IODD parsing, conventions, testing)
+- Added comprehensive `TROUBLESHOOTING.md` (installation, runtime, import, web interface, performance, database, API, Docker issues)
+- Added no-warranty disclaimer to README.md: "Provided 'as-is,' without warranty of any kind"
+
+#### Repository Structure
+- Restructured `/docs` directory to recommended organization:
+  - `/docs/architecture/` - Contains ARCHITECTURE.md
+  - `/docs/user/` - Contains USER_MANUAL.md and user guides
+  - `/docs/developer/` - Contains DEVELOPER_REFERENCE.md, API_SPECIFICATION.md, BEST_PRACTICES.md, CONFIG_PAGE_DEVELOPER_GUIDE.md, ENHANCED_MENUS_SUMMARY.md
+  - `/docs/troubleshooting/` - Contains TROUBLESHOOTING.md
+  - `/docs/visuals/` - For images and diagrams (empty for now)
+
+### Changed
+
+- Updated README.md LICENSE link to point to LICENSE.md
+- Renamed old LICENSE file to LICENSE.md with proper formatting
+- Verified all code has proper docstrings (api.py, iodd_manager.py)
+
+### Removed
+
+- Removed `.claude/` directory (user-specific Claude Code settings)
+- Removed `claude/` directory (temporary analysis files)
+- Removed `nul` file (accidental creation)
+- Removed `temp_iodd_large.xml` (temporary test file)
+- Removed `temp_iodd_sample.xml` (temporary test file)
+- Removed old `LICENSE` file (replaced with LICENSE.md)
+
+### Documentation
+
+This release completes the minimum documentation set:
+- ✅ README.md - Project overview with no-warranty disclaimer
+- ✅ ROADMAP.md - Versioned milestones and future plans
+- ✅ ARCHITECTURE.md - System structure and data flows
+- ✅ USER_MANUAL.md - Installation and usage guide
+- ✅ DEVELOPER_REFERENCE.md - Code and API reference
+- ✅ TROUBLESHOOTING.md - Common issues and solutions
+- ✅ CHANGELOG.md - Version history
+- ✅ LICENSE.md - MIT License with ME-Catalyst copyright
+
+### Repository Audit Checklist
+
+- ✅ Required docs exist and are current
+- ✅ `/docs` directory matches recommended structure
+- ✅ Redundant and outdated files removed
+- ✅ LICENSE present and correct (MIT)
+- ✅ CHANGELOG updated with version and summary
+- ✅ Code fully documented and consistent
+- ✅ Root directory clean and minimal
+
+---
+
 ## [2.0.0] - 2025-11-11
 
 ### Major Release - Complete Project Modernization

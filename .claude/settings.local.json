@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sqlite3:*)",
+      "Bash(nul)",
+      "Bash(python -m alembic:*)",
+      "Bash(python -c:*)",
+      "Bash(python api.py:*)",
+      "Bash(npm run dev:*)",
+      "Bash(timeout 3 echo:*)",
+      "Bash(timeout 2 echo:*)",
+      "Bash(timeout 2 sleep:*)",
+      "Bash(timeout 3 sleep:*)",
+      "Bash(npm install:*)",
+      "Bash(taskkill:*)",
+      "Bash(dir:*)",
+      "Bash(powershell \"Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force\")",
+      "Bash(python apply_parameter_fix.py:*)",
+      "Bash(python:*)",
+      "Bash(start /B python api.py)",
+      "Bash(curl:*)",
+      "Bash(timeout 5 echo:*)",
+      "Bash(npm run build:*)",
+      "Bash(powershell \"Get-Process python -ErrorAction SilentlyContinue | Stop-Process -Force\")",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

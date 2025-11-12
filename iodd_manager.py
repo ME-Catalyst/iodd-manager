@@ -85,6 +85,8 @@ class Parameter:
     unit: Optional[str] = None
     description: Optional[str] = None
     constraints: List[Constraint] = field(default_factory=list)
+    enumeration_values: Dict[str, str] = field(default_factory=dict)  # value -> label mapping
+    bit_length: Optional[int] = None
 
 @dataclass
 class ProcessData:
@@ -129,11 +131,71 @@ class IODDParser:
     def __init__(self, xml_content: str):
         self.xml_content = xml_content
         self.root = ET.fromstring(xml_content)
-        
+        self.text_lookup = self._build_text_lookup()
+
+    def _build_text_lookup(self) -> Dict[str, str]:
+        """Build lookup table for textId references from ExternalTextCollection"""
+        text_map = {}
+
+        # Find all PrimaryLanguage/Text elements
+        for text_elem in self.root.findall('.//iodd:PrimaryLanguage/iodd:Text', self.NAMESPACES):
+            text_id = text_elem.get('id')
+            text_value = text_elem.get('value', '')
+            if text_id:
+                text_map[text_id] = text_value
+
+        return text_map
+
+    def _resolve_text(self, text_id: Optional[str]) -> Optional[str]:
+        """Resolve a textId reference to its actual text value"""
+        if not text_id:
+            return None
+        return self.text_lookup.get(text_id)
+
+
+    def _build_datatype_lookup(self) -> Dict[str, Any]:
+        """Build lookup table for custom datatypes from DatatypeCollection"""
+        datatype_map = {}
+
+        # Find all custom Datatype elements
+        for datatype_elem in self.root.findall('.//iodd:DatatypeCollection/iodd:Datatype', self.NAMESPACES):
+            datatype_id = datatype_elem.get('id')
+            if not datatype_id:
+                continue
+
+            datatype_info = {
+                'type': datatype_elem.get('{http://www.w3.org/2001/XMLSchema-instance}type', 'OctetStringT'),
+                'bitLength': datatype_elem.get('bitLength'),
+                'singleValues': {},  # value -> textId mapping
+                'valueRange': None
+            }
+
+            # Extract single value enumerations
+            for single_val in datatype_elem.findall('.//iodd:SingleValue', self.NAMESPACES):
+                value = single_val.get('value')
+                name_elem = single_val.find('.//iodd:Name', self.NAMESPACES)
+                if name_elem is not None and value is not None:
+                    text_id = name_elem.get('textId')
+                    text_value = self._resolve_text(text_id)
+                    if text_value:
+                        datatype_info['singleValues'][value] = text_value
+
+            # Extract value range
+            value_range = datatype_elem.find('.//iodd:ValueRange', self.NAMESPACES)
+            if value_range is not None:
+                datatype_info['valueRange'] = {
+                    'lower': value_range.get('lowerValue'),
+                    'upper': value_range.get('upperValue')
+                }
+
+            datatype_map[datatype_id] = datatype_info
+
+        return datatype_map
+
     def parse(self) -> DeviceProfile:
         """Parse complete IODD file"""
         logger.info("Parsing IODD file...")
-        
+
         return DeviceProfile(
             vendor_info=self._extract_vendor_info(),
             device_info=self._extract_device_info(),
@@ -145,94 +207,258 @@ class IODDParser:
         )
     
     def _extract_vendor_info(self) -> VendorInfo:
-        """Extract vendor information"""
-        vendor_elem = self.root.find('.//VendorText', self.NAMESPACES)
-        if vendor_elem is not None:
+        """Extract vendor information from DeviceIdentity"""
+        device_identity = self.root.find('.//iodd:DeviceIdentity', self.NAMESPACES)
+        if device_identity is not None:
+            # Get vendor text from textId reference
+            vendor_text_elem = device_identity.find('.//iodd:VendorText', self.NAMESPACES)
+            vendor_text_id = vendor_text_elem.get('textId') if vendor_text_elem is not None else None
+            vendor_text = self._resolve_text(vendor_text_id) or ''
+
+            # Get vendor URL from textId reference
+            vendor_url_elem = device_identity.find('.//iodd:VendorUrl', self.NAMESPACES)
+            vendor_url_id = vendor_url_elem.get('textId') if vendor_url_elem is not None else None
+            vendor_url = self._resolve_text(vendor_url_id)
+
             return VendorInfo(
-                id=int(vendor_elem.get('vendorId', 0)),
-                name=vendor_elem.get('vendorName', ''),
-                text=vendor_elem.text or '',
-                url=vendor_elem.get('vendorUrl')
+                id=int(device_identity.get('vendorId', 0)),
+                name=device_identity.get('vendorName', 'Unknown'),
+                text=vendor_text,
+                url=vendor_url
             )
         return VendorInfo(id=0, name='Unknown', text='')
-    
+
     def _extract_device_info(self) -> DeviceInfo:
-        """Extract device identification"""
-        device_elem = self.root.find('.//DeviceIdentity', self.NAMESPACES)
-        if device_elem is not None:
+        """Extract device identification from DeviceIdentity"""
+        device_identity = self.root.find('.//iodd:DeviceIdentity', self.NAMESPACES)
+        if device_identity is not None:
+            # Get device name from textId reference
+            device_name_elem = device_identity.find('.//iodd:DeviceName', self.NAMESPACES)
+            device_name_id = device_name_elem.get('textId') if device_name_elem is not None else None
+            product_name = self._resolve_text(device_name_id)
+
+            # If no device name, try to get from first DeviceVariant
+            if not product_name:
+                variant_elem = device_identity.find('.//iodd:DeviceVariant', self.NAMESPACES)
+                if variant_elem is not None:
+                    name_elem = variant_elem.find('.//iodd:Name', self.NAMESPACES)
+                    if name_elem is not None:
+                        name_id = name_elem.get('textId')
+                        product_name = self._resolve_text(name_id)
+                    # Fallback to productId attribute
+                    if not product_name:
+                        product_name = variant_elem.get('productId', 'Unknown')
+
             return DeviceInfo(
-                vendor_id=int(device_elem.get('vendorId', 0)),
-                device_id=int(device_elem.get('deviceId', 0)),
-                product_name=self._get_text(device_elem, 'ProductName'),
-                product_id=self._get_text(device_elem, 'ProductId'),
-                product_text=self._get_text(device_elem, 'ProductText'),
-                hardware_revision=device_elem.get('hardwareRevision'),
-                firmware_revision=device_elem.get('firmwareRevision'),
-                software_revision=device_elem.get('softwareRevision')
+                vendor_id=int(device_identity.get('vendorId', 0)),
+                device_id=int(device_identity.get('deviceId', 0)),
+                product_name=product_name or 'Unknown',
+                product_id=device_identity.get('productId'),
+                product_text=None,
+                hardware_revision=device_identity.get('hardwareRevision'),
+                firmware_revision=device_identity.get('firmwareRevision'),
+                software_revision=device_identity.get('softwareRevision')
             )
         return DeviceInfo(vendor_id=0, device_id=0, product_name='Unknown')
     
     def _extract_parameters(self) -> List[Parameter]:
-        """Extract all device parameters"""
+        """Extract all device parameters from Variable elements"""
         parameters = []
-        
-        for param_elem in self.root.findall('.//Parameter', self.NAMESPACES):
-            param = Parameter(
-                id=param_elem.get('id', ''),
-                index=int(param_elem.get('index', 0)),
-                subindex=self._get_int_attr(param_elem, 'subindex'),
-                name=self._get_text(param_elem, 'Name') or param_elem.get('id', ''),
-                data_type=self._parse_data_type(param_elem),
-                access_rights=self._parse_access_rights(param_elem),
-                default_value=self._get_attr(param_elem, 'defaultValue'),
-                description=self._get_text(param_elem, 'Description')
-            )
-            
-            # Extract constraints
-            datatype_elem = param_elem.find('.//Datatype', self.NAMESPACES)
-            if datatype_elem is not None:
-                param.min_value = self._get_attr(datatype_elem, 'min')
-                param.max_value = self._get_attr(datatype_elem, 'max')
-                
-            parameters.append(param)
-            
+
+        # Build datatype lookup table
+        if not hasattr(self, 'datatype_lookup'):
+            self.datatype_lookup = self._build_datatype_lookup()
+
+        # Find all Variable elements in VariableCollection
+        for var_elem in self.root.findall('.//iodd:VariableCollection/iodd:Variable', self.NAMESPACES):
+            param = self._parse_variable_element(var_elem)
+            if param:
+                parameters.append(param)
+
+        # Also parse StdVariableRef elements (standard IO-Link variables)
+        # Skip these for now as they don't have indices
+        # for std_var_elem in self.root.findall('.//iodd:VariableCollection/iodd:StdVariableRef', self.NAMESPACES):
+        #     param = self._parse_std_variable_ref(std_var_elem)
+        #     if param:
+        #         parameters.append(param)
+
+        logger.info(f"Extracted {len(parameters)} parameters")
         return parameters
+
+    def _parse_variable_element(self, var_elem) -> Optional[Parameter]:
+        """Parse a Variable element into a Parameter object"""
+        # Get basic attributes
+        var_id = var_elem.get('id')
+        if not var_id:
+            return None
+
+        index = int(var_elem.get('index', 0))
+        subindex = self._get_int_attr(var_elem, 'subindex')
+        access_rights_str = var_elem.get('accessRights', 'rw')
+        default_value = var_elem.get('defaultValue')
+
+        # Get name from textId reference
+        name_elem = var_elem.find('.//iodd:Name', self.NAMESPACES)
+        name_id = name_elem.get('textId') if name_elem is not None else None
+        param_name = self._resolve_text(name_id) or var_id
+
+        # Get description from textId reference
+        desc_elem = var_elem.find('.//iodd:Description', self.NAMESPACES)
+        desc_id = desc_elem.get('textId') if desc_elem is not None else None
+        description = self._resolve_text(desc_id)
+
+        # Parse datatype
+        datatype_info = self._parse_variable_datatype(var_elem)
+
+        # Parse access rights
+        try:
+            access_rights = AccessRights(access_rights_str)
+        except ValueError:
+            access_rights = AccessRights.READ_WRITE
+
+        # Create parameter
+        param = Parameter(
+            id=var_id,
+            index=index,
+            subindex=subindex,
+            name=param_name,
+            data_type=datatype_info['data_type'],
+            access_rights=access_rights,
+            default_value=default_value,
+            min_value=datatype_info.get('min_value'),
+            max_value=datatype_info.get('max_value'),
+            unit=None,
+            description=description,
+            enumeration_values=datatype_info.get('enumeration_values', {}),
+            bit_length=datatype_info.get('bit_length')
+        )
+
+        return param
+
+    def _parse_variable_datatype(self, var_elem) -> Dict[str, Any]:
+        """Parse datatype information from a Variable element
+
+        Returns dict with keys: data_type, min_value, max_value, enumeration_values, bit_length
+        """
+        result = {
+            'data_type': IODDDataType.OCTET_STRING,
+            'min_value': None,
+            'max_value': None,
+            'enumeration_values': {},
+            'bit_length': None
+        }
+
+        # Check for DatatypeRef (reference to custom datatype)
+        datatype_ref = var_elem.find('.//iodd:DatatypeRef', self.NAMESPACES)
+        if datatype_ref is not None:
+            datatype_id = datatype_ref.get('datatypeId')
+            if datatype_id and datatype_id in self.datatype_lookup:
+                custom_dt = self.datatype_lookup[datatype_id]
+
+                # Map custom type to IODDDataType
+                type_str = custom_dt['type']
+                result['data_type'] = self._map_xsi_type_to_iodd_type(type_str)
+                result['bit_length'] = custom_dt.get('bitLength')
+                result['enumeration_values'] = custom_dt.get('singleValues', {})
+
+                # Handle value range
+                if custom_dt.get('valueRange'):
+                    result['min_value'] = custom_dt['valueRange']['lower']
+                    result['max_value'] = custom_dt['valueRange']['upper']
+
+            return result
+
+        # Check for inline Datatype element
+        datatype_elem = var_elem.find('.//iodd:Datatype', self.NAMESPACES)
+        if datatype_elem is not None:
+            # Get type from xsi:type attribute
+            type_str = datatype_elem.get('{http://www.w3.org/2001/XMLSchema-instance}type', 'OctetStringT')
+            result['data_type'] = self._map_xsi_type_to_iodd_type(type_str)
+            result['bit_length'] = datatype_elem.get('bitLength')
+
+            # Extract single value enumerations (inline)
+            enumeration_values = {}
+            for single_val in datatype_elem.findall('.//iodd:SingleValue', self.NAMESPACES):
+                value = single_val.get('value')
+                name_elem = single_val.find('.//iodd:Name', self.NAMESPACES)
+                if name_elem is not None and value is not None:
+                    text_id = name_elem.get('textId')
+                    text_value = self._resolve_text(text_id)
+                    if text_value:
+                        enumeration_values[value] = text_value
+
+            result['enumeration_values'] = enumeration_values
+
+            # Extract value range (inline)
+            value_range = datatype_elem.find('.//iodd:ValueRange', self.NAMESPACES)
+            if value_range is not None:
+                result['min_value'] = value_range.get('lowerValue')
+                result['max_value'] = value_range.get('upperValue')
+
+        return result
+
+    def _map_xsi_type_to_iodd_type(self, xsi_type: str) -> IODDDataType:
+        """Map XML xsi:type to IODDDataType enum"""
+        type_mapping = {
+            'BooleanT': IODDDataType.BOOLEAN,
+            'IntegerT': IODDDataType.INTEGER,
+            'UIntegerT': IODDDataType.UNSIGNED_INTEGER,
+            'Float32T': IODDDataType.FLOAT,
+            'StringT': IODDDataType.STRING,
+            'OctetStringT': IODDDataType.OCTET_STRING,
+            'TimeT': IODDDataType.TIME,
+            'RecordT': IODDDataType.RECORD,
+            'ArrayT': IODDDataType.ARRAY,
+        }
+
+        return type_mapping.get(xsi_type, IODDDataType.OCTET_STRING)
+
     
     def _extract_process_data(self) -> ProcessDataCollection:
         """Extract process data configuration"""
         collection = ProcessDataCollection()
-        
+
         # Extract input process data
-        pd_in = self.root.find('.//ProcessDataIn', self.NAMESPACES)
+        pd_in = self.root.find('.//iodd:ProcessDataIn', self.NAMESPACES)
         if pd_in is not None:
-            for data_elem in pd_in.findall('.//ProcessData', self.NAMESPACES):
+            for data_elem in pd_in.findall('.//iodd:ProcessData', self.NAMESPACES):
+                # Get name from textId reference
+                name_elem = data_elem.find('.//iodd:Name', self.NAMESPACES)
+                name_id = name_elem.get('textId') if name_elem is not None else None
+                name = self._resolve_text(name_id) or 'Input'
+
                 process_data = ProcessData(
                     index=int(data_elem.get('index', 0)),
-                    name=self._get_text(data_elem, 'Name') or 'Input',
+                    name=name,
                     bit_length=int(data_elem.get('bitLength', 0)),
                     data_type=self._parse_data_type(data_elem)
                 )
                 collection.inputs.append(process_data)
                 collection.total_input_bits += process_data.bit_length
-        
+
         # Extract output process data
-        pd_out = self.root.find('.//ProcessDataOut', self.NAMESPACES)
+        pd_out = self.root.find('.//iodd:ProcessDataOut', self.NAMESPACES)
         if pd_out is not None:
-            for data_elem in pd_out.findall('.//ProcessData', self.NAMESPACES):
+            for data_elem in pd_out.findall('.//iodd:ProcessData', self.NAMESPACES):
+                # Get name from textId reference
+                name_elem = data_elem.find('.//iodd:Name', self.NAMESPACES)
+                name_id = name_elem.get('textId') if name_elem is not None else None
+                name = self._resolve_text(name_id) or 'Output'
+
                 process_data = ProcessData(
                     index=int(data_elem.get('index', 0)),
-                    name=self._get_text(data_elem, 'Name') or 'Output',
+                    name=name,
                     bit_length=int(data_elem.get('bitLength', 0)),
                     data_type=self._parse_data_type(data_elem)
                 )
                 collection.outputs.append(process_data)
                 collection.total_output_bits += process_data.bit_length
-        
+
         return collection
     
     def _parse_data_type(self, elem) -> IODDDataType:
         """Parse data type from element"""
-        datatype_elem = elem.find('.//Datatype', self.NAMESPACES)
+        datatype_elem = elem.find('.//iodd:Datatype', self.NAMESPACES)
         if datatype_elem is not None:
             type_str = datatype_elem.get('type', 'OctetStringT')
             try:
@@ -251,7 +477,7 @@ class IODDParser:
     
     def _get_text(self, parent, tag: str) -> Optional[str]:
         """Get text content of child element"""
-        elem = parent.find(f'.//{tag}', self.NAMESPACES)
+        elem = parent.find(f'.//iodd:{tag}', self.NAMESPACES)
         return elem.text if elem is not None else None
     
     def _get_attr(self, elem, attr: str) -> Optional[str]:
@@ -264,12 +490,25 @@ class IODDParser:
         return int(val) if val else None
     
     def _get_iodd_version(self) -> str:
-        """Get IODD version"""
-        return self.root.get('version', '1.0.1')
-    
+        """Get IODD version from DocumentInfo or ProfileRevision"""
+        # Try DocumentInfo version first
+        doc_info = self.root.find('.//iodd:DocumentInfo', self.NAMESPACES)
+        if doc_info is not None and doc_info.get('version'):
+            return doc_info.get('version')
+
+        # Try ProfileRevision
+        profile_rev = self.root.find('.//iodd:ProfileRevision', self.NAMESPACES)
+        if profile_rev is not None and profile_rev.text:
+            return profile_rev.text
+
+        return '1.0.1'
+
     def _get_schema_version(self) -> str:
-        """Get schema version"""
-        return self.root.get('schemaVersion', '1.0')
+        """Get schema version from ProfileRevision"""
+        profile_rev = self.root.find('.//iodd:ProfileRevision', self.NAMESPACES)
+        if profile_rev is not None and profile_rev.text:
+            return profile_rev.text
+        return '1.0'
 
 # ============================================================================
 # IODD Ingester
@@ -283,8 +522,12 @@ class IODDIngester:
         self.storage_path.mkdir(exist_ok=True)
         self.asset_files = []  # Store asset files during ingestion
 
-    def ingest_file(self, file_path: Union[str, Path]) -> Tuple[DeviceProfile, List[Dict[str, Any]]]:
+    def ingest_file(self, file_path: Union[str, Path], _depth: int = 0) -> Tuple[DeviceProfile, List[Dict[str, Any]]]:
         """Ingest a single IODD file or package
+
+        Args:
+            file_path: Path to the IODD file or package
+            _depth: Internal parameter to track nesting depth (0 = root level)
 
         Returns:
             Tuple of (DeviceProfile, list of asset files)
@@ -295,11 +538,108 @@ class IODDIngester:
         self.asset_files = []  # Reset asset files
 
         if file_path.suffix.lower() in ['.iodd', '.zip']:
+            # Check if this is a nested ZIP (only at root level)
+            if _depth == 0 and self._is_nested_zip(file_path):
+                # This is a nested ZIP containing multiple device packages
+                # Return None to signal the caller to handle it differently
+                return None, []
             return self._ingest_package(file_path)
         elif file_path.suffix.lower() == '.xml':
             return self._ingest_xml(file_path)
         else:
             raise ValueError(f"Unsupported file type: {file_path.suffix}")
+
+    def _is_nested_zip(self, zip_path: Path) -> bool:
+        """Check if a ZIP file contains other ZIP files (nested structure)
+
+        Args:
+            zip_path: Path to the ZIP file to check
+
+        Returns:
+            True if ZIP contains other ZIP files, False otherwise
+        """
+        try:
+            with zipfile.ZipFile(zip_path, 'r') as zip_file:
+                file_list = zip_file.namelist()
+
+                # Check if there are any .zip files
+                zip_files = [f for f in file_list if f.lower().endswith('.zip') and not f.startswith('__MACOSX/')]
+
+                # Check if there are any XML files at root level
+                xml_files = [f for f in file_list if f.lower().endswith('.xml') and '/' not in f]
+
+                # It's a nested ZIP if it has ZIP files but no XML files at root
+                # (if it has both, treat it as a regular package with the XML taking priority)
+                return len(zip_files) > 0 and len(xml_files) == 0
+        except Exception as e:
+            logger.warning(f"Error checking if ZIP is nested: {e}")
+            return False
+
+    def ingest_nested_package(self, package_path: Path) -> List[Tuple[DeviceProfile, List[Dict[str, Any]]]]:
+        """Ingest a nested IODD package containing multiple device packages
+
+        Args:
+            package_path: Path to the parent ZIP file
+
+        Returns:
+            List of tuples, each containing (DeviceProfile, list of asset files)
+        """
+        logger.info(f"Processing nested ZIP package: {package_path}")
+        results = []
+
+        with zipfile.ZipFile(package_path, 'r') as parent_zip:
+            # Find all ZIP files in the parent package
+            zip_files = [f for f in parent_zip.namelist()
+                        if f.lower().endswith('.zip') and not f.startswith('__MACOSX/')]
+
+            if not zip_files:
+                raise ValueError("No child ZIP files found in nested package")
+
+            logger.info(f"Found {len(zip_files)} child package(s) in nested ZIP")
+
+            # Process each child ZIP
+            import tempfile
+            import os
+
+            for zip_file_name in zip_files:
+                try:
+                    logger.info(f"Processing child package: {zip_file_name}")
+
+                    # Extract child ZIP to temporary file
+                    child_zip_data = parent_zip.read(zip_file_name)
+
+                    # Create temporary file for the child ZIP
+                    with tempfile.NamedTemporaryFile(suffix='.zip', delete=False) as tmp_file:
+                        tmp_file.write(child_zip_data)
+                        tmp_zip_path = tmp_file.name
+
+                    try:
+                        # Process the child ZIP at depth 1 (prevent further nesting)
+                        profile, assets = self.ingest_file(Path(tmp_zip_path), _depth=1)
+
+                        if profile:  # Only add if successfully parsed
+                            results.append((profile, assets))
+                            logger.info(f"Successfully processed {zip_file_name}: {profile.device_info.product_name}")
+                        else:
+                            logger.warning(f"Skipped {zip_file_name}: could not parse device profile")
+
+                    finally:
+                        # Clean up temporary file
+                        try:
+                            os.unlink(tmp_zip_path)
+                        except:
+                            pass
+
+                except Exception as e:
+                    logger.error(f"Error processing child package {zip_file_name}: {e}")
+                    # Continue with next package instead of failing entirely
+                    continue
+
+        if not results:
+            raise ValueError("No valid device packages found in nested ZIP")
+
+        logger.info(f"Successfully processed {len(results)} device(s) from nested package")
+        return results
 
     def _ingest_package(self, package_path: Path) -> Tuple[DeviceProfile, List[Dict[str, Any]]]:
         """Ingest IODD package (zip file)
@@ -336,11 +676,33 @@ class IODDIngester:
                 else:
                     file_type = 'other'
 
+                # Detect image purpose from filename
+                # Standard IODD naming conventions:
+                # *logo.png = manufacturer logo
+                # *icon.png = low res thumbnail
+                # *pic.png = full res device image (symbol-pic, etc.)
+                # *con-pic.png = connection pinout
+                image_purpose = None
+                if file_type == 'image':
+                    file_name_lower = Path(file_name).stem.lower()
+                    # Check for specific suffixes (most specific patterns first)
+                    if file_name_lower.endswith('logo'):
+                        image_purpose = 'logo'
+                    elif file_name_lower.endswith('con-pic') or 'connection' in file_name_lower:
+                        image_purpose = 'connection'
+                    elif file_name_lower.endswith('symbol-pic') or (file_name_lower.endswith('-pic') and not file_name_lower.endswith('con-pic')):
+                        # Full resolution device images end with -pic (symbol-pic, device-pic, etc.)
+                        image_purpose = 'device-pic'
+                    elif 'icon' in file_name_lower:
+                        # Thumbnails contain icon
+                        image_purpose = 'icon'
+
                 asset_files.append({
                     'file_name': file_name,
                     'file_type': file_type,
                     'file_content': file_content,
-                    'file_path': file_name
+                    'file_path': file_name,
+                    'image_purpose': image_purpose
                 })
 
                 logger.debug(f"Extracted asset: {file_name} ({file_type})")
@@ -463,6 +825,7 @@ class StorageManager:
                 file_type TEXT,
                 file_content BLOB,
                 file_path TEXT,
+                image_purpose TEXT,
                 FOREIGN KEY (device_id) REFERENCES devices (id)
             )
         """)
@@ -471,23 +834,32 @@ class StorageManager:
         conn.close()
     
     def save_device(self, profile: DeviceProfile) -> int:
-        """Save device profile to database"""
+        """Save device profile to database
+
+        Smart import logic:
+        - If device with same vendor_id + device_id exists, return existing device_id
+        - New assets will be merged in save_assets() method
+        """
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
-        
+
         # Calculate checksum
         checksum = hashlib.sha256(profile.raw_xml.encode()).hexdigest()
-        
-        # Check if device already exists
-        cursor.execute("SELECT id FROM devices WHERE checksum = ?", (checksum,))
+
+        # Check if device already exists by vendor_id and device_id
+        cursor.execute(
+            "SELECT id FROM devices WHERE vendor_id = ? AND device_id = ?",
+            (profile.device_info.vendor_id, profile.device_info.device_id)
+        )
         existing = cursor.fetchone()
         if existing:
-            logger.info(f"Device already exists with ID: {existing[0]}")
+            logger.info(f"Device already exists with ID: {existing[0]} (vendor_id={profile.device_info.vendor_id}, device_id={profile.device_info.device_id}). Will merge new assets.")
+            conn.close()
             return existing[0]
-        
+
         # Insert device
         cursor.execute("""
-            INSERT INTO devices (vendor_id, device_id, product_name, 
+            INSERT INTO devices (vendor_id, device_id, product_name,
                                manufacturer, iodd_version, import_date, checksum)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (
@@ -499,7 +871,7 @@ class StorageManager:
             profile.import_date,
             checksum
         ))
-        
+
         device_id = cursor.lastrowid
         
         # Save IODD file content
@@ -515,11 +887,15 @@ class StorageManager:
         
         # Save parameters
         for param in profile.parameters:
+            # Serialize enumeration values as JSON
+            import json
+            enum_json = json.dumps(param.enumeration_values) if param.enumeration_values else None
+
             cursor.execute("""
                 INSERT INTO parameters (device_id, param_index, name, data_type,
                                       access_rights, default_value, min_value,
-                                      max_value, unit, description)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                      max_value, unit, description, enumeration_values, bit_length)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 device_id,
                 param.index,
@@ -530,7 +906,9 @@ class StorageManager:
                 str(param.min_value) if param.min_value else None,
                 str(param.max_value) if param.max_value else None,
                 param.unit,
-                param.description
+                param.description,
+                enum_json,
+                param.bit_length
             ))
         
         conn.commit()
@@ -542,28 +920,54 @@ class StorageManager:
     def save_assets(self, device_id: int, assets: List[Dict[str, Any]]) -> None:
         """Save asset files for a device
 
+        Smart merge logic:
+        - Only adds assets that don't already exist (by file_name)
+        - Prevents duplicate assets when re-importing the same device
+
         Args:
             device_id: The device ID to associate assets with
-            assets: List of dicts with keys: file_name, file_type, file_content, file_path
+            assets: List of dicts with keys: file_name, file_type, file_content, file_path, image_purpose (optional)
         """
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
+        added_count = 0
+        skipped_count = 0
+
         for asset in assets:
+            # Check if asset with same file_name already exists for this device
+            cursor.execute(
+                "SELECT id FROM iodd_assets WHERE device_id = ? AND file_name = ?",
+                (device_id, asset['file_name'])
+            )
+            existing = cursor.fetchone()
+
+            if existing:
+                logger.debug(f"Asset '{asset['file_name']}' already exists for device {device_id}, skipping")
+                skipped_count += 1
+                continue
+
+            # Insert new asset
             cursor.execute("""
-                INSERT INTO iodd_assets (device_id, file_name, file_type, file_content, file_path)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO iodd_assets (device_id, file_name, file_type, file_content, file_path, image_purpose)
+                VALUES (?, ?, ?, ?, ?, ?)
             """, (
                 device_id,
                 asset['file_name'],
                 asset['file_type'],
                 asset['file_content'],
-                asset['file_path']
+                asset['file_path'],
+                asset.get('image_purpose')
             ))
+            added_count += 1
 
         conn.commit()
         conn.close()
-        logger.info(f"Saved {len(assets)} asset file(s) for device {device_id}")
+
+        if added_count > 0:
+            logger.info(f"Added {added_count} new asset file(s) for device {device_id}")
+        if skipped_count > 0:
+            logger.info(f"Skipped {skipped_count} existing asset file(s) for device {device_id}")
 
     def get_assets(self, device_id: int) -> List[Dict[str, Any]]:
         """Retrieve all asset files for a device
@@ -941,13 +1345,36 @@ class IODDManager:
             'node-red': NodeREDGenerator()
         }
         
-    def import_iodd(self, file_path: str) -> int:
-        """Import an IODD file or package"""
+    def import_iodd(self, file_path: str) -> Union[int, List[int]]:
+        """Import an IODD file or package
+
+        Returns:
+            int: device_id for single device import
+            List[int]: list of device_ids for nested ZIP import
+        """
+        # Try to ingest as single file first
         profile, assets = self.ingester.ingest_file(file_path)
-        device_id = self.storage.save_device(profile)
-        self.storage.save_assets(device_id, assets)
-        logger.info(f"Successfully imported IODD for {profile.device_info.product_name} with {len(assets)} asset file(s)")
-        return device_id
+
+        # Check if this is a nested ZIP (profile will be None)
+        if profile is None:
+            logger.info("Detected nested ZIP package, processing multiple devices...")
+            device_packages = self.ingester.ingest_nested_package(Path(file_path))
+
+            device_ids = []
+            for pkg_profile, pkg_assets in device_packages:
+                device_id = self.storage.save_device(pkg_profile)
+                self.storage.save_assets(device_id, pkg_assets)
+                device_ids.append(device_id)
+                logger.info(f"Successfully imported IODD for {pkg_profile.device_info.product_name} with {len(pkg_assets)} asset file(s)")
+
+            logger.info(f"Nested ZIP import complete: {len(device_ids)} device(s) imported")
+            return device_ids
+        else:
+            # Single device import
+            device_id = self.storage.save_device(profile)
+            self.storage.save_assets(device_id, assets)
+            logger.info(f"Successfully imported IODD for {profile.device_info.product_name} with {len(assets)} asset file(s)")
+            return device_id
     
     def generate_adapter(self, device_id: int, platform: str, output_path: str = "./generated"):
         """Generate adapter for a specific platform"""

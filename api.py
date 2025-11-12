@@ -4,7 +4,7 @@ IODD Manager REST API
 FastAPI-based REST API for IODD management system
 """
 
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 from pathlib import Path
 from datetime import datetime
 import json
@@ -49,6 +49,8 @@ class ParameterInfo(BaseModel):
     max_value: Optional[str] = None
     unit: Optional[str] = None
     description: Optional[str] = None
+    enumeration_values: Optional[Dict[str, str]] = None
+    bit_length: Optional[int] = None
 
 class GenerateRequest(BaseModel):
     """Adapter generation request model"""
@@ -71,10 +73,32 @@ class UploadResponse(BaseModel):
     parameters_count: int
     message: str = "IODD file successfully imported"
 
+class DeviceSummary(BaseModel):
+    """Summary of a single imported device"""
+    device_id: int
+    product_name: str
+    vendor: str
+    parameters_count: int
+
+class MultiUploadResponse(BaseModel):
+    """Multi-device upload response model for nested ZIPs"""
+    devices: List[DeviceSummary]
+    total_count: int
+    message: str = "Multiple IODD devices successfully imported from nested ZIP"
+
 class ErrorResponse(BaseModel):
     """Error response model"""
     error: str
     detail: Optional[str] = None
+
+class AssetInfo(BaseModel):
+    """Asset information model"""
+    id: int
+    device_id: int
+    file_name: str
+    file_type: str
+    file_path: Optional[str] = None
+    image_purpose: Optional[str] = None
 
 # ============================================================================
 # API Application
@@ -124,7 +148,7 @@ async def root():
 # -----------------------------------------------------------------------------
 
 @app.post("/api/iodd/upload",
-          response_model=UploadResponse,
+          response_model=Union[UploadResponse, MultiUploadResponse],
           tags=["IODD Management"])
 async def upload_iodd(
     background_tasks: BackgroundTasks,
@@ -136,6 +160,7 @@ async def upload_iodd(
     Accepts:
     - .xml files (standalone IODD)
     - .iodd files (IODD packages)
+    - .zip files (IODD packages)
 
     Limits:
     - Maximum file size: 10MB
@@ -147,10 +172,10 @@ async def upload_iodd(
             detail="No filename provided"
         )
 
-    if not file.filename.lower().endswith(('.xml', '.iodd')):
+    if not file.filename.lower().endswith(('.xml', '.iodd', '.zip')):
         raise HTTPException(
             status_code=400,
-            detail="File must be .xml or .iodd format"
+            detail="File must be .xml, .iodd, or .zip format"
         )
 
     # Read file content with size limit (10MB)
@@ -174,7 +199,7 @@ async def upload_iodd(
             detail="File is empty"
         )
 
-    # Basic XML validation for .xml files
+    # Basic XML validation for .xml files (skip for binary files like .zip/.iodd)
     if file.filename.lower().endswith('.xml'):
         try:
             content_str = content.decode('utf-8')
@@ -196,22 +221,41 @@ async def upload_iodd(
         tmp_path = tmp_file.name
     
     try:
-        # Import IODD file
-        device_id = manager.import_iodd(tmp_path)
-        
-        # Get device details
-        device = manager.storage.get_device(device_id)
-        
+        # Import IODD file (may return int or List[int])
+        result = manager.import_iodd(tmp_path)
+
         # Clean up temp file in background
         background_tasks.add_task(lambda: Path(tmp_path).unlink(missing_ok=True))
-        
-        return UploadResponse(
-            device_id=device_id,
-            product_name=device['product_name'],
-            vendor=device['manufacturer'],
-            parameters_count=len(device.get('parameters', []))
-        )
-        
+
+        # Check if nested ZIP (multiple devices)
+        if isinstance(result, list):
+            # Multiple devices imported from nested ZIP
+            devices = []
+            for device_id in result:
+                device = manager.storage.get_device(device_id)
+                devices.append(DeviceSummary(
+                    device_id=device_id,
+                    product_name=device['product_name'],
+                    vendor=device['manufacturer'],
+                    parameters_count=len(device.get('parameters', []))
+                ))
+
+            return MultiUploadResponse(
+                devices=devices,
+                total_count=len(devices)
+            )
+        else:
+            # Single device imported
+            device_id = result
+            device = manager.storage.get_device(device_id)
+
+            return UploadResponse(
+                device_id=device_id,
+                product_name=device['product_name'],
+                vendor=device['manufacturer'],
+                parameters_count=len(device.get('parameters', []))
+            )
+
     except Exception as e:
         # Clean up on error
         Path(tmp_path).unlink(missing_ok=True)
@@ -258,6 +302,8 @@ async def get_device_parameters(device_id: int):
     if not device:
         raise HTTPException(status_code=404, detail="Device not found")
     
+    import json
+
     return [
         ParameterInfo(
             index=p['param_index'],
@@ -268,34 +314,114 @@ async def get_device_parameters(device_id: int):
             min_value=p['min_value'],
             max_value=p['max_value'],
             unit=p['unit'],
-            description=p['description']
+            description=p['description'],
+            enumeration_values=json.loads(p['enumeration_values']) if p.get('enumeration_values') else None,
+            bit_length=p.get('bit_length')
         )
         for p in device.get('parameters', [])
     ]
+
+# IMPORTANT: More specific routes must come BEFORE parameterized routes
+# /api/iodd/reset must be before /api/iodd/{device_id}
+
+@app.delete("/api/iodd/reset",
+            tags=["IODD Management"])
+async def reset_database():
+    """Delete all devices and related data from the system"""
+    import sqlite3
+    conn = sqlite3.connect(manager.storage.db_path)
+    cursor = conn.cursor()
+
+    # Get count before deletion
+    cursor.execute("SELECT COUNT(*) FROM devices")
+    device_count = cursor.fetchone()[0]
+
+    # Delete all data from all tables
+    cursor.execute("DELETE FROM parameters")
+    cursor.execute("DELETE FROM iodd_files")
+    cursor.execute("DELETE FROM iodd_assets")
+    cursor.execute("DELETE FROM generated_adapters")
+    cursor.execute("DELETE FROM devices")
+
+    conn.commit()
+    conn.close()
+
+    return {
+        "message": f"Database reset successfully. Deleted {device_count} device(s) and all related data.",
+        "deleted_count": device_count
+    }
+
+class BulkDeleteRequest(BaseModel):
+    """Bulk delete request model"""
+    device_ids: List[int]
+
+@app.post("/api/iodd/bulk-delete",
+          tags=["IODD Management"])
+async def bulk_delete_devices(request: BulkDeleteRequest):
+    """Delete multiple devices from the system"""
+    if not request.device_ids:
+        raise HTTPException(status_code=400, detail="No device IDs provided")
+
+    import sqlite3
+    conn = sqlite3.connect(manager.storage.db_path)
+    cursor = conn.cursor()
+
+    deleted_count = 0
+    not_found = []
+
+    for device_id in request.device_ids:
+        # Check if device exists
+        cursor.execute("SELECT id FROM devices WHERE id = ?", (device_id,))
+        if not cursor.fetchone():
+            not_found.append(device_id)
+            continue
+
+        # Delete related records
+        cursor.execute("DELETE FROM parameters WHERE device_id = ?", (device_id,))
+        cursor.execute("DELETE FROM iodd_files WHERE device_id = ?", (device_id,))
+        cursor.execute("DELETE FROM iodd_assets WHERE device_id = ?", (device_id,))
+        cursor.execute("DELETE FROM generated_adapters WHERE device_id = ?", (device_id,))
+        cursor.execute("DELETE FROM devices WHERE id = ?", (device_id,))
+        deleted_count += 1
+
+    conn.commit()
+    conn.close()
+
+    response = {
+        "deleted_count": deleted_count,
+        "message": f"Successfully deleted {deleted_count} device(s)"
+    }
+
+    if not_found:
+        response["not_found"] = not_found
+        response["message"] += f", {len(not_found)} device(s) not found"
+
+    return response
 
 @app.delete("/api/iodd/{device_id}",
             tags=["IODD Management"])
 async def delete_device(device_id: int):
     """Delete a device from the system"""
     device = manager.storage.get_device(device_id)
-    
+
     if not device:
         raise HTTPException(status_code=404, detail="Device not found")
-    
+
     # Delete from database
     import sqlite3
     conn = sqlite3.connect(manager.storage.db_path)
     cursor = conn.cursor()
-    
-    # Delete related records
+
+    # Delete related records (including assets)
     cursor.execute("DELETE FROM parameters WHERE device_id = ?", (device_id,))
     cursor.execute("DELETE FROM iodd_files WHERE device_id = ?", (device_id,))
+    cursor.execute("DELETE FROM iodd_assets WHERE device_id = ?", (device_id,))
     cursor.execute("DELETE FROM generated_adapters WHERE device_id = ?", (device_id,))
     cursor.execute("DELETE FROM devices WHERE id = ?", (device_id,))
-    
+
     conn.commit()
     conn.close()
-    
+
     return {"message": f"Device {device_id} deleted successfully"}
 
 @app.get("/api/iodd/{device_id}/export",
@@ -357,27 +483,198 @@ async def export_iodd(device_id: int, format: str = "zip"):
             filename=file_name or f"{product_name}.xml"
         )
 
-    # Create ZIP package with all assets
+    # Create ZIP package with all assets (using original filenames)
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
         for file_name, file_content, file_type in assets:
-            # Write each file to the ZIP
+            # Write each file to the ZIP with its original filename
             zip_file.writestr(file_name, file_content)
 
     zip_buffer.seek(0)
 
     # Create temporary file for the ZIP
-    with tempfile.NamedTemporaryFile(suffix='.iodd', delete=False) as tmp_file:
+    with tempfile.NamedTemporaryFile(suffix='.zip', delete=False) as tmp_file:
         tmp_file.write(zip_buffer.getvalue())
         tmp_path = tmp_file.name
 
-    # Clean filename for download
+    # Use product name for the ZIP filename
     safe_product_name = "".join(c for c in product_name if c.isalnum() or c in (' ', '-', '_')).strip()
 
     return FileResponse(
         path=tmp_path,
         media_type="application/zip",
-        filename=f"{safe_product_name}.iodd"
+        filename=f"{safe_product_name}.zip"
+    )
+
+@app.get("/api/iodd/{device_id}/assets",
+         response_model=List[AssetInfo],
+         tags=["IODD Management"])
+async def list_assets(device_id: int):
+    """Get all assets for a specific device"""
+    import sqlite3
+
+    conn = sqlite3.connect(manager.storage.db_path)
+    cursor = conn.cursor()
+
+    # Verify device exists
+    cursor.execute("SELECT id FROM devices WHERE id = ?", (device_id,))
+    if not cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=404, detail="Device not found")
+
+    # Get all assets
+    cursor.execute(
+        """SELECT id, device_id, file_name, file_type, file_path, image_purpose
+           FROM iodd_assets WHERE device_id = ?""",
+        (device_id,)
+    )
+    assets = cursor.fetchall()
+    conn.close()
+
+    return [
+        AssetInfo(
+            id=asset[0],
+            device_id=asset[1],
+            file_name=asset[2],
+            file_type=asset[3],
+            file_path=asset[4],
+            image_purpose=asset[5]
+        )
+        for asset in assets
+    ]
+
+@app.get("/api/iodd/{device_id}/xml",
+         tags=["IODD Management"])
+async def get_device_xml(device_id: int):
+    """Get the XML content for a device"""
+    import sqlite3
+
+    conn = sqlite3.connect(manager.storage.db_path)
+    cursor = conn.cursor()
+
+    # Get the XML asset
+    cursor.execute(
+        """SELECT file_content FROM iodd_assets
+           WHERE device_id = ? AND file_type = 'xml'
+           LIMIT 1""",
+        (device_id,)
+    )
+    result = cursor.fetchone()
+    conn.close()
+
+    if not result:
+        raise HTTPException(status_code=404, detail="XML file not found for this device")
+
+    xml_content = result[0]
+    if isinstance(xml_content, bytes):
+        xml_content = xml_content.decode('utf-8')
+
+    return {"xml_content": xml_content}
+
+@app.get("/api/iodd/{device_id}/thumbnail",
+         tags=["IODD Management"])
+async def get_device_thumbnail(device_id: int):
+    """Get the thumbnail/icon image for a device"""
+    import sqlite3
+    import mimetypes
+
+    conn = sqlite3.connect(manager.storage.db_path)
+    cursor = conn.cursor()
+
+    # Try to find icon image first, then any image
+    cursor.execute(
+        """SELECT file_name, file_content FROM iodd_assets
+           WHERE device_id = ? AND file_type = 'image' AND image_purpose = 'icon'
+           LIMIT 1""",
+        (device_id,)
+    )
+    result = cursor.fetchone()
+
+    # If no icon, try any image
+    if not result:
+        cursor.execute(
+            """SELECT file_name, file_content FROM iodd_assets
+               WHERE device_id = ? AND file_type = 'image'
+               LIMIT 1""",
+            (device_id,)
+        )
+        result = cursor.fetchone()
+
+    conn.close()
+
+    if not result:
+        raise HTTPException(status_code=404, detail="No image found for this device")
+
+    file_name, file_content = result
+
+    # Determine MIME type
+    mime_type = mimetypes.guess_type(file_name)[0] or 'image/png'
+
+    # Create temporary file
+    with tempfile.NamedTemporaryFile(delete=False, suffix=Path(file_name).suffix) as tmp_file:
+        tmp_file.write(file_content if isinstance(file_content, bytes) else file_content.encode())
+        tmp_path = tmp_file.name
+
+    return FileResponse(
+        path=tmp_path,
+        media_type=mime_type,
+        filename=file_name
+    )
+
+@app.get("/api/iodd/{device_id}/assets/{asset_id}",
+         tags=["IODD Management"])
+async def get_asset(device_id: int, asset_id: int):
+    """Get a specific asset file (e.g., image)"""
+    import sqlite3
+    import mimetypes
+
+    conn = sqlite3.connect(manager.storage.db_path)
+    cursor = conn.cursor()
+
+    # Get asset
+    cursor.execute(
+        """SELECT file_name, file_content, file_type
+           FROM iodd_assets
+           WHERE id = ? AND device_id = ?""",
+        (asset_id, device_id)
+    )
+    asset = cursor.fetchone()
+    conn.close()
+
+    if not asset:
+        raise HTTPException(status_code=404, detail="Asset not found")
+
+    file_name, file_content, file_type = asset
+
+    # Determine MIME type
+    mime_type = mimetypes.guess_type(file_name)[0]
+    if not mime_type:
+        # Default MIME types based on file type
+        if file_type == 'image':
+            if file_name.lower().endswith('.png'):
+                mime_type = 'image/png'
+            elif file_name.lower().endswith(('.jpg', '.jpeg')):
+                mime_type = 'image/jpeg'
+            elif file_name.lower().endswith('.gif'):
+                mime_type = 'image/gif'
+            elif file_name.lower().endswith('.svg'):
+                mime_type = 'image/svg+xml'
+            else:
+                mime_type = 'application/octet-stream'
+        elif file_type == 'xml':
+            mime_type = 'application/xml'
+        else:
+            mime_type = 'application/octet-stream'
+
+    # Create temporary file
+    with tempfile.NamedTemporaryFile(delete=False, suffix=Path(file_name).suffix) as tmp_file:
+        tmp_file.write(file_content if isinstance(file_content, bytes) else file_content.encode())
+        tmp_path = tmp_file.name
+
+    return FileResponse(
+        path=tmp_path,
+        media_type=mime_type,
+        filename=file_name
     )
 
 # -----------------------------------------------------------------------------

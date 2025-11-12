@@ -190,8 +190,6 @@ module.exports = {
   },
   plugins: [
     require("tailwindcss-animate"),
-    require("@tailwindcss/forms"),
-    require("@tailwindcss/typography"),
     function({ addUtilities }) {
       const newUtilities = {
         '.text-gradient': {

@@ -12,7 +12,10 @@ import {
   Upload, Download, FileCode, Cpu, Settings, Trash2, Eye, Code2,
   Activity, Database, Package, Zap, ChevronRight, Search, Filter,
   BarChart3, Home, ChevronLeft, Star, X, MoreVertical, Calendar,
-  Grid3x3, List, Image as ImageIcon, ArrowLeft, ExternalLink, Copy
+  Grid3x3, List, Image as ImageIcon, ArrowLeft, ExternalLink, Copy,
+  AlertTriangle, Radio, ArrowRightLeft, FileText, Lock, Wrench, Monitor,
+  Wifi, Menu, ChevronDown, Info, Type, Hash, ToggleLeft, Command, RotateCcw,
+  AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
@@ -832,8 +835,25 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [assets, setAssets] = useState([]);
   const [parameters, setParameters] = useState([]);
+  const [errors, setErrors] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [processData, setProcessData] = useState([]);
+  const [documentInfo, setDocumentInfo] = useState(null);
+  const [deviceFeatures, setDeviceFeatures] = useState(null);
+  const [communicationProfile, setCommunicationProfile] = useState(null);
+  const [uiMenus, setUiMenus] = useState(null);
+  const [configSchema, setConfigSchema] = useState(null);
+  const [parameterValues, setParameterValues] = useState({});
+  const [activeConfigMenu, setActiveConfigMenu] = useState(null);
+  const [selectedParameter, setSelectedParameter] = useState(null);
+  const [validationErrors, setValidationErrors] = useState({});
+  const [configurationName, setConfigurationName] = useState('Untitled Configuration');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [xmlContent, setXmlContent] = useState('');
   const [loadingXml, setLoadingXml] = useState(false);
+  const [loadingErrors, setLoadingErrors] = useState(false);
+  const [loadingEvents, setLoadingEvents] = useState(false);
+  const [loadingProcessData, setLoadingProcessData] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [paramSearchQuery, setParamSearchQuery] = useState('');
@@ -844,6 +864,13 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
     if (device) {
       fetchAssets();
       fetchParameters();
+      fetchErrors();
+      fetchEvents();
+      fetchProcessData();
+      fetchDocumentInfo();
+      fetchDeviceFeatures();
+      fetchCommunicationProfile();
+      fetchUiMenus();
     }
   }, [device]);
 
@@ -883,10 +910,94 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
     }
   };
 
+  const fetchErrors = async () => {
+    setLoadingErrors(true);
+    try {
+      const response = await axios.get(`${API_BASE}/api/iodd/${device.id}/errors`);
+      setErrors(response.data);
+    } catch (error) {
+      console.error('Failed to fetch errors:', error);
+    } finally {
+      setLoadingErrors(false);
+    }
+  };
+
+  const fetchEvents = async () => {
+    setLoadingEvents(true);
+    try {
+      const response = await axios.get(`${API_BASE}/api/iodd/${device.id}/events`);
+      setEvents(response.data);
+    } catch (error) {
+      console.error('Failed to fetch events:', error);
+    } finally {
+      setLoadingEvents(false);
+    }
+  };
+
+  const fetchProcessData = async () => {
+    setLoadingProcessData(true);
+    try {
+      const response = await axios.get(`${API_BASE}/api/iodd/${device.id}/processdata`);
+      setProcessData(response.data);
+    } catch (error) {
+      console.error('Failed to fetch process data:', error);
+    } finally {
+      setLoadingProcessData(false);
+    }
+  };
+
+  const fetchDocumentInfo = async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/api/iodd/${device.id}/documentinfo`);
+      setDocumentInfo(response.data);
+    } catch (error) {
+      console.error('Failed to fetch document info:', error);
+    }
+  };
+
+  const fetchDeviceFeatures = async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/api/iodd/${device.id}/features`);
+      setDeviceFeatures(response.data);
+    } catch (error) {
+      console.error('Failed to fetch device features:', error);
+    }
+  };
+
+  const fetchCommunicationProfile = async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/api/iodd/${device.id}/communication`);
+      setCommunicationProfile(response.data);
+    } catch (error) {
+      console.error('Failed to fetch communication profile:', error);
+    }
+  };
+
+  const fetchUiMenus = async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/api/iodd/${device.id}/menus`);
+      setUiMenus(response.data);
+    } catch (error) {
+      console.error('Failed to fetch UI menus:', error);
+    }
+  };
+
+  const fetchConfigSchema = async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/api/iodd/${device.id}/config-schema`);
+      setConfigSchema(response.data);
+    } catch (error) {
+      console.error('Failed to fetch config schema:', error);
+    }
+  };
+
   const handleTabChange = (value) => {
     setActiveTab(value);
     if (value === 'xml' && !xmlContent) {
       fetchXml();
+    }
+    if (value === 'menus' && !configSchema) {
+      fetchConfigSchema();
     }
   };
 
@@ -910,6 +1021,665 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
       });
     } finally {
       setDeleting(false);
+    }
+  };
+
+  // Helper Functions for Interactive Configuration
+  const initializeParameterValues = (schema) => {
+    const values = {};
+    schema.menus.forEach(menu => {
+      menu.items.forEach(item => {
+        if (item.parameter && item.variable_id) {
+          values[item.variable_id] = item.parameter.default_value || '';
+        }
+      });
+    });
+    setParameterValues(values);
+    if (schema.menus.length > 0) {
+      setActiveConfigMenu(schema.menus[0].id);
+    }
+  };
+
+  const updateParameterValue = (variableId, value, param) => {
+    setParameterValues(prev => ({ ...prev, [variableId]: value }));
+    setHasUnsavedChanges(true);
+
+    // Validate the new value
+    const errors = validateParameter(param, value);
+    setValidationErrors(prev => ({
+      ...prev,
+      [variableId]: errors.length > 0 ? errors[0] : null
+    }));
+  };
+
+  const validateParameter = (param, value) => {
+    const errors = [];
+
+    if (param.enumeration_values && Object.keys(param.enumeration_values).length > 0) {
+      if (!Object.keys(param.enumeration_values).includes(value)) {
+        errors.push('Invalid enumeration value');
+      }
+    }
+
+    if (param.min_value !== null && param.min_value !== undefined) {
+      const numValue = parseFloat(value);
+      const minValue = parseFloat(param.min_value);
+      if (!isNaN(numValue) && !isNaN(minValue) && numValue < minValue) {
+        errors.push(`Value must be >= ${param.min_value}`);
+      }
+    }
+
+    if (param.max_value !== null && param.max_value !== undefined) {
+      const numValue = parseFloat(value);
+      const maxValue = parseFloat(param.max_value);
+      if (!isNaN(numValue) && !isNaN(maxValue) && numValue > maxValue) {
+        errors.push(`Value must be <= ${param.max_value}`);
+      }
+    }
+
+    return errors;
+  };
+
+  const exportConfiguration = () => {
+    const config = {
+      deviceId: device.id,
+      deviceName: device.product_text,
+      configurationName,
+      timestamp: new Date().toISOString(),
+      parameters: parameterValues
+    };
+
+    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${device.product_text}_${configurationName.replace(/\s+/g, '_')}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast.success('Configuration exported successfully');
+  };
+
+  const resetConfiguration = () => {
+    if (configSchema) {
+      initializeParameterValues(configSchema);
+      setValidationErrors({});
+      setHasUnsavedChanges(false);
+      toast.info('Configuration reset to default values');
+    }
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Copied to clipboard');
+  };
+
+  // Initialize parameter values when config schema loads
+  useEffect(() => {
+    if (configSchema && Object.keys(parameterValues).length === 0) {
+      initializeParameterValues(configSchema);
+    }
+  }, [configSchema]);
+
+  // Comprehensive Menu Item Display Component - Shows ALL menu items
+  const MenuItemDisplay = ({ item, index }) => {
+    // Handle Button Items
+    if (item.button_value) {
+      return (
+        <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/30">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Command className="w-4 h-4 text-orange-400" />
+              <span className="text-sm font-medium text-slate-300">Action Button</span>
+              {item.variable_id && (
+                <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/50 font-mono text-xs">
+                  {item.variable_id}
+                </Badge>
+              )}
+            </div>
+            <Badge className="bg-orange-500/20 text-orange-300 border-orange-500/50">
+              Value: {item.button_value}
+            </Badge>
+          </div>
+          {item.access_right_restriction && (
+            <div className="mt-2 text-xs text-slate-400">
+              Access: <Badge className="ml-1 bg-slate-700 text-slate-300 text-xs">{item.access_right_restriction}</Badge>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Handle Menu References (Submenus)
+    if (item.menu_ref) {
+      return (
+        <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/30">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ChevronRight className="w-4 h-4 text-purple-400" />
+              <span className="text-sm font-medium text-slate-300">Submenu Link</span>
+            </div>
+            <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/50 font-mono">
+              {item.menu_ref}
+            </Badge>
+          </div>
+          {item.variable_id && (
+            <div className="mt-2 text-xs text-slate-400">
+              Variable: <Badge className="ml-1 bg-cyan-500/20 text-cyan-300 font-mono text-xs">{item.variable_id}</Badge>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Handle RecordItem References
+    if (item.record_item_ref) {
+      return (
+        <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Database className="w-4 h-4 text-blue-400" />
+              <span className="text-sm font-medium text-slate-300">Record Item</span>
+            </div>
+            <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/50 font-mono">
+              {item.record_item_ref}
+            </Badge>
+          </div>
+          <div className="mt-2 space-y-1 text-xs">
+            {item.subindex !== null && (
+              <div className="text-slate-400">
+                Subindex: <Badge className="ml-1 bg-slate-700 text-slate-300 text-xs">{item.subindex}</Badge>
+              </div>
+            )}
+            {item.access_right_restriction && (
+              <div className="text-slate-400">
+                Access: <Badge className="ml-1 bg-slate-700 text-slate-300 text-xs">{item.access_right_restriction}</Badge>
+              </div>
+            )}
+            {item.display_format && (
+              <div className="text-slate-400">
+                Format: <Badge className="ml-1 bg-slate-700 text-slate-300 text-xs">{item.display_format}</Badge>
+              </div>
+            )}
+            {item.unit_code && (
+              <div className="text-slate-400">
+                Unit: <Badge className="ml-1 bg-slate-700 text-slate-300 text-xs">{item.unit_code}</Badge>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // Handle Variable Items (with or without parameter details)
+    if (item.variable_id) {
+      const param = item.parameter;
+      const variableId = item.variable_id;
+      const value = parameterValues[variableId] || (param?.default_value) || '';
+      const isReadOnly = item.access_right_restriction === 'ro';
+
+      // If we have full parameter details, show interactive control
+      if (param) {
+        return <InteractiveParameterControl item={item} />;
+      }
+
+      // Otherwise, show variable info card (parameter lookup failed)
+      return (
+        <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Type className="w-4 h-4 text-slate-400" />
+              <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/50 font-mono text-xs">
+                {variableId}
+              </Badge>
+            </div>
+            {isReadOnly && (
+              <Badge className="text-xs bg-blue-500/20 text-blue-400 border-blue-500/50">Read Only</Badge>
+            )}
+          </div>
+          <div className="space-y-1 text-xs">
+            {item.access_right_restriction && (
+              <div className="text-slate-400">
+                Access: <Badge className="ml-1 bg-slate-700 text-slate-300 text-xs">{item.access_right_restriction}</Badge>
+              </div>
+            )}
+            {item.display_format && (
+              <div className="text-slate-400">
+                Format: <Badge className="ml-1 bg-slate-700 text-slate-300 text-xs">{item.display_format}</Badge>
+              </div>
+            )}
+            {item.unit_code && (
+              <div className="text-slate-400">
+                Unit: <Badge className="ml-1 bg-slate-700 text-slate-300 text-xs">{item.unit_code}</Badge>
+              </div>
+            )}
+            <div className="text-slate-500 text-xs mt-2">
+              ⚠ Parameter details not found in database
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Fallback for unknown item types
+    return (
+      <div className="p-3 rounded-lg bg-slate-800/30 border border-slate-700">
+        <div className="text-xs text-slate-500">Unknown item type</div>
+        <pre className="text-xs text-slate-600 mt-1">{JSON.stringify(item, null, 2)}</pre>
+      </div>
+    );
+  };
+
+  // Interactive Parameter Control Component
+  const InteractiveParameterControl = ({ item }) => {
+    const param = item.parameter;
+    const variableId = item.variable_id;
+    const value = parameterValues[variableId] || param.default_value || '';
+    const error = validationErrors[variableId];
+    const isReadOnly = item.access_right_restriction === 'ro';
+
+    if (!param) return null;
+
+    const handleChange = (newValue) => {
+      updateParameterValue(variableId, newValue, param);
+    };
+
+    // Enumeration - Dropdown
+    if (param.enumeration_values && Object.keys(param.enumeration_values).length > 0) {
+      return (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label className="text-sm text-slate-300 cursor-pointer" onClick={() => setSelectedParameter(item)}>
+              {param.name}
+              {item.unit_code && <span className="ml-1 text-xs text-slate-500">({item.unit_code})</span>}
+            </Label>
+            {isReadOnly && <Badge className="text-xs bg-blue-500/20 text-blue-400">Read Only</Badge>}
+          </div>
+          <Select
+            value={value}
+            onValueChange={handleChange}
+            disabled={isReadOnly}
+          >
+            <SelectTrigger className={`bg-slate-800 border-slate-700 text-white ${error ? 'border-red-500' : ''}`}>
+              <SelectValue placeholder="Select value..." />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(param.enumeration_values).map(([enumValue, enumName]) => (
+                <SelectItem key={enumValue} value={enumValue}>
+                  {enumName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {error && (
+            <p className="text-xs text-red-400 flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" />
+              {error}
+            </p>
+          )}
+        </div>
+      );
+    }
+
+    // Boolean - Toggle
+    if (param.data_type && param.data_type.toLowerCase().includes('bool')) {
+      return (
+        <div className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 border border-slate-700">
+          <Label className="text-sm text-slate-300 cursor-pointer flex-1" onClick={() => setSelectedParameter(item)}>
+            {param.name}
+            {isReadOnly && <Badge className="ml-2 text-xs bg-blue-500/20 text-blue-400">Read Only</Badge>}
+          </Label>
+          <input
+            type="checkbox"
+            checked={value === '1' || value === 'true' || value === true}
+            onChange={(e) => handleChange(e.target.checked ? '1' : '0')}
+            disabled={isReadOnly}
+            className="w-5 h-5 rounded border-slate-600 text-violet-500 focus:ring-violet-500"
+          />
+        </div>
+      );
+    }
+
+    // Numeric with range - Slider + Input
+    if (param.min_value !== null && param.max_value !== null) {
+      const numValue = parseFloat(value) || 0;
+      const minVal = parseFloat(param.min_value) || 0;
+      const maxVal = parseFloat(param.max_value) || 100;
+
+      return (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label className="text-sm text-slate-300 cursor-pointer" onClick={() => setSelectedParameter(item)}>
+              {param.name}
+              {item.unit_code && <span className="ml-1 text-xs text-slate-500">({item.unit_code})</span>}
+            </Label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                value={value}
+                onChange={(e) => handleChange(e.target.value)}
+                disabled={isReadOnly}
+                min={minVal}
+                max={maxVal}
+                className={`w-20 h-8 bg-slate-800 border-slate-700 text-white text-sm ${error ? 'border-red-500' : ''}`}
+              />
+              {isReadOnly && <Badge className="text-xs bg-blue-500/20 text-blue-400">RO</Badge>}
+            </div>
+          </div>
+          <input
+            type="range"
+            min={minVal}
+            max={maxVal}
+            value={numValue}
+            onChange={(e) => handleChange(e.target.value)}
+            disabled={isReadOnly}
+            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-violet-500"
+          />
+          <div className="flex justify-between text-xs text-slate-500">
+            <span>{param.min_value}</span>
+            <span>{param.max_value}</span>
+          </div>
+          {error && (
+            <p className="text-xs text-red-400 flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" />
+              {error}
+            </p>
+          )}
+        </div>
+      );
+    }
+
+    // Default - Text Input
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-sm text-slate-300 cursor-pointer" onClick={() => setSelectedParameter(item)}>
+            {param.name}
+            {item.unit_code && <span className="ml-1 text-xs text-slate-500">({item.unit_code})</span>}
+          </Label>
+          {isReadOnly && <Badge className="text-xs bg-blue-500/20 text-blue-400">Read Only</Badge>}
+        </div>
+        <Input
+          type="text"
+          value={value}
+          onChange={(e) => handleChange(e.target.value)}
+          disabled={isReadOnly}
+          placeholder={`Enter ${param.name.toLowerCase()}...`}
+          className={`bg-slate-800 border-slate-700 text-white ${error ? 'border-red-500' : ''}`}
+        />
+        {error && (
+          <p className="text-xs text-red-400 flex items-center gap-1">
+            <AlertCircle className="w-3 h-3" />
+            {error}
+          </p>
+        )}
+      </div>
+    );
+  };
+
+  // MenuSection Component - Shows a collapsible menu with parameter details
+  const MenuSection = ({ menu, isEven }) => {
+    const [isExpanded, setIsExpanded] = useState(true);
+
+    // Separate items by type
+    const variableItems = menu.items.filter(item => item.variable_id && item.parameter);
+    const subMenuItems = menu.items.filter(item => item.menu_ref);
+    const buttonItems = menu.items.filter(item => item.button_value);
+
+    return (
+      <div className={`rounded-lg border ${isEven ? 'bg-gradient-to-br from-violet-500/5 to-purple-500/5 border-violet-500/30' : 'bg-gradient-to-br from-blue-500/5 to-cyan-500/5 border-blue-500/30'}`}>
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors rounded-t-lg"
+        >
+          <div className="flex items-center gap-3">
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isEven ? 'bg-violet-500/20' : 'bg-blue-500/20'}`}>
+              <Menu className={`w-4 h-4 ${isEven ? 'text-violet-400' : 'text-blue-400'}`} />
+            </div>
+            <h3 className="text-lg font-semibold text-white">{menu.name}</h3>
+            <Badge className={`${isEven ? 'bg-violet-500/20 text-violet-400 border-violet-500/50' : 'bg-blue-500/20 text-blue-400 border-blue-500/50'}`}>
+              {menu.items.length} items
+            </Badge>
+          </div>
+          <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+        </button>
+
+        {isExpanded && (
+          <div className="p-4 space-y-3 border-t border-slate-700">
+            {variableItems.map((item, idx) => (
+              <ParameterItem key={idx} item={item} />
+            ))}
+
+            {subMenuItems.map((item, idx) => (
+              <div key={idx} className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/30">
+                <div className="flex items-center gap-2">
+                  <ChevronRight className="w-4 h-4 text-purple-400" />
+                  <span className="text-sm text-slate-300">Submenu:</span>
+                  <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/50 font-mono">
+                    {item.menu_ref}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+
+            {buttonItems.map((item, idx) => (
+              <div key={idx} className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/30">
+                <div className="flex items-center gap-2">
+                  <Command className="w-4 h-4 text-orange-400" />
+                  <span className="text-sm text-slate-300">Action Button:</span>
+                  <Badge className="bg-orange-500/20 text-orange-300 border-orange-500/50">
+                    Value: {item.button_value}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+
+            {menu.items.length === 0 && (
+              <div className="text-center py-4 text-slate-500 text-sm">No items in this menu</div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // ParameterItem Component - Shows detailed parameter information
+  const ParameterItem = ({ item }) => {
+    const [showDetails, setShowDetails] = useState(false);
+    const param = item.parameter;
+
+    const getTypeIcon = (dataType) => {
+      if (!dataType) return <Hash className="w-4 h-4" />;
+      const type = dataType.toLowerCase();
+      if (type.includes('string')) return <Type className="w-4 h-4 text-cyan-400" />;
+      if (type.includes('bool')) return <ToggleLeft className="w-4 h-4 text-green-400" />;
+      if (type.includes('int') || type.includes('float')) return <Hash className="w-4 h-4 text-blue-400" />;
+      return <Database className="w-4 h-4 text-slate-400" />;
+    };
+
+    const getAccessColor = (rights) => {
+      if (rights === 'ro') return 'bg-blue-500/20 text-blue-400 border-blue-500/50';
+      if (rights === 'wo') return 'bg-orange-500/20 text-orange-400 border-orange-500/50';
+      return 'bg-green-500/20 text-green-400 border-green-500/50';
+    };
+
+    if (!param) {
+      return (
+        <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700">
+          <div className="flex items-center gap-2">
+            <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/50 font-mono text-xs">
+              {item.variable_id || item.record_item_ref}
+            </Badge>
+            <span className="text-xs text-slate-500">No parameter definition found</span>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="rounded-lg bg-slate-800/50 border border-slate-700 overflow-hidden">
+        <button
+          onClick={() => setShowDetails(!showDetails)}
+          className="w-full p-3 hover:bg-white/5 transition-colors"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 flex-1">
+              {getTypeIcon(param.data_type)}
+              <div className="flex flex-col items-start">
+                <span className="text-sm font-medium text-white">{param.name}</span>
+                <span className="text-xs text-slate-500 font-mono">{item.variable_id}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {param.default_value && (
+                <span className="text-xs text-slate-400 px-2 py-1 rounded bg-slate-700">
+                  Default: <span className="text-cyan-300 font-mono">{param.default_value}</span>
+                </span>
+              )}
+              {item.access_right_restriction && (
+                <Badge className={`text-xs ${getAccessColor(item.access_right_restriction)}`}>
+                  {item.access_right_restriction}
+                </Badge>
+              )}
+              <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showDetails ? 'rotate-180' : ''}`} />
+            </div>
+          </div>
+        </button>
+
+        {showDetails && (
+          <div className="p-4 border-t border-slate-700 bg-slate-900/50 space-y-3">
+            {param.description && (
+              <div>
+                <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Description</p>
+                <p className="text-sm text-slate-300">{param.description}</p>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="p-2 rounded bg-slate-800 border border-slate-700">
+                <p className="text-xs text-slate-500 mb-1">Data Type</p>
+                <p className="text-xs font-mono text-white">{param.data_type}</p>
+              </div>
+              {param.bit_length && (
+                <div className="p-2 rounded bg-slate-800 border border-slate-700">
+                  <p className="text-xs text-slate-500 mb-1">Bit Length</p>
+                  <p className="text-xs font-mono text-white">{param.bit_length} bits</p>
+                </div>
+              )}
+              {item.display_format && (
+                <div className="p-2 rounded bg-slate-800 border border-slate-700">
+                  <p className="text-xs text-slate-500 mb-1">Display Format</p>
+                  <p className="text-xs font-mono text-white">{item.display_format}</p>
+                </div>
+              )}
+              {item.unit_code && (
+                <div className="p-2 rounded bg-slate-800 border border-slate-700">
+                  <p className="text-xs text-slate-500 mb-1">Unit Code</p>
+                  <p className="text-xs font-mono text-white">{item.unit_code}</p>
+                </div>
+              )}
+            </div>
+
+            {(param.min_value !== null || param.max_value !== null) && (
+              <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
+                <p className="text-xs text-blue-400 font-semibold mb-2">Value Range</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-white font-mono">{param.min_value !== null ? param.min_value : '−∞'}</span>
+                  <span className="text-slate-500">to</span>
+                  <span className="text-sm text-white font-mono">{param.max_value !== null ? param.max_value : '+∞'}</span>
+                </div>
+              </div>
+            )}
+
+            {param.enumeration_values && Object.keys(param.enumeration_values).length > 0 && (
+              <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30">
+                <p className="text-xs text-green-400 font-semibold mb-2">Enumeration Values</p>
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(param.enumeration_values).map(([value, name]) => (
+                    <div key={value} className="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-xs">
+                      <span className="text-green-400 font-mono">{value}</span>
+                      <span className="text-slate-500 mx-1">→</span>
+                      <span className="text-slate-300">{name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="p-3 rounded-lg bg-violet-500/10 border border-violet-500/30">
+              <p className="text-xs text-violet-400 font-semibold mb-2 flex items-center gap-1">
+                <Eye className="w-3 h-3" />
+                Config Form Preview
+              </p>
+              <ParameterPreview param={param} item={item} />
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // ParameterPreview Component - Shows what the config control would look like
+  const ParameterPreview = ({ param, item }) => {
+    if (param.enumeration_values && Object.keys(param.enumeration_values).length > 0) {
+      return (
+        <div className="space-y-2">
+          <Label className="text-xs text-slate-300">{param.name}</Label>
+          <Select disabled value={param.default_value || ''}>
+            <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+              <SelectValue placeholder="Select value..." />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(param.enumeration_values).map(([value, name]) => (
+                <SelectItem key={value} value={value}>{name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      );
+    } else if (param.data_type && param.data_type.toLowerCase().includes('bool')) {
+      return (
+        <div className="flex items-center gap-2 p-2 rounded bg-slate-800">
+          <input
+            type="checkbox"
+            disabled
+            checked={param.default_value === '1' || param.default_value === 'true'}
+            className="w-4 h-4"
+          />
+          <Label className="text-sm text-slate-300">{param.name}</Label>
+        </div>
+      );
+    } else if (param.min_value !== null || param.max_value !== null) {
+      return (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label className="text-xs text-slate-300">{param.name}</Label>
+            <span className="text-xs text-slate-400">{param.default_value || '0'}</span>
+          </div>
+          <input
+            type="range"
+            min={param.min_value || 0}
+            max={param.max_value || 100}
+            value={param.default_value || 0}
+            disabled
+            className="w-full"
+          />
+        </div>
+      );
+    } else {
+      return (
+        <div className="space-y-2">
+          <Label className="text-xs text-slate-300">{param.name}</Label>
+          <Input
+            disabled
+            value={param.default_value || ''}
+            placeholder={`Enter ${param.name.toLowerCase()}...`}
+            className="bg-slate-800 border-slate-700 text-white"
+          />
+        </div>
+      );
     }
   };
 
@@ -997,18 +1767,22 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
               {/* Device Image Showcase */}
               <div className="lg:col-span-1">
-                <div className="relative aspect-square rounded-2xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-2 border-slate-700 p-6 flex items-center justify-center group-hover:border-cyan-500/50 transition-all duration-300">
+                <div className="relative aspect-square rounded-2xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-2 border-slate-700 p-6 overflow-hidden group-hover:border-cyan-500/50 transition-all duration-300">
                   {/* Animated background glow */}
                   <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-purple-500/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                   {mainDeviceImage ? (
-                    <img
-                      src={`${API_BASE}/api/iodd/${device.id}/assets/${mainDeviceImage.id}`}
-                      alt={device.product_name}
-                      className="relative z-10 max-w-full max-h-full object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-300"
-                    />
+                    <div className="relative z-10 w-full h-full flex items-center justify-center">
+                      <img
+                        src={`${API_BASE}/api/iodd/${device.id}/assets/${mainDeviceImage.id}`}
+                        alt={device.product_name}
+                        className="w-full h-full object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
                   ) : (
-                    <Package className="w-32 h-32 text-slate-600 relative z-10" />
+                    <div className="relative z-10 w-full h-full flex items-center justify-center">
+                      <Package className="w-32 h-32 text-slate-600" />
+                    </div>
                   )}
 
                   {/* Pulse animation circle */}
@@ -1133,6 +1907,55 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
                 </Badge>
               </TabsTrigger>
               <TabsTrigger
+                value="errors"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-rose-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-red-500/20 transition-all duration-300 gap-2 px-6 py-2.5"
+              >
+                <AlertTriangle className="w-4 h-4" />
+                <span className="font-medium">Errors</span>
+                <Badge className="ml-2 bg-slate-700 text-slate-200 text-xs px-2 py-0.5">
+                  {errors.length}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger
+                value="events"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-600 data-[state=active]:to-amber-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-yellow-500/20 transition-all duration-300 gap-2 px-6 py-2.5"
+              >
+                <Radio className="w-4 h-4" />
+                <span className="font-medium">Events</span>
+                <Badge className="ml-2 bg-slate-700 text-slate-200 text-xs px-2 py-0.5">
+                  {events.length}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger
+                value="processdata"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/20 transition-all duration-300 gap-2 px-6 py-2.5"
+              >
+                <ArrowRightLeft className="w-4 h-4" />
+                <span className="font-medium">Process Data</span>
+                <Badge className="ml-2 bg-slate-700 text-slate-200 text-xs px-2 py-0.5">
+                  {processData.length}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger
+                value="communication"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-600 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-teal-500/20 transition-all duration-300 gap-2 px-6 py-2.5"
+              >
+                <Wifi className="w-4 h-4" />
+                <span className="font-medium">Communication</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="menus"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-violet-500/20 transition-all duration-300 gap-2 px-6 py-2.5"
+              >
+                <Menu className="w-4 h-4" />
+                <span className="font-medium">Menus</span>
+                {uiMenus && uiMenus.menus && (
+                  <Badge className="ml-2 bg-slate-700 text-slate-200 text-xs px-2 py-0.5">
+                    {uiMenus.menus.length}
+                  </Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger
                 value="xml"
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-600 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-green-500/20 transition-all duration-300 gap-2 px-6 py-2.5"
               >
@@ -1210,6 +2033,128 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Document Information */}
+            {documentInfo && (
+              <Card className="bg-slate-900/80 backdrop-blur-sm border-slate-800 hover:border-cyan-500/30 transition-all">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-white text-xl flex items-center gap-2">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/20 to-indigo-500/20 flex items-center justify-center">
+                        <FileText className="w-5 h-5 text-blue-400" />
+                      </div>
+                      Document Information
+                    </CardTitle>
+                    <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/50">
+                      Metadata
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {documentInfo.copyright && (
+                      <div className="p-4 rounded-lg bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700">
+                        <p className="text-xs text-slate-400 uppercase tracking-wider mb-2">Copyright</p>
+                        <p className="text-sm text-white">{documentInfo.copyright}</p>
+                      </div>
+                    )}
+                    {documentInfo.release_date && (
+                      <div className="p-4 rounded-lg bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700">
+                        <p className="text-xs text-slate-400 uppercase tracking-wider mb-2">Release Date</p>
+                        <p className="text-sm text-white">{documentInfo.release_date}</p>
+                      </div>
+                    )}
+                    {documentInfo.version && (
+                      <div className="p-4 rounded-lg bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700">
+                        <p className="text-xs text-slate-400 uppercase tracking-wider mb-2">Document Version</p>
+                        <p className="text-sm text-white">{documentInfo.version}</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Device Features & Capabilities */}
+            {deviceFeatures && (
+              <Card className="bg-slate-900/80 backdrop-blur-sm border-slate-800 hover:border-cyan-500/30 transition-all">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-white text-xl flex items-center gap-2">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+                        <Settings className="w-5 h-5 text-purple-400" />
+                      </div>
+                      Device Features
+                    </CardTitle>
+                    <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/50">
+                      Capabilities
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Feature flags */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <div className={`p-3 rounded-lg border ${deviceFeatures.data_storage ? 'bg-green-500/10 border-green-500/30' : 'bg-slate-800/50 border-slate-700'}`}>
+                        <div className="flex items-center gap-2">
+                          <Database className={`w-4 h-4 ${deviceFeatures.data_storage ? 'text-green-400' : 'text-slate-500'}`} />
+                          <span className={`text-sm ${deviceFeatures.data_storage ? 'text-green-400' : 'text-slate-500'}`}>
+                            Data Storage
+                          </span>
+                        </div>
+                      </div>
+                      <div className={`p-3 rounded-lg border ${deviceFeatures.block_parameter ? 'bg-green-500/10 border-green-500/30' : 'bg-slate-800/50 border-slate-700'}`}>
+                        <div className="flex items-center gap-2">
+                          <Lock className={`w-4 h-4 ${deviceFeatures.block_parameter ? 'text-green-400' : 'text-slate-500'}`} />
+                          <span className={`text-sm ${deviceFeatures.block_parameter ? 'text-green-400' : 'text-slate-500'}`}>
+                            Block Parameter
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Profile Characteristic */}
+                    {deviceFeatures.profile_characteristic && (
+                      <div className="p-4 rounded-lg bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700">
+                        <p className="text-xs text-slate-400 uppercase tracking-wider mb-2">Profile Characteristic</p>
+                        <p className="text-sm text-white font-mono">{deviceFeatures.profile_characteristic}</p>
+                      </div>
+                    )}
+
+                    {/* Access Locks */}
+                    <div>
+                      <p className="text-xs text-slate-400 uppercase tracking-wider mb-3">Supported Access Locks</p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div className={`p-3 rounded-lg border text-center ${deviceFeatures.access_locks_data_storage ? 'bg-cyan-500/10 border-cyan-500/30' : 'bg-slate-800/50 border-slate-700'}`}>
+                          <Database className={`w-4 h-4 mx-auto mb-1 ${deviceFeatures.access_locks_data_storage ? 'text-cyan-400' : 'text-slate-500'}`} />
+                          <span className={`text-xs ${deviceFeatures.access_locks_data_storage ? 'text-cyan-400' : 'text-slate-500'}`}>
+                            Data Storage
+                          </span>
+                        </div>
+                        <div className={`p-3 rounded-lg border text-center ${deviceFeatures.access_locks_parameter ? 'bg-cyan-500/10 border-cyan-500/30' : 'bg-slate-800/50 border-slate-700'}`}>
+                          <Settings className={`w-4 h-4 mx-auto mb-1 ${deviceFeatures.access_locks_parameter ? 'text-cyan-400' : 'text-slate-500'}`} />
+                          <span className={`text-xs ${deviceFeatures.access_locks_parameter ? 'text-cyan-400' : 'text-slate-500'}`}>
+                            Parameter
+                          </span>
+                        </div>
+                        <div className={`p-3 rounded-lg border text-center ${deviceFeatures.access_locks_local_parameterization ? 'bg-cyan-500/10 border-cyan-500/30' : 'bg-slate-800/50 border-slate-700'}`}>
+                          <Wrench className={`w-4 h-4 mx-auto mb-1 ${deviceFeatures.access_locks_local_parameterization ? 'text-cyan-400' : 'text-slate-500'}`} />
+                          <span className={`text-xs ${deviceFeatures.access_locks_local_parameterization ? 'text-cyan-400' : 'text-slate-500'}`}>
+                            Local Param
+                          </span>
+                        </div>
+                        <div className={`p-3 rounded-lg border text-center ${deviceFeatures.access_locks_local_user_interface ? 'bg-cyan-500/10 border-cyan-500/30' : 'bg-slate-800/50 border-slate-700'}`}>
+                          <Monitor className={`w-4 h-4 mx-auto mb-1 ${deviceFeatures.access_locks_local_user_interface ? 'text-cyan-400' : 'text-slate-500'}`} />
+                          <span className={`text-xs ${deviceFeatures.access_locks_local_user_interface ? 'text-cyan-400' : 'text-slate-500'}`}>
+                            Local UI
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Device Images Gallery */}
             {imageAssets.length > 0 && (
@@ -1319,10 +2264,20 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
                           >
                             <td className="py-3 px-4 text-sm font-mono text-cyan-400 font-semibold">{param.index}</td>
                             <td className="py-3 px-4 text-sm text-white font-medium">
-                              <div>
-                                {param.name}
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span>{param.name}</span>
+                                {param.dynamic && (
+                                  <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/50 text-xs">
+                                    Dynamic
+                                  </Badge>
+                                )}
+                                {param.unit_code && (
+                                  <span className="text-xs text-purple-400 font-semibold">
+                                    [{param.unit_code}]
+                                  </span>
+                                )}
                                 {param.bit_length && (
-                                  <span className="ml-2 text-xs text-slate-500">({param.bit_length} bits)</span>
+                                  <span className="text-xs text-slate-500">({param.bit_length} bits)</span>
                                 )}
                               </div>
                             </td>
@@ -1522,6 +2477,632 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Errors Tab */}
+          <TabsContent value="errors" className="space-y-4 mt-6">
+            <Card className="bg-slate-900/80 backdrop-blur-sm border-slate-800">
+              <CardHeader>
+                <CardTitle className="text-white text-xl flex items-center gap-2">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-red-500/20 to-rose-500/20 flex items-center justify-center">
+                    <AlertTriangle className="w-5 h-5 text-red-400" />
+                  </div>
+                  Error Types
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Standard IO-Link error codes supported by this device
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loadingErrors ? (
+                  <div className="space-y-3">
+                    {[...Array(5)].map((_, i) => (
+                      <Skeleton key={i} className="h-16 bg-slate-800" />
+                    ))}
+                  </div>
+                ) : errors.length === 0 ? (
+                  <div className="text-center py-8 text-slate-400">
+                    No error types defined for this device
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {errors.map((error) => (
+                      <div
+                        key={error.id}
+                        className="p-4 rounded-lg bg-gradient-to-br from-red-500/10 to-rose-500/5 border border-slate-700 hover:border-red-500/50 transition-all"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <div className="px-3 py-1 rounded-md bg-red-500/20 border border-red-500/30">
+                              <span className="text-red-300 font-mono text-sm font-bold">
+                                {error.code}/{error.additional_code}
+                              </span>
+                            </div>
+                            <div className="px-3 py-1 rounded-md bg-slate-700/30 border border-slate-600/30">
+                              <span className="text-slate-300 font-mono text-xs">
+                                0x{error.code.toString(16).toUpperCase().padStart(2, '0')}/0x{error.additional_code.toString(16).toUpperCase().padStart(2, '0')}
+                              </span>
+                            </div>
+                            <h3 className="text-white font-semibold">{error.name}</h3>
+                          </div>
+                        </div>
+                        {error.description && (
+                          <p className="text-slate-400 text-sm mt-2 ml-1">{error.description}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Events Tab */}
+          <TabsContent value="events" className="space-y-4 mt-6">
+            <Card className="bg-slate-900/80 backdrop-blur-sm border-slate-800">
+              <CardHeader>
+                <CardTitle className="text-white text-xl flex items-center gap-2">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-500/20 to-amber-500/20 flex items-center justify-center">
+                    <Radio className="w-5 h-5 text-yellow-400" />
+                  </div>
+                  Device Events
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Events that can be triggered by this device
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loadingEvents ? (
+                  <div className="space-y-3">
+                    {[...Array(3)].map((_, i) => (
+                      <Skeleton key={i} className="h-16 bg-slate-800" />
+                    ))}
+                  </div>
+                ) : events.length === 0 ? (
+                  <div className="text-center py-8 text-slate-400">
+                    No events defined for this device
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {events.map((event) => (
+                      <div
+                        key={event.id}
+                        className="p-4 rounded-lg bg-gradient-to-br from-yellow-500/10 to-amber-500/5 border border-slate-700 hover:border-yellow-500/50 transition-all"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <div className="px-3 py-1 rounded-md bg-yellow-500/20 border border-yellow-500/30">
+                              <span className="text-yellow-300 font-mono text-sm font-bold">
+                                {event.code}
+                              </span>
+                            </div>
+                            <div className="px-3 py-1 rounded-md bg-slate-700/30 border border-slate-600/30">
+                              <span className="text-slate-300 font-mono text-xs">
+                                0x{event.code.toString(16).toUpperCase().padStart(4, '0')}
+                              </span>
+                            </div>
+                            {event.event_type && (
+                              <Badge className={`
+                                ${event.event_type === 'Error' ? 'bg-red-500/20 text-red-400 border-red-500/50' : ''}
+                                ${event.event_type === 'Warning' ? 'bg-orange-500/20 text-orange-400 border-orange-500/50' : ''}
+                                ${event.event_type === 'Notification' ? 'bg-blue-500/20 text-blue-400 border-blue-500/50' : ''}
+                                font-semibold
+                              `}>
+                                {event.event_type}
+                              </Badge>
+                            )}
+                            <h3 className="text-white font-semibold">{event.name}</h3>
+                          </div>
+                        </div>
+                        {event.description && (
+                          <p className="text-slate-400 text-sm mt-2 ml-1">{event.description}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Process Data Tab */}
+          <TabsContent value="processdata" className="space-y-4 mt-6">
+            <Card className="bg-slate-900/80 backdrop-blur-sm border-slate-800">
+              <CardHeader>
+                <CardTitle className="text-white text-xl flex items-center gap-2">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/20 to-indigo-500/20 flex items-center justify-center">
+                    <ArrowRightLeft className="w-5 h-5 text-blue-400" />
+                  </div>
+                  Process Data Structure
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Input and output process data configuration for real-time communication
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loadingProcessData ? (
+                  <div className="space-y-3">
+                    {[...Array(4)].map((_, i) => (
+                      <Skeleton key={i} className="h-24 bg-slate-800" />
+                    ))}
+                  </div>
+                ) : processData.length === 0 ? (
+                  <div className="text-center py-8 text-slate-400">
+                    No process data defined for this device
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {/* Process Data Inputs */}
+                    {processData.filter(pd => pd.direction === 'input').length > 0 && (
+                      <div>
+                        <h3 className="text-lg font-semibold text-cyan-400 mb-3 flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                          Process Data Inputs ({processData.filter(pd => pd.direction === 'input').length})
+                        </h3>
+                        <div className="space-y-3">
+                          {processData.filter(pd => pd.direction === 'input').map((pd) => (
+                            <div
+                              key={pd.id}
+                              className="p-4 rounded-lg bg-gradient-to-br from-cyan-500/10 to-blue-500/5 border border-slate-700 hover:border-cyan-500/50 transition-all"
+                            >
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <h4 className="text-white font-semibold">{pd.name}</h4>
+                                    <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/50 text-xs">
+                                      {pd.bit_length} bits
+                                    </Badge>
+                                    <Badge className="bg-slate-700 text-slate-300 text-xs">
+                                      {pd.data_type}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-xs text-slate-500 font-mono">ID: {pd.pd_id}</p>
+                                </div>
+                              </div>
+                              {pd.record_items && pd.record_items.length > 0 && (
+                                <div className="mt-3 pt-3 border-t border-slate-700">
+                                  <p className="text-xs text-slate-400 mb-2 font-semibold">Record Structure:</p>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    {pd.record_items.map((item) => (
+                                      <div
+                                        key={item.subindex}
+                                        className="p-2 rounded bg-slate-800/50 border border-slate-700"
+                                      >
+                                        <div className="flex items-center justify-between mb-1">
+                                          <span className="text-slate-300 text-sm font-medium">{item.name}</span>
+                                          <span className="text-xs text-slate-500 font-mono">idx:{item.subindex}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-xs text-slate-400">
+                                          <span className="font-mono">{item.data_type}</span>
+                                          <span>•</span>
+                                          <span>{item.bit_length} bits</span>
+                                          <span>•</span>
+                                          <span>offset: {item.bit_offset}</span>
+                                        </div>
+                                        {item.single_values && item.single_values.length > 0 && (
+                                          <div className="mt-2 pt-2 border-t border-slate-700">
+                                            <p className="text-xs text-slate-500 mb-1">Values:</p>
+                                            <div className="flex flex-wrap gap-1">
+                                              {item.single_values.map((sv, svIdx) => (
+                                                <div
+                                                  key={svIdx}
+                                                  className="text-xs px-2 py-1 rounded bg-slate-700/50 text-slate-300"
+                                                  title={sv.description || sv.name}
+                                                >
+                                                  <span className="font-mono text-cyan-400">{sv.value}</span>
+                                                  <span className="text-slate-500 mx-1">=</span>
+                                                  <span>{sv.name}</span>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Process Data Outputs */}
+                    {processData.filter(pd => pd.direction === 'output').length > 0 && (
+                      <div>
+                        <h3 className="text-lg font-semibold text-purple-400 mb-3 flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+                          Process Data Outputs ({processData.filter(pd => pd.direction === 'output').length})
+                        </h3>
+                        <div className="space-y-3">
+                          {processData.filter(pd => pd.direction === 'output').map((pd) => (
+                            <div
+                              key={pd.id}
+                              className="p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-slate-700 hover:border-purple-500/50 transition-all"
+                            >
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <h4 className="text-white font-semibold">{pd.name}</h4>
+                                    <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/50 text-xs">
+                                      {pd.bit_length} bits
+                                    </Badge>
+                                    <Badge className="bg-slate-700 text-slate-300 text-xs">
+                                      {pd.data_type}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-xs text-slate-500 font-mono">ID: {pd.pd_id}</p>
+                                </div>
+                              </div>
+                              {pd.record_items && pd.record_items.length > 0 && (
+                                <div className="mt-3 pt-3 border-t border-slate-700">
+                                  <p className="text-xs text-slate-400 mb-2 font-semibold">Record Structure:</p>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    {pd.record_items.map((item) => (
+                                      <div
+                                        key={item.subindex}
+                                        className="p-2 rounded bg-slate-800/50 border border-slate-700"
+                                      >
+                                        <div className="flex items-center justify-between mb-1">
+                                          <span className="text-slate-300 text-sm font-medium">{item.name}</span>
+                                          <span className="text-xs text-slate-500 font-mono">idx:{item.subindex}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-xs text-slate-400">
+                                          <span className="font-mono">{item.data_type}</span>
+                                          <span>•</span>
+                                          <span>{item.bit_length} bits</span>
+                                          <span>•</span>
+                                          <span>offset: {item.bit_offset}</span>
+                                        </div>
+                                        {item.single_values && item.single_values.length > 0 && (
+                                          <div className="mt-2 pt-2 border-t border-slate-700">
+                                            <p className="text-xs text-slate-500 mb-1">Values:</p>
+                                            <div className="flex flex-wrap gap-1">
+                                              {item.single_values.map((sv, svIdx) => (
+                                                <div
+                                                  key={svIdx}
+                                                  className="text-xs px-2 py-1 rounded bg-slate-700/50 text-slate-300"
+                                                  title={sv.description || sv.name}
+                                                >
+                                                  <span className="font-mono text-cyan-400">{sv.value}</span>
+                                                  <span className="text-slate-500 mx-1">=</span>
+                                                  <span>{sv.name}</span>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Communication Tab */}
+          <TabsContent value="communication" className="space-y-4 mt-6">
+            {communicationProfile ? (
+              <Card className="bg-slate-900/80 backdrop-blur-sm border-slate-800">
+                <CardHeader>
+                  <CardTitle className="text-white text-xl flex items-center gap-2">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-teal-500/20 to-emerald-500/20 flex items-center justify-center">
+                      <Wifi className="w-5 h-5 text-teal-400" />
+                    </div>
+                    IO-Link Communication Profile
+                  </CardTitle>
+                  <CardDescription className="text-slate-400">
+                    Network configuration and physical connection details
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {/* Protocol Information */}
+                    <div>
+                      <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Protocol</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {communicationProfile.iolink_revision && (
+                          <div className="p-4 rounded-lg bg-gradient-to-br from-teal-500/10 to-emerald-500/5 border border-slate-700">
+                            <p className="text-xs text-slate-400 mb-1">IO-Link Revision</p>
+                            <p className="text-lg font-bold text-teal-400">{communicationProfile.iolink_revision}</p>
+                          </div>
+                        )}
+                        {communicationProfile.compatible_with && (
+                          <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-slate-700">
+                            <p className="text-xs text-slate-400 mb-1">Compatible With</p>
+                            <p className="text-lg font-bold text-blue-400">{communicationProfile.compatible_with}</p>
+                          </div>
+                        )}
+                        {communicationProfile.bitrate && (
+                          <div className="p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-slate-700">
+                            <p className="text-xs text-slate-400 mb-1">Bitrate</p>
+                            <p className="text-lg font-bold text-purple-400">{communicationProfile.bitrate}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Timing Information */}
+                    <div>
+                      <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Timing & Performance</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {communicationProfile.min_cycle_time && (
+                          <div className="p-4 rounded-lg bg-gradient-to-br from-orange-500/10 to-amber-500/5 border border-slate-700">
+                            <p className="text-xs text-slate-400 mb-1">Min Cycle Time</p>
+                            <p className="text-lg font-bold text-orange-400">{(communicationProfile.min_cycle_time / 1000).toFixed(1)} ms</p>
+                          </div>
+                        )}
+                        {communicationProfile.msequence_capability && (
+                          <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-slate-700">
+                            <p className="text-xs text-slate-400 mb-1">M-Sequence Capability</p>
+                            <p className="text-lg font-bold text-green-400">{communicationProfile.msequence_capability} bytes</p>
+                          </div>
+                        )}
+                        <div className={`p-4 rounded-lg border ${communicationProfile.sio_supported ? 'bg-green-500/10 border-green-500/30' : 'bg-slate-800/50 border-slate-700'}`}>
+                          <p className="text-xs text-slate-400 mb-1">SIO Support</p>
+                          <p className={`text-lg font-bold ${communicationProfile.sio_supported ? 'text-green-400' : 'text-slate-500'}`}>
+                            {communicationProfile.sio_supported ? 'Supported' : 'Not Supported'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Physical Connection */}
+                    {communicationProfile.connection_type && (
+                      <div>
+                        <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Physical Connection</h3>
+                        <div className="p-4 rounded-lg bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700">
+                          <p className="text-xs text-slate-400 mb-2">Connection Type</p>
+                          <p className="text-lg font-bold text-white">{communicationProfile.connection_type}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Wire Configuration */}
+                    {communicationProfile.wire_config && Object.keys(communicationProfile.wire_config).length > 0 && (
+                      <div>
+                        <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Wire Configuration</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          {Object.entries(communicationProfile.wire_config).map(([wire, func]) => (
+                            <div key={wire} className="p-3 rounded-lg bg-gradient-to-br from-cyan-500/10 to-blue-500/5 border border-slate-700">
+                              <p className="text-xs text-slate-400 mb-1">{wire}</p>
+                              <p className="text-sm font-semibold text-cyan-400">{func}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="text-center py-12 text-slate-400">
+                No communication profile information available for this device
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Enhanced Menus Tab with Parameter Details */}
+          <TabsContent value="menus" className="space-y-4 mt-6">
+            {configSchema && configSchema.menus && configSchema.menus.length > 0 ? (
+              <div className="space-y-4">
+                {/* Configuration Toolbar */}
+                <Card className="bg-gradient-to-r from-violet-500/10 to-purple-500/10 border-violet-500/30">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4 flex-1">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center">
+                          <Settings className="w-5 h-5 text-violet-400" />
+                        </div>
+                        <div className="flex-1">
+                          <Input
+                            value={configurationName}
+                            onChange={(e) => setConfigurationName(e.target.value)}
+                            className="bg-slate-800/50 border-violet-500/30 text-white font-semibold max-w-md"
+                            placeholder="Configuration name..."
+                          />
+                          <p className="text-xs text-slate-400 mt-1">
+                            {hasUnsavedChanges ? (
+                              <span className="text-orange-400">Unsaved changes</span>
+                            ) : (
+                              'All changes auto-saved'
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={resetConfiguration}
+                          className="bg-slate-800 border-slate-700 hover:bg-slate-700"
+                        >
+                          <RotateCcw className="w-4 h-4 mr-2" />
+                          Reset
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={exportConfiguration}
+                          className="bg-violet-500/10 border-violet-500/50 hover:bg-violet-500/20 text-violet-400"
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Export
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Main Configuration Interface */}
+                <div className="grid grid-cols-12 gap-4">
+                  {/* Left: Configuration Interface */}
+                  <div className="col-span-12 lg:col-span-8">
+                    <Card className="bg-slate-900/80 backdrop-blur-sm border-slate-800">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-white text-lg">Device Configuration</CardTitle>
+                        <CardDescription className="text-slate-400">
+                          Adjust device parameters - changes are not applied to the physical device
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {/* Menu Tabs */}
+                        <Tabs value={activeConfigMenu} onValueChange={setActiveConfigMenu} className="w-full">
+                          <TabsList className="bg-slate-800/50 border border-slate-700 p-1 flex flex-wrap h-auto">
+                            {configSchema.menus.map((menu) => (
+                              <TabsTrigger
+                                key={menu.id}
+                                value={menu.id}
+                                className="data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-400 text-slate-400 text-sm"
+                              >
+                                {menu.name}
+                                <Badge className="ml-2 bg-slate-700 text-slate-300 text-xs">
+                                  {menu.items.length}
+                                </Badge>
+                              </TabsTrigger>
+                            ))}
+                          </TabsList>
+
+                          {/* Menu Content - Show ALL items */}
+                          {configSchema.menus.map((menu) => (
+                            <TabsContent key={menu.id} value={menu.id} className="mt-4 space-y-3">
+                              {menu.items.length === 0 ? (
+                                <div className="text-center py-12 text-slate-500">
+                                  No items in this menu
+                                </div>
+                              ) : (
+                                menu.items.map((item, idx) => (
+                                  <MenuItemDisplay key={idx} item={item} index={idx} />
+                                ))
+                              )}
+                            </TabsContent>
+                          ))}
+                        </Tabs>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Right: Parameter Details Panel */}
+                  <div className="col-span-12 lg:col-span-4">
+                    <Card className="bg-slate-900/80 backdrop-blur-sm border-slate-800 sticky top-4">
+                      <CardHeader>
+                        <CardTitle className="text-white text-lg flex items-center gap-2">
+                          <Info className="w-5 h-5 text-violet-400" />
+                          Parameter Details
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {selectedParameter && selectedParameter.parameter ? (
+                          <div className="space-y-4">
+                            <div>
+                              <h3 className="text-lg font-semibold text-white mb-1">
+                                {selectedParameter.parameter.name}
+                              </h3>
+                              <Badge className="font-mono text-xs bg-cyan-500/20 text-cyan-300 border-cyan-500/50">
+                                {selectedParameter.variable_id}
+                              </Badge>
+                            </div>
+
+                            {selectedParameter.parameter.description && (
+                              <div>
+                                <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Description</p>
+                                <p className="text-sm text-slate-300">{selectedParameter.parameter.description}</p>
+                              </div>
+                            )}
+
+                            <div className="grid grid-cols-2 gap-3 text-sm">
+                              <div className="p-2 rounded bg-slate-800/50 border border-slate-700">
+                                <p className="text-xs text-slate-500 mb-1">Data Type</p>
+                                <p className="text-slate-300 font-mono text-xs">{selectedParameter.parameter.data_type}</p>
+                              </div>
+                              <div className="p-2 rounded bg-slate-800/50 border border-slate-700">
+                                <p className="text-xs text-slate-500 mb-1">Access</p>
+                                <Badge className={`text-xs ${selectedParameter.access_right_restriction === 'ro' ? 'bg-blue-500/20 text-blue-400' : selectedParameter.access_right_restriction === 'wo' ? 'bg-orange-500/20 text-orange-400' : 'bg-green-500/20 text-green-400'}`}>
+                                  {selectedParameter.access_right_restriction}
+                                </Badge>
+                              </div>
+                              {selectedParameter.parameter.default_value && (
+                                <div className="p-2 rounded bg-slate-800/50 border border-slate-700">
+                                  <p className="text-xs text-slate-500 mb-1">Default</p>
+                                  <p className="text-slate-300 font-mono text-xs">{selectedParameter.parameter.default_value}</p>
+                                </div>
+                              )}
+                              {selectedParameter.parameter.bit_length && (
+                                <div className="p-2 rounded bg-slate-800/50 border border-slate-700">
+                                  <p className="text-xs text-slate-500 mb-1">Bit Length</p>
+                                  <p className="text-slate-300 font-mono text-xs">{selectedParameter.parameter.bit_length}</p>
+                                </div>
+                              )}
+                            </div>
+
+                            {(selectedParameter.parameter.min_value !== null || selectedParameter.parameter.max_value !== null) && (
+                              <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
+                                <p className="text-xs text-blue-400 font-semibold mb-2">Value Range</p>
+                                <div className="flex items-center justify-between text-sm">
+                                  <span className="text-slate-300">Min: <span className="font-mono">{selectedParameter.parameter.min_value}</span></span>
+                                  <span className="text-slate-300">Max: <span className="font-mono">{selectedParameter.parameter.max_value}</span></span>
+                                </div>
+                              </div>
+                            )}
+
+                            {selectedParameter.parameter.enumeration_values && Object.keys(selectedParameter.parameter.enumeration_values).length > 0 && (
+                              <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30">
+                                <p className="text-xs text-green-400 font-semibold mb-2">Valid Values</p>
+                                <div className="space-y-1 max-h-40 overflow-y-auto">
+                                  {Object.entries(selectedParameter.parameter.enumeration_values).map(([value, name]) => (
+                                    <div key={value} className="text-xs text-slate-300 flex items-center gap-2">
+                                      <span className="font-mono bg-slate-800 px-2 py-1 rounded">{value}</span>
+                                      <span>{name}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="pt-3 border-t border-slate-700">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => copyToClipboard(selectedParameter.variable_id)}
+                                className="w-full bg-slate-800 border-slate-700 hover:bg-slate-700"
+                              >
+                                <Copy className="w-4 h-4 mr-2" />
+                                Copy Variable ID
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-center py-12 text-slate-500">
+                            <Info className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                            <p className="text-sm">Click on any parameter to view details</p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-12 text-slate-400">
+                {configSchema === null ? (
+                  <div>
+                    <Skeleton className="h-8 w-64 mx-auto mb-2 bg-slate-800" />
+                    <Skeleton className="h-4 w-48 mx-auto bg-slate-800" />
+                  </div>
+                ) : (
+                  'No menu structure information available for this device'
+                )}
+              </div>
+            )}
           </TabsContent>
 
           {/* XML Viewer Tab */}

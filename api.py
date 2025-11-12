@@ -51,6 +51,11 @@ class ParameterInfo(BaseModel):
     description: Optional[str] = None
     enumeration_values: Optional[Dict[str, str]] = None
     bit_length: Optional[int] = None
+    dynamic: Optional[bool] = False
+    excluded_from_data_storage: Optional[bool] = False
+    modifies_other_variables: Optional[bool] = False
+    unit_code: Optional[str] = None
+    value_range_name: Optional[str] = None
 
 class GenerateRequest(BaseModel):
     """Adapter generation request model"""
@@ -99,6 +104,101 @@ class AssetInfo(BaseModel):
     file_type: str
     file_path: Optional[str] = None
     image_purpose: Optional[str] = None
+
+class ErrorTypeInfo(BaseModel):
+    """Error type information model"""
+    id: int
+    code: int
+    additional_code: int
+    name: Optional[str] = None
+    description: Optional[str] = None
+
+class EventInfo(BaseModel):
+    """Event information model"""
+    id: int
+    code: int
+    name: Optional[str] = None
+    description: Optional[str] = None
+    event_type: Optional[str] = None
+
+class SingleValueModel(BaseModel):
+    """Single value enumeration model"""
+    value: str
+    name: str
+    description: Optional[str] = None
+
+class RecordItemInfo(BaseModel):
+    """Process data record item information model"""
+    subindex: int
+    name: str
+    bit_offset: int
+    bit_length: int
+    data_type: str
+    default_value: Optional[str] = None
+    single_values: List[SingleValueModel] = []
+
+class ProcessDataInfo(BaseModel):
+    """Process data information model"""
+    id: int
+    pd_id: str
+    name: str
+    direction: str
+    bit_length: int
+    data_type: str
+    description: Optional[str] = None
+    record_items: List[RecordItemInfo] = []
+
+class DocumentInfoModel(BaseModel):
+    """Document information model"""
+    copyright: Optional[str] = None
+    release_date: Optional[str] = None
+    version: Optional[str] = None
+
+class DeviceFeaturesModel(BaseModel):
+    """Device features and capabilities model"""
+    block_parameter: bool = False
+    data_storage: bool = False
+    profile_characteristic: Optional[str] = None
+    access_locks_data_storage: bool = False
+    access_locks_local_parameterization: bool = False
+    access_locks_local_user_interface: bool = False
+    access_locks_parameter: bool = False
+
+class CommunicationProfileModel(BaseModel):
+    """Communication network profile model"""
+    iolink_revision: Optional[str] = None
+    compatible_with: Optional[str] = None
+    bitrate: Optional[str] = None
+    min_cycle_time: Optional[int] = None
+    msequence_capability: Optional[int] = None
+    sio_supported: bool = False
+    connection_type: Optional[str] = None
+    wire_config: Optional[Dict[str, str]] = None
+
+class MenuItemModel(BaseModel):
+    """UI menu item model"""
+    variable_id: Optional[str] = None
+    record_item_ref: Optional[str] = None
+    subindex: Optional[int] = None
+    access_right_restriction: Optional[str] = None
+    display_format: Optional[str] = None
+    unit_code: Optional[str] = None
+    button_value: Optional[str] = None
+    menu_ref: Optional[str] = None
+
+class MenuModel(BaseModel):
+    """UI menu model"""
+    id: str
+    name: str
+    items: List[MenuItemModel] = []
+    sub_menus: List[str] = []
+
+class UserInterfaceMenusModel(BaseModel):
+    """Complete UI menu structure model"""
+    menus: List[MenuModel] = []
+    observer_role_menus: Dict[str, str] = {}
+    maintenance_role_menus: Dict[str, str] = {}
+    specialist_role_menus: Dict[str, str] = {}
 
 # ============================================================================
 # API Application
@@ -316,10 +416,506 @@ async def get_device_parameters(device_id: int):
             unit=p['unit'],
             description=p['description'],
             enumeration_values=json.loads(p['enumeration_values']) if p.get('enumeration_values') else None,
-            bit_length=p.get('bit_length')
+            bit_length=p.get('bit_length'),
+            dynamic=bool(p.get('dynamic', 0)),
+            excluded_from_data_storage=bool(p.get('excluded_from_data_storage', 0)),
+            modifies_other_variables=bool(p.get('modifies_other_variables', 0)),
+            unit_code=p.get('unit_code'),
+            value_range_name=p.get('value_range_name')
         )
         for p in device.get('parameters', [])
     ]
+
+@app.get("/api/iodd/{device_id}/errors",
+         response_model=List[ErrorTypeInfo],
+         tags=["IODD Management"])
+async def get_device_errors(device_id: int):
+    """Get all error types for a specific device"""
+    device = manager.storage.get_device(device_id)
+
+    if not device:
+        raise HTTPException(status_code=404, detail="Device not found")
+
+    import sqlite3
+    conn = sqlite3.connect(manager.storage.db_path)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT id, code, additional_code, name, description
+        FROM error_types
+        WHERE device_id = ?
+        ORDER BY code, additional_code
+    """, (device_id,))
+
+    errors = []
+    for row in cursor.fetchall():
+        errors.append(ErrorTypeInfo(
+            id=row[0],
+            code=row[1],
+            additional_code=row[2],
+            name=row[3],
+            description=row[4]
+        ))
+
+    conn.close()
+    return errors
+
+@app.get("/api/iodd/{device_id}/events",
+         response_model=List[EventInfo],
+         tags=["IODD Management"])
+async def get_device_events(device_id: int):
+    """Get all events for a specific device"""
+    device = manager.storage.get_device(device_id)
+
+    if not device:
+        raise HTTPException(status_code=404, detail="Device not found")
+
+    import sqlite3
+    conn = sqlite3.connect(manager.storage.db_path)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT id, code, name, description, event_type
+        FROM events
+        WHERE device_id = ?
+        ORDER BY code
+    """, (device_id,))
+
+    events = []
+    for row in cursor.fetchall():
+        events.append(EventInfo(
+            id=row[0],
+            code=row[1],
+            name=row[2],
+            description=row[3],
+            event_type=row[4]
+        ))
+
+    conn.close()
+    return events
+
+@app.get("/api/iodd/{device_id}/processdata",
+         response_model=List[ProcessDataInfo],
+         tags=["IODD Management"])
+async def get_device_process_data(device_id: int):
+    """Get all process data (inputs and outputs) for a specific device"""
+    device = manager.storage.get_device(device_id)
+
+    if not device:
+        raise HTTPException(status_code=404, detail="Device not found")
+
+    import sqlite3
+    conn = sqlite3.connect(manager.storage.db_path)
+    cursor = conn.cursor()
+
+    # Get all process data for this device
+    cursor.execute("""
+        SELECT id, pd_id, name, direction, bit_length, data_type, description
+        FROM process_data
+        WHERE device_id = ?
+        ORDER BY direction, id
+    """, (device_id,))
+
+    process_data_list = []
+    for row in cursor.fetchall():
+        pd_id = row[0]
+
+        # Get record items for this process data
+        cursor.execute("""
+            SELECT id, subindex, name, bit_offset, bit_length, data_type, default_value
+            FROM process_data_record_items
+            WHERE process_data_id = ?
+            ORDER BY subindex
+        """, (pd_id,))
+
+        record_items = []
+        for item_row in cursor.fetchall():
+            item_id = item_row[0]
+
+            # Get single values for this record item
+            cursor.execute("""
+                SELECT value, name, description
+                FROM process_data_single_values
+                WHERE record_item_id = ?
+                ORDER BY value
+            """, (item_id,))
+
+            single_values = []
+            for sv_row in cursor.fetchall():
+                single_values.append(SingleValueModel(
+                    value=sv_row[0],
+                    name=sv_row[1],
+                    description=sv_row[2]
+                ))
+
+            record_items.append(RecordItemInfo(
+                subindex=item_row[1],
+                name=item_row[2],
+                bit_offset=item_row[3],
+                bit_length=item_row[4],
+                data_type=item_row[5],
+                default_value=item_row[6],
+                single_values=single_values
+            ))
+
+        process_data_list.append(ProcessDataInfo(
+            id=pd_id,
+            pd_id=row[1],
+            name=row[2],
+            direction=row[3],
+            bit_length=row[4],
+            data_type=row[5],
+            description=row[6],
+            record_items=record_items
+        ))
+
+    conn.close()
+    return process_data_list
+
+@app.get("/api/iodd/{device_id}/documentinfo",
+         response_model=Optional[DocumentInfoModel],
+         tags=["IODD Management"])
+async def get_device_document_info(device_id: int):
+    """Get document information for a specific device"""
+    device = manager.storage.get_device(device_id)
+
+    if not device:
+        raise HTTPException(status_code=404, detail="Device not found")
+
+    import sqlite3
+    conn = sqlite3.connect(manager.storage.db_path)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT copyright, release_date, version
+        FROM document_info
+        WHERE device_id = ?
+    """, (device_id,))
+
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row:
+        return None
+
+    return DocumentInfoModel(
+        copyright=row[0],
+        release_date=row[1],
+        version=row[2]
+    )
+
+@app.get("/api/iodd/{device_id}/features",
+         response_model=Optional[DeviceFeaturesModel],
+         tags=["IODD Management"])
+async def get_device_features(device_id: int):
+    """Get device features and capabilities for a specific device"""
+    device = manager.storage.get_device(device_id)
+
+    if not device:
+        raise HTTPException(status_code=404, detail="Device not found")
+
+    import sqlite3
+    conn = sqlite3.connect(manager.storage.db_path)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT block_parameter, data_storage, profile_characteristic,
+               access_locks_data_storage, access_locks_local_parameterization,
+               access_locks_local_user_interface, access_locks_parameter
+        FROM device_features
+        WHERE device_id = ?
+    """, (device_id,))
+
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row:
+        return None
+
+    return DeviceFeaturesModel(
+        block_parameter=bool(row[0]),
+        data_storage=bool(row[1]),
+        profile_characteristic=row[2],
+        access_locks_data_storage=bool(row[3]),
+        access_locks_local_parameterization=bool(row[4]),
+        access_locks_local_user_interface=bool(row[5]),
+        access_locks_parameter=bool(row[6])
+    )
+
+@app.get("/api/iodd/{device_id}/communication",
+         response_model=Optional[CommunicationProfileModel],
+         tags=["IODD Management"])
+async def get_device_communication_profile(device_id: int):
+    """Get communication network profile for a specific device"""
+    device = manager.storage.get_device(device_id)
+
+    if not device:
+        raise HTTPException(status_code=404, detail="Device not found")
+
+    import sqlite3
+    import json
+    conn = sqlite3.connect(manager.storage.db_path)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT iolink_revision, compatible_with, bitrate, min_cycle_time,
+               msequence_capability, sio_supported, connection_type, wire_config
+        FROM communication_profile
+        WHERE device_id = ?
+    """, (device_id,))
+
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row:
+        return None
+
+    return CommunicationProfileModel(
+        iolink_revision=row[0],
+        compatible_with=row[1],
+        bitrate=row[2],
+        min_cycle_time=row[3],
+        msequence_capability=row[4],
+        sio_supported=bool(row[5]),
+        connection_type=row[6],
+        wire_config=json.loads(row[7]) if row[7] else {}
+    )
+
+@app.get("/api/iodd/{device_id}/menus",
+         response_model=Optional[UserInterfaceMenusModel],
+         tags=["IODD Management"])
+async def get_device_ui_menus(device_id: int):
+    """Get user interface menu structure for a specific device"""
+    device = manager.storage.get_device(device_id)
+
+    if not device:
+        raise HTTPException(status_code=404, detail="Device not found")
+
+    import sqlite3
+    conn = sqlite3.connect(manager.storage.db_path)
+    cursor = conn.cursor()
+
+    # Get all menus for this device
+    cursor.execute("""
+        SELECT id, menu_id, name
+        FROM ui_menus
+        WHERE device_id = ?
+        ORDER BY id
+    """, (device_id,))
+
+    menus = []
+    for row in cursor.fetchall():
+        menu_db_id = row[0]
+        menu_id = row[1]
+        menu_name = row[2]
+
+        # Get menu items for this menu
+        cursor.execute("""
+            SELECT variable_id, record_item_ref, subindex, access_right_restriction,
+                   display_format, unit_code, button_value, menu_ref
+            FROM ui_menu_items
+            WHERE menu_id = ?
+            ORDER BY item_order
+        """, (menu_db_id,))
+
+        items = []
+        sub_menus = []
+        for item_row in cursor.fetchall():
+            item = MenuItemModel(
+                variable_id=item_row[0],
+                record_item_ref=item_row[1],
+                subindex=item_row[2],
+                access_right_restriction=item_row[3],
+                display_format=item_row[4],
+                unit_code=item_row[5],
+                button_value=item_row[6],
+                menu_ref=item_row[7]
+            )
+            items.append(item)
+            if item.menu_ref:
+                sub_menus.append(item.menu_ref)
+
+        menus.append(MenuModel(
+            id=menu_id,
+            name=menu_name,
+            items=items,
+            sub_menus=sub_menus
+        ))
+
+    # Get role menu mappings
+    observer_menus = {}
+    maintenance_menus = {}
+    specialist_menus = {}
+
+    cursor.execute("""
+        SELECT role_type, menu_type, menu_id
+        FROM ui_menu_roles
+        WHERE device_id = ?
+    """, (device_id,))
+
+    for row in cursor.fetchall():
+        role_type = row[0]
+        menu_type = row[1]
+        menu_id = row[2]
+
+        if role_type == 'observer':
+            observer_menus[menu_type] = menu_id
+        elif role_type == 'maintenance':
+            maintenance_menus[menu_type] = menu_id
+        elif role_type == 'specialist':
+            specialist_menus[menu_type] = menu_id
+
+    conn.close()
+
+    if not menus:
+        return None
+
+    return UserInterfaceMenusModel(
+        menus=menus,
+        observer_role_menus=observer_menus,
+        maintenance_role_menus=maintenance_menus,
+        specialist_role_menus=specialist_menus
+    )
+
+@app.get("/api/iodd/{device_id}/config-schema",
+         tags=["IODD Management"])
+async def get_device_config_schema(device_id: int):
+    """Get enriched menu structure with parameter details for config page generation"""
+    device = manager.storage.get_device(device_id)
+
+    if not device:
+        raise HTTPException(status_code=404, detail="Device not found")
+
+    import sqlite3
+    conn = sqlite3.connect(manager.storage.db_path)
+    cursor = conn.cursor()
+
+    # Get all menus with their items
+    cursor.execute("""
+        SELECT id, menu_id, name
+        FROM ui_menus
+        WHERE device_id = ?
+        ORDER BY id
+    """, (device_id,))
+
+    menus = []
+    for menu_row in cursor.fetchall():
+        db_menu_id = menu_row[0]
+        menu_id = menu_row[1]
+        menu_name = menu_row[2]
+
+        # Get menu items
+        cursor.execute("""
+            SELECT variable_id, record_item_ref, subindex, access_right_restriction,
+                   display_format, unit_code, button_value, menu_ref
+            FROM ui_menu_items
+            WHERE menu_id = ?
+            ORDER BY item_order
+        """, (db_menu_id,))
+
+        items = []
+        for item_row in cursor.fetchall():
+            variable_id = item_row[0]
+            record_item_ref = item_row[1]
+
+            # Enrich with parameter details
+            param_details = None
+            if variable_id:
+                # Try exact match first (e.g., "V_Qualityofteach" = "V_Qualityofteach")
+                cursor.execute("""
+                    SELECT id, name, data_type, access_rights, default_value,
+                           min_value, max_value, unit, description, enumeration_values,
+                           bit_length
+                    FROM parameters
+                    WHERE device_id = ? AND name = ?
+                """, (device_id, variable_id))
+
+                param_row = cursor.fetchone()
+
+                # If exact match failed, try transformed name as fallback
+                # e.g., "V_LED_Intensity" -> "LED Intensity"
+                if not param_row:
+                    param_name = variable_id.replace('_', ' ').strip()
+                    if param_name.startswith('V '):
+                        param_name = param_name[2:].strip()
+
+                    cursor.execute("""
+                        SELECT id, name, data_type, access_rights, default_value,
+                               min_value, max_value, unit, description, enumeration_values,
+                               bit_length
+                        FROM parameters
+                        WHERE device_id = ? AND name = ?
+                    """, (device_id, param_name))
+
+                    param_row = cursor.fetchone()
+                if param_row:
+                    # Parse enumeration values
+                    enum_values = {}
+                    if param_row[9]:
+                        try:
+                            import json
+                            enum_values = json.loads(param_row[9])
+                        except:
+                            pass
+
+                    param_details = {
+                        'id': param_row[0],
+                        'name': param_row[1],
+                        'data_type': param_row[2],
+                        'access_rights': param_row[3],
+                        'default_value': param_row[4],
+                        'min_value': param_row[5],
+                        'max_value': param_row[6],
+                        'unit': param_row[7],
+                        'description': param_row[8],
+                        'enumeration_values': enum_values,
+                        'bit_length': param_row[10]
+                    }
+
+            items.append({
+                'variable_id': variable_id,
+                'record_item_ref': record_item_ref,
+                'subindex': item_row[2],
+                'access_right_restriction': item_row[3],
+                'display_format': item_row[4],
+                'unit_code': item_row[5],
+                'button_value': item_row[6],
+                'menu_ref': item_row[7],
+                'parameter': param_details
+            })
+
+        menus.append({
+            'id': menu_id,
+            'name': menu_name,
+            'items': items
+        })
+
+    # Get role mappings
+    cursor.execute("""
+        SELECT role_type, menu_type, menu_id
+        FROM ui_menu_roles
+        WHERE device_id = ?
+    """, (device_id,))
+
+    role_mappings = {
+        'observer': {},
+        'maintenance': {},
+        'specialist': {}
+    }
+
+    for row in cursor.fetchall():
+        role_type = row[0]
+        menu_type = row[1]
+        menu_id = row[2]
+        if role_type in role_mappings:
+            role_mappings[role_type][menu_type] = menu_id
+
+    conn.close()
+
+    return {
+        'menus': menus,
+        'role_mappings': role_mappings
+    }
 
 # IMPORTANT: More specific routes must come BEFORE parameterized routes
 # /api/iodd/reset must be before /api/iodd/{device_id}
@@ -337,6 +933,18 @@ async def reset_database():
     device_count = cursor.fetchone()[0]
 
     # Delete all data from all tables
+    cursor.execute("DELETE FROM ui_menu_roles")
+    cursor.execute("DELETE FROM ui_menu_items")
+    cursor.execute("DELETE FROM ui_menus")
+    cursor.execute("DELETE FROM communication_profile")
+    cursor.execute("DELETE FROM device_features")
+    cursor.execute("DELETE FROM document_info")
+    cursor.execute("DELETE FROM process_data_single_values")
+    cursor.execute("DELETE FROM parameter_single_values")
+    cursor.execute("DELETE FROM process_data_record_items")
+    cursor.execute("DELETE FROM process_data")
+    cursor.execute("DELETE FROM error_types")
+    cursor.execute("DELETE FROM events")
     cursor.execute("DELETE FROM parameters")
     cursor.execute("DELETE FROM iodd_files")
     cursor.execute("DELETE FROM iodd_assets")
@@ -377,6 +985,10 @@ async def bulk_delete_devices(request: BulkDeleteRequest):
             continue
 
         # Delete related records
+        cursor.execute("DELETE FROM process_data_record_items WHERE process_data_id IN (SELECT id FROM process_data WHERE device_id = ?)", (device_id,))
+        cursor.execute("DELETE FROM process_data WHERE device_id = ?", (device_id,))
+        cursor.execute("DELETE FROM error_types WHERE device_id = ?", (device_id,))
+        cursor.execute("DELETE FROM events WHERE device_id = ?", (device_id,))
         cursor.execute("DELETE FROM parameters WHERE device_id = ?", (device_id,))
         cursor.execute("DELETE FROM iodd_files WHERE device_id = ?", (device_id,))
         cursor.execute("DELETE FROM iodd_assets WHERE device_id = ?", (device_id,))
@@ -413,6 +1025,10 @@ async def delete_device(device_id: int):
     cursor = conn.cursor()
 
     # Delete related records (including assets)
+    cursor.execute("DELETE FROM process_data_record_items WHERE process_data_id IN (SELECT id FROM process_data WHERE device_id = ?)", (device_id,))
+    cursor.execute("DELETE FROM process_data WHERE device_id = ?", (device_id,))
+    cursor.execute("DELETE FROM error_types WHERE device_id = ?", (device_id,))
+    cursor.execute("DELETE FROM events WHERE device_id = ?", (device_id,))
     cursor.execute("DELETE FROM parameters WHERE device_id = ?", (device_id,))
     cursor.execute("DELETE FROM iodd_files WHERE device_id = ?", (device_id,))
     cursor.execute("DELETE FROM iodd_assets WHERE device_id = ?", (device_id,))

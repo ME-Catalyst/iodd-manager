@@ -87,15 +87,33 @@ class Parameter:
     constraints: List[Constraint] = field(default_factory=list)
     enumeration_values: Dict[str, str] = field(default_factory=dict)  # value -> label mapping
     bit_length: Optional[int] = None
+    dynamic: bool = False
+    excluded_from_data_storage: bool = False
+    modifies_other_variables: bool = False
+    unit_code: Optional[str] = None
+    value_range_name: Optional[str] = None
+    single_values: List[SingleValue] = field(default_factory=list)
+
+@dataclass
+class RecordItem:
+    """Record item within process data"""
+    subindex: int
+    name: str
+    bit_offset: int
+    bit_length: int
+    data_type: str
+    default_value: Optional[str] = None
+    single_values: List['SingleValue'] = field(default_factory=list)
 
 @dataclass
 class ProcessData:
     """Process data definition"""
-    index: int
+    id: str
     name: str
     bit_length: int
-    data_type: IODDDataType
-    subindex_ref: Optional[int] = None
+    data_type: str
+    record_items: List[RecordItem] = field(default_factory=list)
+    description: Optional[str] = None
 
 @dataclass
 class ProcessDataCollection:
@@ -106,14 +124,101 @@ class ProcessDataCollection:
     total_output_bits: int = 0
 
 @dataclass
+class ErrorType:
+    """Device error type definition"""
+    code: int
+    additional_code: int
+    name: Optional[str] = None
+    description: Optional[str] = None
+
+@dataclass
+class Event:
+    """Device event definition"""
+    code: int
+    name: Optional[str] = None
+    description: Optional[str] = None
+    event_type: Optional[str] = None  # Notification, Warning, Error
+
+@dataclass
+class DocumentInfo:
+    """IODD document metadata"""
+    copyright: Optional[str] = None
+    release_date: Optional[str] = None
+    version: Optional[str] = None
+
+@dataclass
+class DeviceFeatures:
+    """Device capabilities and features"""
+    block_parameter: bool = False
+    data_storage: bool = False
+    profile_characteristic: Optional[str] = None
+    access_locks_data_storage: bool = False
+    access_locks_local_parameterization: bool = False
+    access_locks_local_user_interface: bool = False
+    access_locks_parameter: bool = False
+
+@dataclass
+class CommunicationProfile:
+    """IO-Link communication network profile"""
+    iolink_revision: Optional[str] = None
+    compatible_with: Optional[str] = None
+    bitrate: Optional[str] = None
+    min_cycle_time: Optional[int] = None  # microseconds
+    msequence_capability: Optional[int] = None
+    sio_supported: bool = False
+    connection_type: Optional[str] = None
+    wire_config: Dict[str, str] = field(default_factory=dict)
+
+@dataclass
+class MenuItem:
+    """User interface menu item reference"""
+    variable_id: Optional[str] = None
+    record_item_ref: Optional[str] = None
+    subindex: Optional[int] = None
+    access_right_restriction: Optional[str] = None
+    display_format: Optional[str] = None
+    unit_code: Optional[str] = None
+    button_value: Optional[str] = None
+    menu_ref: Optional[str] = None
+
+@dataclass
+class Menu:
+    """User interface menu definition"""
+    id: str
+    name: str
+    items: List[MenuItem] = field(default_factory=list)
+    sub_menus: List[str] = field(default_factory=list)
+
+@dataclass
+class UserInterfaceMenus:
+    """Complete user interface menu structure"""
+    menus: List[Menu] = field(default_factory=list)
+    observer_role_menus: Dict[str, str] = field(default_factory=dict)
+    maintenance_role_menus: Dict[str, str] = field(default_factory=dict)
+    specialist_role_menus: Dict[str, str] = field(default_factory=dict)
+
+@dataclass
+class SingleValue:
+    """Single value enumeration for parameters/process data"""
+    value: str
+    name: str
+    description: Optional[str] = None
+
+@dataclass
 class DeviceProfile:
     """Complete device profile from IODD"""
     vendor_info: VendorInfo
     device_info: DeviceInfo
     parameters: List[Parameter]
     process_data: ProcessDataCollection
-    iodd_version: str
-    schema_version: str
+    error_types: List[ErrorType] = field(default_factory=list)
+    events: List[Event] = field(default_factory=list)
+    document_info: Optional[DocumentInfo] = None
+    device_features: Optional[DeviceFeatures] = None
+    communication_profile: Optional[CommunicationProfile] = None
+    ui_menus: Optional[UserInterfaceMenus] = None
+    iodd_version: str = ""
+    schema_version: str = ""
     import_date: datetime = field(default_factory=datetime.now)
     raw_xml: Optional[str] = None
 
@@ -201,6 +306,12 @@ class IODDParser:
             device_info=self._extract_device_info(),
             parameters=self._extract_parameters(),
             process_data=self._extract_process_data(),
+            error_types=self._extract_error_types(),
+            events=self._extract_events(),
+            document_info=self._extract_document_info(),
+            device_features=self._extract_device_features(),
+            communication_profile=self._extract_communication_profile(),
+            ui_menus=self._extract_ui_menus(),
             iodd_version=self._get_iodd_version(),
             schema_version=self._get_schema_version(),
             raw_xml=self.xml_content
@@ -276,11 +387,13 @@ class IODDParser:
                 parameters.append(param)
 
         # Also parse StdVariableRef elements (standard IO-Link variables)
-        # Skip these for now as they don't have indices
-        # for std_var_elem in self.root.findall('.//iodd:VariableCollection/iodd:StdVariableRef', self.NAMESPACES):
-        #     param = self._parse_std_variable_ref(std_var_elem)
-        #     if param:
-        #         parameters.append(param)
+        # These are standardized variables defined by the IO-Link specification
+        std_var_base_index = 9000  # Start synthetic indices at 9000 to avoid conflicts
+        for std_var_elem in self.root.findall('.//iodd:VariableCollection/iodd:StdVariableRef', self.NAMESPACES):
+            param = self._parse_std_variable_ref(std_var_elem, std_var_base_index)
+            if param:
+                parameters.append(param)
+                std_var_base_index += 1
 
         logger.info(f"Extracted {len(parameters)} parameters")
         return parameters
@@ -296,6 +409,11 @@ class IODDParser:
         subindex = self._get_int_attr(var_elem, 'subindex')
         access_rights_str = var_elem.get('accessRights', 'rw')
         default_value = var_elem.get('defaultValue')
+
+        # Get additional attributes
+        dynamic = var_elem.get('dynamic', 'false').lower() == 'true'
+        excluded_from_data_storage = var_elem.get('excludedFromDataStorage', 'false').lower() == 'true'
+        modifies_other_variables = var_elem.get('modifiesOtherVariables', 'false').lower() == 'true'
 
         # Get name from textId reference
         name_elem = var_elem.find('.//iodd:Name', self.NAMESPACES)
@@ -330,7 +448,118 @@ class IODDParser:
             unit=None,
             description=description,
             enumeration_values=datatype_info.get('enumeration_values', {}),
-            bit_length=datatype_info.get('bit_length')
+            bit_length=datatype_info.get('bit_length'),
+            dynamic=dynamic,
+            excluded_from_data_storage=excluded_from_data_storage,
+            modifies_other_variables=modifies_other_variables,
+            unit_code=datatype_info.get('unit_code'),
+            value_range_name=datatype_info.get('value_range_name'),
+            single_values=datatype_info.get('single_values', [])
+        )
+
+        return param
+
+    def _parse_std_variable_ref(self, std_var_elem, synthetic_index: int) -> Optional[Parameter]:
+        """Parse a StdVariableRef element into a Parameter object
+
+        Standard IO-Link variables are defined in the IO-Link specification and
+        referenced in IODD files. These include variables like V_VendorName,
+        V_ProductName, V_SerialNumber, V_DeviceStatus, etc.
+        """
+        # Get the reference ID (e.g., "V_VendorName")
+        var_id = std_var_elem.get('variableId')
+        if not var_id:
+            return None
+
+        # Standard variables don't have explicit indices, so we use synthetic ones
+        index = synthetic_index
+        subindex = self._get_int_attr(std_var_elem, 'subindex')
+
+        # Get name from textId reference (if provided)
+        name_elem = std_var_elem.find('.//iodd:Name', self.NAMESPACES)
+        name_id = name_elem.get('textId') if name_elem is not None else None
+        param_name = self._resolve_text(name_id) or var_id
+
+        # Get description from textId reference (if provided)
+        desc_elem = std_var_elem.find('.//iodd:Description', self.NAMESPACES)
+        desc_id = desc_elem.get('textId') if desc_elem is not None else None
+        description = self._resolve_text(desc_id)
+
+        # Standard IO-Link variable metadata (based on IO-Link specification)
+        # Map variable IDs to their standard datatypes and access rights
+        std_var_metadata = {
+            # Identification variables (strings, read-only)
+            'V_VendorName': ('StringT', 'ro', 32),
+            'V_VendorText': ('StringT', 'ro', 32),
+            'V_ProductName': ('StringT', 'ro', 32),
+            'V_ProductID': ('StringT', 'ro', 16),
+            'V_ProductText': ('StringT', 'ro', 32),
+            'V_SerialNumber': ('StringT', 'ro', 16),
+            'V_HardwareRevision': ('StringT', 'ro', 16),
+            'V_FirmwareRevision': ('StringT', 'ro', 16),
+            'V_SoftwareRevision': ('StringT', 'ro', 16),
+            'V_ApplicationSpecificTag': ('StringT', 'rw', 32),
+            'V_FunctionSpecificTag': ('StringT', 'rw', 32),
+            'V_LocationSpecificTag': ('StringT', 'rw', 32),
+            'V_DeviceAccessLocks': ('UIntegerT', 'rw', 8),
+
+            # Status and diagnostic variables
+            'V_DeviceStatus': ('UIntegerT', 'ro', 8),
+            'V_DetailedDeviceStatus': ('RecordT', 'ro', None),
+            'V_ProcessDataInput': ('OctetStringT', 'ro', None),
+            'V_ProcessDataOutput': ('OctetStringT', 'rw', None),
+            'V_SystemCommand': ('UIntegerT', 'rw', 8),
+            'V_ProcessDataInputDescriptor': ('RecordT', 'ro', None),
+            'V_ProcessDataOutputDescriptor': ('RecordT', 'ro', None),
+
+            # Other common variables
+            'V_ErrorCount': ('UIntegerT', 'ro', 8),
+            'V_OperatingTime': ('UIntegerT', 'ro', 32),
+            'V_PowerCycleCount': ('UIntegerT', 'ro', 16),
+        }
+
+        # Get metadata for this standard variable
+        metadata = std_var_metadata.get(var_id)
+        if metadata:
+            data_type_str, access_rights_str, bit_length = metadata
+        else:
+            # Default for unknown standard variables
+            data_type_str = 'StringT'
+            access_rights_str = 'ro'
+            bit_length = None
+
+        # Convert to enum types
+        try:
+            data_type = IODDDataType(data_type_str)
+        except ValueError:
+            data_type = IODDDataType.OCTET_STRING
+
+        try:
+            access_rights = AccessRights(access_rights_str)
+        except ValueError:
+            access_rights = AccessRights.READ_ONLY
+
+        # Create parameter
+        param = Parameter(
+            id=var_id,
+            index=index,
+            subindex=subindex,
+            name=param_name,
+            data_type=data_type,
+            access_rights=access_rights,
+            default_value=None,
+            min_value=None,
+            max_value=None,
+            unit=None,
+            description=description or f"Standard IO-Link variable: {var_id}",
+            enumeration_values={},
+            bit_length=bit_length,
+            dynamic=False,
+            excluded_from_data_storage=False,
+            modifies_other_variables=False,
+            unit_code=None,
+            value_range_name=None,
+            single_values=[]
         )
 
         return param
@@ -419,43 +648,362 @@ class IODDParser:
         collection = ProcessDataCollection()
 
         # Extract input process data
-        pd_in = self.root.find('.//iodd:ProcessDataIn', self.NAMESPACES)
-        if pd_in is not None:
-            for data_elem in pd_in.findall('.//iodd:ProcessData', self.NAMESPACES):
-                # Get name from textId reference
-                name_elem = data_elem.find('.//iodd:Name', self.NAMESPACES)
-                name_id = name_elem.get('textId') if name_elem is not None else None
-                name = self._resolve_text(name_id) or 'Input'
+        pd_in_elems = self.root.findall('.//iodd:ProcessDataIn', self.NAMESPACES)
+        for pd_in in pd_in_elems:
+            # Get the process data ID and attributes
+            pd_id = pd_in.get('id', 'ProcessDataIn')
+            bit_length = int(pd_in.get('bitLength', 0))
 
-                process_data = ProcessData(
-                    index=int(data_elem.get('index', 0)),
-                    name=name,
-                    bit_length=int(data_elem.get('bitLength', 0)),
-                    data_type=self._parse_data_type(data_elem)
-                )
-                collection.inputs.append(process_data)
-                collection.total_input_bits += process_data.bit_length
+            # Get name from textId reference
+            name_elem = pd_in.find('.//iodd:Name', self.NAMESPACES)
+            name_id = name_elem.get('textId') if name_elem is not None else None
+            name = self._resolve_text(name_id) or 'Input'
+
+            # Extract datatype info
+            datatype_elem = pd_in.find('.//iodd:Datatype', self.NAMESPACES)
+            data_type = 'Unknown'
+            record_items = []
+
+            if datatype_elem is not None:
+                data_type = datatype_elem.get('{http://www.w3.org/2001/XMLSchema-instance}type', 'RecordT')
+
+                # Extract record items if it's a RecordT
+                for record_item in datatype_elem.findall('.//iodd:RecordItem', self.NAMESPACES):
+                    subindex = int(record_item.get('subindex', 0))
+                    bit_offset = int(record_item.get('bitOffset', 0))
+
+                    # Get record item name
+                    item_name_elem = record_item.find('.//iodd:Name', self.NAMESPACES)
+                    item_name_id = item_name_elem.get('textId') if item_name_elem is not None else None
+                    item_name = self._resolve_text(item_name_id) or f'Item {subindex}'
+
+                    # Get datatype info and single values
+                    item_type = 'Unknown'
+                    item_bit_length = 8
+                    single_values = []
+
+                    simple_dt = record_item.find('.//iodd:SimpleDatatype', self.NAMESPACES)
+                    if simple_dt is not None:
+                        item_type = simple_dt.get('{http://www.w3.org/2001/XMLSchema-instance}type', 'UIntegerT')
+                        item_bit_length = int(simple_dt.get('bitLength', 8))
+
+                        # Extract inline single values
+                        for single_val in simple_dt.findall('.//iodd:SingleValue', self.NAMESPACES):
+                            value = single_val.get('value')
+                            name_elem = single_val.find('.//iodd:Name', self.NAMESPACES)
+                            if name_elem is not None and value is not None:
+                                text_id = name_elem.get('textId')
+                                text_value = self._resolve_text(text_id)
+                                if text_value:
+                                    desc_elem = single_val.find('.//iodd:Description', self.NAMESPACES)
+                                    desc_id = desc_elem.get('textId') if desc_elem is not None else None
+                                    description = self._resolve_text(desc_id)
+                                    single_values.append(SingleValue(
+                                        value=value,
+                                        name=text_value,
+                                        description=description
+                                    ))
+                    else:
+                        # Check for DatatypeRef
+                        dt_ref = record_item.find('.//iodd:DatatypeRef', self.NAMESPACES)
+                        if dt_ref is not None:
+                            datatype_id = dt_ref.get('datatypeId', 'Unknown')
+                            item_type = datatype_id
+
+                            # Look up custom datatype for single values
+                            if datatype_id in self.datatype_lookup:
+                                custom_dt = self.datatype_lookup[datatype_id]
+                                bit_len = custom_dt.get('bitLength')
+                                item_bit_length = int(bit_len) if bit_len is not None else 8
+
+                                # Convert single values dictionary to list of SingleValue objects
+                                for value, name in custom_dt.get('singleValues', {}).items():
+                                    single_values.append(SingleValue(
+                                        value=value,
+                                        name=name,
+                                        description=None
+                                    ))
+                            else:
+                                item_bit_length = 8  # Default
+                        else:
+                            item_type = 'Unknown'
+                            item_bit_length = 8
+
+                    record_items.append(RecordItem(
+                        subindex=subindex,
+                        name=item_name,
+                        bit_offset=bit_offset,
+                        bit_length=item_bit_length,
+                        data_type=item_type,
+                        single_values=single_values
+                    ))
+
+            process_data = ProcessData(
+                id=pd_id,
+                name=name,
+                bit_length=bit_length,
+                data_type=data_type,
+                record_items=record_items
+            )
+            collection.inputs.append(process_data)
+            collection.total_input_bits += bit_length
 
         # Extract output process data
-        pd_out = self.root.find('.//iodd:ProcessDataOut', self.NAMESPACES)
-        if pd_out is not None:
-            for data_elem in pd_out.findall('.//iodd:ProcessData', self.NAMESPACES):
-                # Get name from textId reference
-                name_elem = data_elem.find('.//iodd:Name', self.NAMESPACES)
-                name_id = name_elem.get('textId') if name_elem is not None else None
-                name = self._resolve_text(name_id) or 'Output'
+        pd_out_elems = self.root.findall('.//iodd:ProcessDataOut', self.NAMESPACES)
+        for pd_out in pd_out_elems:
+            # Get the process data ID and attributes
+            pd_id = pd_out.get('id', 'ProcessDataOut')
+            bit_length = int(pd_out.get('bitLength', 0))
 
-                process_data = ProcessData(
-                    index=int(data_elem.get('index', 0)),
-                    name=name,
-                    bit_length=int(data_elem.get('bitLength', 0)),
-                    data_type=self._parse_data_type(data_elem)
-                )
-                collection.outputs.append(process_data)
-                collection.total_output_bits += process_data.bit_length
+            # Get name from textId reference
+            name_elem = pd_out.find('.//iodd:Name', self.NAMESPACES)
+            name_id = name_elem.get('textId') if name_elem is not None else None
+            name = self._resolve_text(name_id) or 'Output'
+
+            # Extract datatype info
+            datatype_elem = pd_out.find('.//iodd:Datatype', self.NAMESPACES)
+            data_type = 'Unknown'
+            record_items = []
+
+            if datatype_elem is not None:
+                data_type = datatype_elem.get('{http://www.w3.org/2001/XMLSchema-instance}type', 'RecordT')
+
+                # Extract record items if it's a RecordT
+                for record_item in datatype_elem.findall('.//iodd:RecordItem', self.NAMESPACES):
+                    subindex = int(record_item.get('subindex', 0))
+                    bit_offset = int(record_item.get('bitOffset', 0))
+
+                    # Get record item name
+                    item_name_elem = record_item.find('.//iodd:Name', self.NAMESPACES)
+                    item_name_id = item_name_elem.get('textId') if item_name_elem is not None else None
+                    item_name = self._resolve_text(item_name_id) or f'Item {subindex}'
+
+                    # Get datatype info and single values
+                    item_type = 'Unknown'
+                    item_bit_length = 8
+                    single_values = []
+
+                    simple_dt = record_item.find('.//iodd:SimpleDatatype', self.NAMESPACES)
+                    if simple_dt is not None:
+                        item_type = simple_dt.get('{http://www.w3.org/2001/XMLSchema-instance}type', 'UIntegerT')
+                        item_bit_length = int(simple_dt.get('bitLength', 8))
+
+                        # Extract inline single values
+                        for single_val in simple_dt.findall('.//iodd:SingleValue', self.NAMESPACES):
+                            value = single_val.get('value')
+                            name_elem = single_val.find('.//iodd:Name', self.NAMESPACES)
+                            if name_elem is not None and value is not None:
+                                text_id = name_elem.get('textId')
+                                text_value = self._resolve_text(text_id)
+                                if text_value:
+                                    desc_elem = single_val.find('.//iodd:Description', self.NAMESPACES)
+                                    desc_id = desc_elem.get('textId') if desc_elem is not None else None
+                                    description = self._resolve_text(desc_id)
+                                    single_values.append(SingleValue(
+                                        value=value,
+                                        name=text_value,
+                                        description=description
+                                    ))
+                    else:
+                        # Check for DatatypeRef
+                        dt_ref = record_item.find('.//iodd:DatatypeRef', self.NAMESPACES)
+                        if dt_ref is not None:
+                            datatype_id = dt_ref.get('datatypeId', 'Unknown')
+                            item_type = datatype_id
+
+                            # Look up custom datatype for single values
+                            if datatype_id in self.datatype_lookup:
+                                custom_dt = self.datatype_lookup[datatype_id]
+                                bit_len = custom_dt.get('bitLength')
+                                item_bit_length = int(bit_len) if bit_len is not None else 8
+
+                                # Convert single values dictionary to list of SingleValue objects
+                                for value, name in custom_dt.get('singleValues', {}).items():
+                                    single_values.append(SingleValue(
+                                        value=value,
+                                        name=name,
+                                        description=None
+                                    ))
+                            else:
+                                item_bit_length = 8  # Default
+                        else:
+                            item_type = 'Unknown'
+                            item_bit_length = 8
+
+                    record_items.append(RecordItem(
+                        subindex=subindex,
+                        name=item_name,
+                        bit_offset=bit_offset,
+                        bit_length=item_bit_length,
+                        data_type=item_type,
+                        single_values=single_values
+                    ))
+
+            process_data = ProcessData(
+                id=pd_id,
+                name=name,
+                bit_length=bit_length,
+                data_type=data_type,
+                record_items=record_items
+            )
+            collection.outputs.append(process_data)
+            collection.total_output_bits += bit_length
 
         return collection
-    
+
+    def _extract_error_types(self) -> List[ErrorType]:
+        """Extract error types from ErrorTypeCollection"""
+        error_types = []
+
+        # Find ErrorTypeCollection
+        error_collection = self.root.find('.//iodd:ErrorTypeCollection', self.NAMESPACES)
+        if error_collection is None:
+            return error_types
+
+        # Extract standard error type references
+        for error_ref in error_collection.findall('.//iodd:StdErrorTypeRef', self.NAMESPACES):
+            code = int(error_ref.get('code', 0))
+            additional_code = int(error_ref.get('additionalCode', 0))
+
+            # Try to get descriptive name based on standard error codes
+            error_name = self._get_standard_error_name(code, additional_code)
+
+            error_types.append(ErrorType(
+                code=code,
+                additional_code=additional_code,
+                name=error_name,
+                description=self._get_standard_error_description(code, additional_code)
+            ))
+
+        # Also check for custom error types (ErrorType elements)
+        for error_elem in error_collection.findall('.//iodd:ErrorType', self.NAMESPACES):
+            code = int(error_elem.get('code', 0))
+            additional_code = int(error_elem.get('additionalCode', 0))
+
+            # Get name from textId
+            name_elem = error_elem.find('.//iodd:Name', self.NAMESPACES)
+            name_id = name_elem.get('textId') if name_elem is not None else None
+            name = self._resolve_text(name_id)
+
+            # Get description from textId
+            desc_elem = error_elem.find('.//iodd:Description', self.NAMESPACES)
+            desc_id = desc_elem.get('textId') if desc_elem is not None else None
+            description = self._resolve_text(desc_id)
+
+            error_types.append(ErrorType(
+                code=code,
+                additional_code=additional_code,
+                name=name,
+                description=description
+            ))
+
+        return error_types
+
+    def _extract_events(self) -> List[Event]:
+        """Extract events from EventCollection"""
+        events = []
+
+        # Find EventCollection
+        event_collection = self.root.find('.//iodd:EventCollection', self.NAMESPACES)
+        if event_collection is None:
+            return events
+
+        # Extract standard event references
+        for event_ref in event_collection.findall('.//iodd:StdEventRef', self.NAMESPACES):
+            code = int(event_ref.get('code', 0))
+
+            # Try to get descriptive name based on standard event codes
+            event_name = self._get_standard_event_name(code)
+
+            events.append(Event(
+                code=code,
+                name=event_name,
+                description=self._get_standard_event_description(code)
+            ))
+
+        # Also check for custom events (Event elements)
+        for event_elem in event_collection.findall('.//iodd:Event', self.NAMESPACES):
+            code = int(event_elem.get('code', 0))
+            event_type = event_elem.get('type')  # Notification, Warning, Error
+
+            # Get name from textId
+            name_elem = event_elem.find('.//iodd:Name', self.NAMESPACES)
+            name_id = name_elem.get('textId') if name_elem is not None else None
+            name = self._resolve_text(name_id)
+
+            # Get description from textId
+            desc_elem = event_elem.find('.//iodd:Description', self.NAMESPACES)
+            desc_id = desc_elem.get('textId') if desc_elem is not None else None
+            description = self._resolve_text(desc_id)
+
+            events.append(Event(
+                code=code,
+                name=name,
+                description=description,
+                event_type=event_type
+            ))
+
+        return events
+
+    def _get_standard_error_name(self, code: int, additional_code: int) -> str:
+        """Get standard IO-Link error name"""
+        # Standard IO-Link error codes
+        error_map = {
+            (128, 0): "Application Error",
+            (128, 17): "Parameter Error - Invalid Index",
+            (128, 18): "Parameter Error - Invalid Length",
+            (128, 32): "Communication Error",
+            (128, 35): "Communication Error - Parity",
+            (128, 48): "Device Error - Hardware Fault",
+            (128, 51): "Device Error - Temperature High",
+            (128, 52): "Device Error - Temperature Low",
+            (128, 53): "Device Error - Supply Voltage High",
+            (128, 54): "Device Error - Supply Voltage Low",
+            (128, 64): "Device Error - Process Data Error",
+            (128, 65): "Device Error - Sensor Error",
+            (128, 130): "System Command Error"
+        }
+        return error_map.get((code, additional_code), f"Error {code}/{additional_code}")
+
+    def _get_standard_error_description(self, code: int, additional_code: int) -> str:
+        """Get standard IO-Link error description"""
+        desc_map = {
+            (128, 0): "General application error",
+            (128, 17): "Invalid parameter index accessed",
+            (128, 18): "Invalid parameter length",
+            (128, 32): "General communication error",
+            (128, 35): "Communication parity error detected",
+            (128, 48): "Device hardware fault detected",
+            (128, 51): "Device temperature above threshold",
+            (128, 52): "Device temperature below threshold",
+            (128, 53): "Supply voltage above threshold",
+            (128, 54): "Supply voltage below threshold",
+            (128, 64): "Error in process data",
+            (128, 65): "Sensor error detected",
+            (128, 130): "System command execution error"
+        }
+        return desc_map.get((code, additional_code), "")
+
+    def _get_standard_event_name(self, code: int) -> str:
+        """Get standard IO-Link event name"""
+        event_map = {
+            20480: "Device Status Event",
+            20481: "Process Data Changed",
+            25376: "Warning Event",
+            25377: "Error Event"
+        }
+        return event_map.get(code, f"Event {code}")
+
+    def _get_standard_event_description(self, code: int) -> str:
+        """Get standard IO-Link event description"""
+        desc_map = {
+            20480: "Device status has changed",
+            20481: "Process data configuration changed",
+            25376: "Device warning condition",
+            25377: "Device error condition"
+        }
+        return desc_map.get(code, "")
+
     def _parse_data_type(self, elem) -> IODDDataType:
         """Parse data type from element"""
         datatype_elem = elem.find('.//iodd:Datatype', self.NAMESPACES)
@@ -509,6 +1057,177 @@ class IODDParser:
         if profile_rev is not None and profile_rev.text:
             return profile_rev.text
         return '1.0'
+
+    def _extract_document_info(self) -> Optional[DocumentInfo]:
+        """Extract document metadata from DocumentInfo element"""
+        doc_info_elem = self.root.find('.//iodd:DocumentInfo', self.NAMESPACES)
+        if doc_info_elem is None:
+            return None
+
+        return DocumentInfo(
+            copyright=doc_info_elem.get('copyright'),
+            release_date=doc_info_elem.get('releaseDate'),
+            version=doc_info_elem.get('version')
+        )
+
+    def _extract_device_features(self) -> Optional[DeviceFeatures]:
+        """Extract device features and capabilities from Features element"""
+        features_elem = self.root.find('.//iodd:Features', self.NAMESPACES)
+        if features_elem is None:
+            return None
+
+        # Parse access locks
+        access_locks_elem = features_elem.find('.//iodd:SupportedAccessLocks', self.NAMESPACES)
+
+        return DeviceFeatures(
+            block_parameter=features_elem.get('blockParameter', 'false').lower() == 'true',
+            data_storage=features_elem.get('dataStorage', 'false').lower() == 'true',
+            profile_characteristic=features_elem.get('profileCharacteristic'),
+            access_locks_data_storage=access_locks_elem.get('dataStorage', 'false').lower() == 'true' if access_locks_elem is not None else False,
+            access_locks_local_parameterization=access_locks_elem.get('localParameterization', 'false').lower() == 'true' if access_locks_elem is not None else False,
+            access_locks_local_user_interface=access_locks_elem.get('localUserInterface', 'false').lower() == 'true' if access_locks_elem is not None else False,
+            access_locks_parameter=access_locks_elem.get('parameter', 'false').lower() == 'true' if access_locks_elem is not None else False
+        )
+
+    def _extract_communication_profile(self) -> Optional[CommunicationProfile]:
+        """Extract communication network profile from CommNetworkProfile element"""
+        comm_profile_elem = self.root.find('.//iodd:CommNetworkProfile', self.NAMESPACES)
+        if comm_profile_elem is None:
+            return None
+
+        # Get physical layer info
+        physical_layer = comm_profile_elem.find('.//iodd:PhysicalLayer', self.NAMESPACES)
+
+        bitrate = None
+        min_cycle_time = None
+        msequence_capability = None
+        sio_supported = False
+
+        if physical_layer is not None:
+            bitrate = physical_layer.get('bitrate')
+            min_cycle_time_str = physical_layer.get('minCycleTime')
+            if min_cycle_time_str:
+                min_cycle_time = int(min_cycle_time_str)
+            msequence_cap_str = physical_layer.get('mSequenceCapability')
+            if msequence_cap_str:
+                msequence_capability = int(msequence_cap_str)
+            sio_supported = physical_layer.get('sioSupported', 'false').lower() == 'true'
+
+        # Get connection info
+        connection_elem = comm_profile_elem.find('.//iodd:Connection', self.NAMESPACES)
+        connection_type = None
+        wire_config = {}
+
+        if connection_elem is not None:
+            connection_type = connection_elem.get('{http://www.w3.org/2001/XMLSchema-instance}type', '').replace('T', '')
+
+            # Extract wire configuration
+            for i in range(1, 5):
+                wire_elem = connection_elem.find(f'.//iodd:Wire{i}', self.NAMESPACES)
+                if wire_elem is not None:
+                    wire_function = wire_elem.get('function', 'Standard')
+                    wire_config[f'Wire{i}'] = wire_function
+
+        return CommunicationProfile(
+            iolink_revision=comm_profile_elem.get('iolinkRevision'),
+            compatible_with=comm_profile_elem.get('compatibleWith'),
+            bitrate=bitrate,
+            min_cycle_time=min_cycle_time,
+            msequence_capability=msequence_capability,
+            sio_supported=sio_supported,
+            connection_type=connection_type,
+            wire_config=wire_config
+        )
+
+    def _extract_ui_menus(self) -> Optional[UserInterfaceMenus]:
+        """Extract user interface menu structure"""
+        ui_elem = self.root.find('.//iodd:UserInterface', self.NAMESPACES)
+        if ui_elem is None:
+            return None
+
+        menus = []
+
+        # Extract all menus
+        for menu_elem in ui_elem.findall('.//iodd:Menu', self.NAMESPACES):
+            menu_id = menu_elem.get('id')
+            if not menu_id:
+                continue
+
+            # Get menu name from textId
+            name_elem = menu_elem.find('.//iodd:Name', self.NAMESPACES)
+            name_id = name_elem.get('textId') if name_elem is not None else None
+            menu_name = self._resolve_text(name_id) or menu_id
+
+            items = []
+
+            # Extract variable references
+            for var_ref in menu_elem.findall('.//iodd:VariableRef', self.NAMESPACES):
+                items.append(MenuItem(
+                    variable_id=var_ref.get('variableId'),
+                    access_right_restriction=var_ref.get('accessRightRestriction'),
+                    display_format=var_ref.get('displayFormat'),
+                    unit_code=var_ref.get('unitCode')
+                ))
+
+            # Extract record item references
+            for record_ref in menu_elem.findall('.//iodd:RecordItemRef', self.NAMESPACES):
+                items.append(MenuItem(
+                    record_item_ref=record_ref.get('variableId'),
+                    subindex=int(record_ref.get('subindex')) if record_ref.get('subindex') else None,
+                    access_right_restriction=record_ref.get('accessRightRestriction'),
+                    display_format=record_ref.get('displayFormat'),
+                    unit_code=record_ref.get('unitCode')
+                ))
+
+            # Extract menu references (sub-menus)
+            sub_menus = []
+            for menu_ref in menu_elem.findall('.//iodd:MenuRef', self.NAMESPACES):
+                sub_menu_id = menu_ref.get('menuId')
+                if sub_menu_id:
+                    sub_menus.append(sub_menu_id)
+                    items.append(MenuItem(menu_ref=sub_menu_id))
+
+            menus.append(Menu(
+                id=menu_id,
+                name=menu_name,
+                items=items,
+                sub_menus=sub_menus
+            ))
+
+        # Extract role menu sets
+        observer_menus = {}
+        observer_set = ui_elem.find('.//iodd:ObserverRoleMenuSet', self.NAMESPACES)
+        if observer_set is not None:
+            for menu_ref in observer_set:
+                menu_type = menu_ref.tag.replace('{http://www.io-link.com/IODD/2010/10}', '')
+                menu_id = menu_ref.get('menuId')
+                if menu_id:
+                    observer_menus[menu_type] = menu_id
+
+        maintenance_menus = {}
+        maintenance_set = ui_elem.find('.//iodd:MaintenanceRoleMenuSet', self.NAMESPACES)
+        if maintenance_set is not None:
+            for menu_ref in maintenance_set:
+                menu_type = menu_ref.tag.replace('{http://www.io-link.com/IODD/2010/10}', '')
+                menu_id = menu_ref.get('menuId')
+                if menu_id:
+                    maintenance_menus[menu_type] = menu_id
+
+        specialist_menus = {}
+        specialist_set = ui_elem.find('.//iodd:SpecialistRoleMenuSet', self.NAMESPACES)
+        if specialist_set is not None:
+            for menu_ref in specialist_set:
+                menu_type = menu_ref.tag.replace('{http://www.io-link.com/IODD/2010/10}', '')
+                menu_id = menu_ref.get('menuId')
+                if menu_id:
+                    specialist_menus[menu_type] = menu_id
+
+        return UserInterfaceMenus(
+            menus=menus,
+            observer_role_menus=observer_menus,
+            maintenance_role_menus=maintenance_menus,
+            specialist_role_menus=specialist_menus
+        )
 
 # ============================================================================
 # IODD Ingester
@@ -830,6 +1549,57 @@ class StorageManager:
             )
         """)
 
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS error_types (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                device_id INTEGER,
+                code INTEGER,
+                additional_code INTEGER,
+                name TEXT,
+                description TEXT,
+                FOREIGN KEY (device_id) REFERENCES devices (id)
+            )
+        """)
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                device_id INTEGER,
+                code INTEGER,
+                name TEXT,
+                description TEXT,
+                FOREIGN KEY (device_id) REFERENCES devices (id)
+            )
+        """)
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS process_data (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                device_id INTEGER,
+                pd_id TEXT,
+                name TEXT,
+                direction TEXT,
+                bit_length INTEGER,
+                data_type TEXT,
+                description TEXT,
+                FOREIGN KEY (device_id) REFERENCES devices (id)
+            )
+        """)
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS process_data_record_items (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                process_data_id INTEGER,
+                subindex INTEGER,
+                name TEXT,
+                bit_offset INTEGER,
+                bit_length INTEGER,
+                data_type TEXT,
+                default_value TEXT,
+                FOREIGN KEY (process_data_id) REFERENCES process_data (id)
+            )
+        """)
+
         conn.commit()
         conn.close()
     
@@ -894,8 +1664,10 @@ class StorageManager:
             cursor.execute("""
                 INSERT INTO parameters (device_id, param_index, name, data_type,
                                       access_rights, default_value, min_value,
-                                      max_value, unit, description, enumeration_values, bit_length)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                      max_value, unit, description, enumeration_values, bit_length,
+                                      dynamic, excluded_from_data_storage, modifies_other_variables,
+                                      unit_code, value_range_name)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 device_id,
                 param.index,
@@ -908,12 +1680,231 @@ class StorageManager:
                 param.unit,
                 param.description,
                 enum_json,
-                param.bit_length
+                param.bit_length,
+                1 if param.dynamic else 0,
+                1 if param.excluded_from_data_storage else 0,
+                1 if param.modifies_other_variables else 0,
+                param.unit_code,
+                param.value_range_name
             ))
-        
+
+        # Save error types
+        for error in profile.error_types:
+            cursor.execute("""
+                INSERT INTO error_types (device_id, code, additional_code, name, description)
+                VALUES (?, ?, ?, ?, ?)
+            """, (
+                device_id,
+                error.code,
+                error.additional_code,
+                error.name,
+                error.description
+            ))
+
+        # Save events
+        for event in profile.events:
+            cursor.execute("""
+                INSERT INTO events (device_id, code, name, description, event_type)
+                VALUES (?, ?, ?, ?, ?)
+            """, (
+                device_id,
+                event.code,
+                event.name,
+                event.description,
+                event.event_type
+            ))
+
+        # Save process data inputs
+        for pd in profile.process_data.inputs:
+            cursor.execute("""
+                INSERT INTO process_data (device_id, pd_id, name, direction, bit_length, data_type, description)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (
+                device_id,
+                pd.id,
+                pd.name,
+                'input',
+                pd.bit_length,
+                pd.data_type,
+                pd.description
+            ))
+            pd_db_id = cursor.lastrowid
+
+            # Save record items for this process data
+            for item in pd.record_items:
+                cursor.execute("""
+                    INSERT INTO process_data_record_items (process_data_id, subindex, name, bit_offset, bit_length, data_type, default_value)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    pd_db_id,
+                    item.subindex,
+                    item.name,
+                    item.bit_offset,
+                    item.bit_length,
+                    item.data_type,
+                    item.default_value
+                ))
+                item_db_id = cursor.lastrowid
+
+                # Save single values for this record item
+                for single_val in item.single_values:
+                    cursor.execute("""
+                        INSERT INTO process_data_single_values (record_item_id, value, name, description)
+                        VALUES (?, ?, ?, ?)
+                    """, (
+                        item_db_id,
+                        single_val.value,
+                        single_val.name,
+                        single_val.description
+                    ))
+
+        # Save process data outputs
+        for pd in profile.process_data.outputs:
+            cursor.execute("""
+                INSERT INTO process_data (device_id, pd_id, name, direction, bit_length, data_type, description)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (
+                device_id,
+                pd.id,
+                pd.name,
+                'output',
+                pd.bit_length,
+                pd.data_type,
+                pd.description
+            ))
+            pd_db_id = cursor.lastrowid
+
+            # Save record items for this process data
+            for item in pd.record_items:
+                cursor.execute("""
+                    INSERT INTO process_data_record_items (process_data_id, subindex, name, bit_offset, bit_length, data_type, default_value)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    pd_db_id,
+                    item.subindex,
+                    item.name,
+                    item.bit_offset,
+                    item.bit_length,
+                    item.data_type,
+                    item.default_value
+                ))
+                item_db_id = cursor.lastrowid
+
+                # Save single values for this record item
+                for single_val in item.single_values:
+                    cursor.execute("""
+                        INSERT INTO process_data_single_values (record_item_id, value, name, description)
+                        VALUES (?, ?, ?, ?)
+                    """, (
+                        item_db_id,
+                        single_val.value,
+                        single_val.name,
+                        single_val.description
+                    ))
+
+        # Save document info
+        if profile.document_info:
+            cursor.execute("""
+                INSERT INTO document_info (device_id, copyright, release_date, version)
+                VALUES (?, ?, ?, ?)
+            """, (
+                device_id,
+                profile.document_info.copyright,
+                profile.document_info.release_date,
+                profile.document_info.version
+            ))
+
+        # Save device features
+        if profile.device_features:
+            cursor.execute("""
+                INSERT INTO device_features (device_id, block_parameter, data_storage, profile_characteristic,
+                                            access_locks_data_storage, access_locks_local_parameterization,
+                                            access_locks_local_user_interface, access_locks_parameter)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                device_id,
+                1 if profile.device_features.block_parameter else 0,
+                1 if profile.device_features.data_storage else 0,
+                profile.device_features.profile_characteristic,
+                1 if profile.device_features.access_locks_data_storage else 0,
+                1 if profile.device_features.access_locks_local_parameterization else 0,
+                1 if profile.device_features.access_locks_local_user_interface else 0,
+                1 if profile.device_features.access_locks_parameter else 0
+            ))
+
+        # Save communication profile
+        if profile.communication_profile:
+            import json
+            wire_config_json = json.dumps(profile.communication_profile.wire_config)
+            cursor.execute("""
+                INSERT INTO communication_profile (device_id, iolink_revision, compatible_with, bitrate,
+                                                   min_cycle_time, msequence_capability, sio_supported,
+                                                   connection_type, wire_config)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                device_id,
+                profile.communication_profile.iolink_revision,
+                profile.communication_profile.compatible_with,
+                profile.communication_profile.bitrate,
+                profile.communication_profile.min_cycle_time,
+                profile.communication_profile.msequence_capability,
+                1 if profile.communication_profile.sio_supported else 0,
+                profile.communication_profile.connection_type,
+                wire_config_json
+            ))
+
+        # Save UI menus
+        if profile.ui_menus:
+            import json
+            for menu in profile.ui_menus.menus:
+                cursor.execute("""
+                    INSERT INTO ui_menus (device_id, menu_id, name)
+                    VALUES (?, ?, ?)
+                """, (device_id, menu.id, menu.name))
+                menu_db_id = cursor.lastrowid
+
+                # Save menu items
+                for idx, item in enumerate(menu.items):
+                    cursor.execute("""
+                        INSERT INTO ui_menu_items (menu_id, variable_id, record_item_ref, subindex,
+                                                   access_right_restriction, display_format, unit_code,
+                                                   button_value, menu_ref, item_order)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        menu_db_id,
+                        item.variable_id,
+                        item.record_item_ref,
+                        item.subindex,
+                        item.access_right_restriction,
+                        item.display_format,
+                        item.unit_code,
+                        item.button_value,
+                        item.menu_ref,
+                        idx
+                    ))
+
+            # Save role menu mappings
+            for menu_type, menu_id in profile.ui_menus.observer_role_menus.items():
+                cursor.execute("""
+                    INSERT INTO ui_menu_roles (device_id, role_type, menu_type, menu_id)
+                    VALUES (?, ?, ?, ?)
+                """, (device_id, 'observer', menu_type, menu_id))
+
+            for menu_type, menu_id in profile.ui_menus.maintenance_role_menus.items():
+                cursor.execute("""
+                    INSERT INTO ui_menu_roles (device_id, role_type, menu_type, menu_id)
+                    VALUES (?, ?, ?, ?)
+                """, (device_id, 'maintenance', menu_type, menu_id))
+
+            for menu_type, menu_id in profile.ui_menus.specialist_role_menus.items():
+                cursor.execute("""
+                    INSERT INTO ui_menu_roles (device_id, role_type, menu_type, menu_id)
+                    VALUES (?, ?, ?, ?)
+                """, (device_id, 'specialist', menu_type, menu_id))
+
         conn.commit()
         conn.close()
-        
+
         logger.info(f"Saved device with ID: {device_id}")
         return device_id
 

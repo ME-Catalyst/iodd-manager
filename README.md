@@ -22,31 +22,20 @@
 
 ## Overview
 
-IODD Manager is a comprehensive solution for importing, managing, and generating platform-specific adapters from IO-Link Device Description (IODD) files. It provides a powerful REST API backend with a modern React frontend for device management and adapter generation.
+IODD Manager is a comprehensive solution for importing, managing, and analyzing IO-Link Device Description (IODD) files. It provides a powerful REST API backend with a modern React frontend for device management and interactive configuration.
 
 ### Key Features
 
 - 🎯 **IODD File Management** - Import, parse, and store IODD XML files and packages
-- 🔌 **Adapter Generation** - Generate platform-specific code (Node-RED, Python, MQTT, OPC UA)
-- 🖥️ **Modern Web UI** - React-based dashboard with 3D visualizations and analytics
+- 📦 **Multi-File Import** - Support for single files, ZIP packages, and nested ZIP archives
+- 🖥️ **Modern Web UI** - React-based dashboard with interactive device configuration
+- 📊 **Interactive Menus** - Full IODD menu rendering with parameter controls
 - 🚀 **REST API** - Full-featured FastAPI backend with OpenAPI documentation
-- 💾 **Database Migrations** - Alembic-powered schema versioning
+- 💾 **Database Storage** - SQLite/PostgreSQL with Alembic migrations
 - ⚙️ **Configuration Management** - Environment-based configuration with .env support
 - 🧪 **Comprehensive Testing** - 65+ tests with pytest
 - 🔒 **Security** - CORS configuration, input validation, SQL injection protection
 - 📦 **Docker Ready** - Containerized deployment with docker-compose
-- 🔄 **CI/CD Pipeline** - Automated testing and quality checks
-
-## Supported Platforms
-
-### Currently Implemented
-- ✅ **Node-RED** - Generate custom Node-RED nodes with full device interface
-
-### Planned
-- 🚧 **Python** - Device driver libraries
-- 🚧 **MQTT** - Bridge adapters for MQTT integration
-- 🚧 **OPC UA** - Server configuration generators
-- 🚧 **Modbus** - Protocol mapping generators
 
 ## Quick Start
 
@@ -580,25 +569,6 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/ME-Catalyst/iodd-manager/discussions)
 - 📧 **Email**: support@example.com
 
-## Roadmap
-
-### Version 2.1 (Q1 2025)
-- [ ] Python device driver generator
-- [ ] MQTT bridge adapter
-- [ ] Device simulation mode
-- [ ] PostgreSQL support
-
-### Version 2.2 (Q2 2025)
-- [ ] OPC UA configuration generator
-- [ ] Modbus mapping generator
-- [ ] Authentication system
-- [ ] Multi-user support
-
-### Version 3.0 (Q3 2025)
-- [ ] Cloud deployment templates
-- [ ] Kubernetes manifests
-- [ ] Advanced analytics
-- [ ] Device provisioning
 
 ## Stats
 

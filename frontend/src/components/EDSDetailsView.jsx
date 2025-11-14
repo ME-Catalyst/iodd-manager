@@ -21,6 +21,7 @@ const EDSDetailsView = ({ selectedEds: initialEds, onBack, onExportJSON, onExpor
   const [selectedRevisionId, setSelectedRevisionId] = useState(initialEds.id);
   const [selectedEds, setSelectedEds] = useState(initialEds);
   const [loadingRevision, setLoadingRevision] = useState(false);
+  const [groups, setGroups] = useState([]);
 
   // Fetch available revisions for this device
   useEffect(() => {
@@ -44,6 +45,21 @@ const EDSDetailsView = ({ selectedEds: initialEds, onBack, onExportJSON, onExpor
 
     fetchRevisions();
   }, [API_BASE, initialEds.vendor_code, initialEds.product_code]);
+
+  // Fetch parameter groups for this EDS file
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const response = await axios.get(`${API_BASE}/api/eds/${selectedEds.id}/groups`);
+        setGroups(response.data.groups || []);
+      } catch (error) {
+        console.error('Failed to fetch groups:', error);
+        setGroups([]);
+      }
+    };
+
+    fetchGroups();
+  }, [API_BASE, selectedEds.id]);
 
   // Load a different revision when selected
   const handleRevisionChange = async (revisionId) => {
@@ -207,7 +223,7 @@ const EDSDetailsView = ({ selectedEds: initialEds, onBack, onExportJSON, onExpor
       {/* Tab Content */}
       <div className="min-h-[600px]">
         {activeTab === 'overview' && <OverviewTab selectedEds={selectedEds} />}
-        {activeTab === 'parameters' && <ParametersTab selectedEds={selectedEds} />}
+        {activeTab === 'parameters' && <ParametersTab selectedEds={selectedEds} groups={groups} />}
         {activeTab === 'connections' && <ConnectionsTab selectedEds={selectedEds} />}
         {activeTab === 'assemblies' && <AssembliesSection edsId={selectedEds.id} />}
         {activeTab === 'ports' && <PortsSection edsId={selectedEds.id} />}
@@ -331,15 +347,54 @@ const OverviewTab = ({ selectedEds }) => {
 };
 
 // Parameters Tab Component
-const ParametersTab = ({ selectedEds }) => {
+const ParametersTab = ({ selectedEds, groups }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategories, setSelectedCategories] = useState(new Set());
   const [expandedCategories, setExpandedCategories] = useState(new Set(['network_timing', 'io_assembly', 'connection_points']));
   const [viewMode, setViewMode] = useState('grouped'); // 'grouped' or 'flat'
+  const [groupingMode, setGroupingMode] = useState(groups && groups.length > 0 ? 'eds_groups' : 'auto'); // 'auto' or 'eds_groups'
 
-  // Group parameters by category
+  // Group parameters by category (auto-categorization)
   const groupedParams = groupParametersByCategory(selectedEds.parameters || []);
   const sortedCategories = getSortedCategories(groupedParams, false);
+
+  // Group parameters by EDS-defined groups
+  const groupedByEdsGroups = React.useMemo(() => {
+    if (!groups || groups.length === 0) return {};
+
+    const result = {};
+    const paramMap = new Map((selectedEds.parameters || []).map(p => [p.param_number, p]));
+
+    groups.forEach(group => {
+      const groupParams = (group.parameter_numbers || [])
+        .map(num => paramMap.get(num))
+        .filter(p => p !== undefined);
+
+      if (groupParams.length > 0) {
+        result[group.group_name] = groupParams;
+      }
+    });
+
+    // Add ungrouped parameters
+    const groupedParamNumbers = new Set(
+      groups.flatMap(g => g.parameter_numbers || [])
+    );
+    const ungroupedParams = (selectedEds.parameters || []).filter(
+      p => !groupedParamNumbers.has(p.param_number)
+    );
+
+    if (ungroupedParams.length > 0) {
+      result['Ungrouped'] = ungroupedParams;
+    }
+
+    return result;
+  }, [selectedEds.parameters, groups]);
+
+  // Determine which grouping to use
+  const categoriesToUse = groupingMode === 'eds_groups' ? groupedByEdsGroups : groupedParams;
+  const sortedCategoriesToUse = groupingMode === 'eds_groups'
+    ? Object.keys(groupedByEdsGroups)
+    : sortedCategories;
 
   // Filter by search term
   const filterBySearch = (params) => {
@@ -359,10 +414,24 @@ const ParametersTab = ({ selectedEds }) => {
   };
 
   // Get filtered categories
-  const filteredCategories = filterByCategories(sortedCategories).map(cat => ({
-    ...cat,
-    parameters: filterBySearch(cat.parameters)
-  })).filter(cat => cat.parameters.length > 0);
+  const filteredCategories = groupingMode === 'eds_groups'
+    ? Object.entries(categoriesToUse)
+        .filter(([name]) => selectedCategories.size === 0 || selectedCategories.has(name))
+        .map(([name, params]) => ({
+          category: {
+            id: name,
+            name: name,
+            icon: Database, // Use generic icon for EDS groups
+            color: 'blue',
+            description: `EDS-defined parameter group`
+          },
+          parameters: filterBySearch(params)
+        }))
+        .filter(cat => cat.parameters.length > 0)
+    : filterByCategories(sortedCategories).map(cat => ({
+        ...cat,
+        parameters: filterBySearch(cat.parameters)
+      })).filter(cat => cat.parameters.length > 0);
 
   // Count total filtered parameters
   const totalFiltered = filteredCategories.reduce((sum, cat) => sum + cat.parameters.length, 0);
@@ -468,6 +537,22 @@ const ParametersTab = ({ selectedEds }) => {
             <Download className="w-4 h-4 mr-2" />
             CSV
           </Button>
+
+          {groups && groups.length > 0 && (
+            <Button
+              onClick={() => setGroupingMode(groupingMode === 'auto' ? 'eds_groups' : 'auto')}
+              variant="outline"
+              size="sm"
+              className={`border-slate-700 hover:bg-slate-800 ${
+                groupingMode === 'eds_groups'
+                  ? 'bg-blue-900/30 text-blue-300 border-blue-700'
+                  : 'text-slate-300'
+              }`}
+            >
+              <Database className="w-4 h-4 mr-2" />
+              {groupingMode === 'eds_groups' ? 'EDS Groups' : 'Auto Groups'}
+            </Button>
+          )}
         </div>
       </div>
 

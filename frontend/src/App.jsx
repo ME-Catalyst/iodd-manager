@@ -1514,6 +1514,73 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
     }
   };
 
+  // Export functions
+  const exportToCSV = (data, filename) => {
+    if (!data || data.length === 0) return;
+
+    const headers = Object.keys(data[0]);
+    const csvContent = [
+      headers.join(','),
+      ...data.map(row =>
+        headers.map(header => {
+          const value = row[header];
+          // Handle values that contain commas or quotes
+          if (value === null || value === undefined) return '';
+          const stringValue = String(value);
+          if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+            return `"${stringValue.replace(/"/g, '""')}"`;
+          }
+          return stringValue;
+        }).join(',')
+      )
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  };
+
+  const exportToJSON = (data, filename) => {
+    if (!data) return;
+
+    const jsonContent = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonContent], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  };
+
+  const handleExportParameters = (format) => {
+    const filename = `${device.product_name}_parameters_${new Date().toISOString().split('T')[0]}.${format}`;
+    if (format === 'csv') {
+      exportToCSV(filteredParameters, filename);
+    } else {
+      exportToJSON(filteredParameters, filename);
+    }
+    toast({
+      title: 'Export successful',
+      description: `Parameters exported to ${filename}`,
+    });
+  };
+
+  const handleExportProcessData = (format) => {
+    const filename = `${device.product_name}_processdata_${new Date().toISOString().split('T')[0]}.${format}`;
+    if (format === 'csv') {
+      exportToCSV(processData, filename);
+    } else {
+      exportToJSON(processData, filename);
+    }
+    toast({
+      title: 'Export successful',
+      description: `Process data exported to ${filename}`,
+    });
+  };
+
   const fetchParameters = async () => {
     try {
       const response = await axios.get(`${API_BASE}/api/iodd/${device.id}/parameters`);
@@ -3021,9 +3088,35 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
                       {parameters.length} configuration parameters available
                     </CardDescription>
                   </div>
-                  <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/50 text-base px-4 py-1">
-                    {filteredParameters.length} / {parameters.length}
-                  </Badge>
+                  <div className="flex items-center gap-3">
+                    <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/50 text-base px-4 py-1">
+                      {filteredParameters.length} / {parameters.length}
+                    </Badge>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleExportParameters('csv')}
+                        disabled={filteredParameters.length === 0}
+                        className="border-purple-500/50 text-purple-300 hover:bg-purple-500/10"
+                        title="Export to CSV"
+                      >
+                        <Download className="w-4 h-4 mr-1" />
+                        CSV
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleExportParameters('json')}
+                        disabled={filteredParameters.length === 0}
+                        className="border-purple-500/50 text-purple-300 hover:bg-purple-500/10"
+                        title="Export to JSON"
+                      >
+                        <Download className="w-4 h-4 mr-1" />
+                        JSON
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -3491,15 +3584,43 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
           <TabsContent value="processdata" className="space-y-4 mt-6">
             <Card className="bg-slate-900/80 backdrop-blur-sm border-slate-800">
               <CardHeader>
-                <CardTitle className="text-white text-xl flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/20 to-indigo-500/20 flex items-center justify-center">
-                    <ArrowRightLeft className="w-5 h-5 text-blue-400" />
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-white text-xl flex items-center gap-2">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/20 to-indigo-500/20 flex items-center justify-center">
+                        <ArrowRightLeft className="w-5 h-5 text-blue-400" />
+                      </div>
+                      Process Data Structure
+                    </CardTitle>
+                    <CardDescription className="text-slate-400 mt-2">
+                      Input and output process data configuration for real-time communication
+                    </CardDescription>
                   </div>
-                  Process Data Structure
-                </CardTitle>
-                <CardDescription className="text-slate-400">
-                  Input and output process data configuration for real-time communication
-                </CardDescription>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleExportProcessData('csv')}
+                      disabled={processData.length === 0}
+                      className="border-blue-500/50 text-blue-300 hover:bg-blue-500/10"
+                      title="Export to CSV"
+                    >
+                      <Download className="w-4 h-4 mr-1" />
+                      CSV
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleExportProcessData('json')}
+                      disabled={processData.length === 0}
+                      className="border-blue-500/50 text-blue-300 hover:bg-blue-500/10"
+                      title="Export to JSON"
+                    >
+                      <Download className="w-4 h-4 mr-1" />
+                      JSON
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 {loadingProcessData ? (

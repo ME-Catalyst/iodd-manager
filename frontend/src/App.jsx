@@ -598,6 +598,8 @@ const DeviceListPage = ({ devices, onDeviceSelect, onUpload, API_BASE, toast, on
   const [selectedDevices, setSelectedDevices] = useState([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(24);
 
   const filteredDevices = useMemo(() => {
     let result = devices;
@@ -623,6 +625,20 @@ const DeviceListPage = ({ devices, onDeviceSelect, onUpload, API_BASE, toast, on
     const uniqueVendors = [...new Set(devices.map(d => d.manufacturer))];
     return uniqueVendors.sort();
   }, [devices]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredDevices.length / itemsPerPage);
+
+  const paginatedDevices = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredDevices.slice(startIndex, endIndex);
+  }, [filteredDevices, currentPage, itemsPerPage]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filters]);
 
   const toggleDeviceSelection = (deviceId) => {
     setSelectedDevices(prev =>
@@ -801,7 +817,7 @@ const DeviceListPage = ({ devices, onDeviceSelect, onUpload, API_BASE, toast, on
 
       {/* Device List */}
       <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-2'}>
-        {filteredDevices.map((device) => (
+        {paginatedDevices.map((device) => (
           viewMode === 'grid' ? (
             <DeviceGridCard
               key={device.id}
@@ -829,6 +845,110 @@ const DeviceListPage = ({ devices, onDeviceSelect, onUpload, API_BASE, toast, on
           )
         ))}
       </div>
+
+      {/* Pagination Controls */}
+      {filteredDevices.length > 0 && totalPages > 1 && (
+        <Card className="bg-slate-900 border-slate-800 mt-6">
+          <CardContent className="py-4">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              {/* Results Info */}
+              <div className="text-sm text-slate-400">
+                Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredDevices.length)} of {filteredDevices.length} devices
+              </div>
+
+              {/* Page Navigation */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(1)}
+                  disabled={currentPage === 1}
+                  className="border-slate-700 text-slate-300 hover:bg-slate-800 disabled:opacity-30"
+                >
+                  <ChevronLeft className="w-4 h-4 mr-1" />
+                  First
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="border-slate-700 text-slate-300 hover:bg-slate-800 disabled:opacity-30"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+
+                {/* Page Numbers */}
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={currentPage === pageNum ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={currentPage === pageNum
+                          ? 'bg-[#3DB60F] hover:bg-[#3DB60F]/90 text-white'
+                          : 'border-slate-700 text-slate-300 hover:bg-slate-800'}
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="border-slate-700 text-slate-300 hover:bg-slate-800 disabled:opacity-30"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(totalPages)}
+                  disabled={currentPage === totalPages}
+                  className="border-slate-700 text-slate-300 hover:bg-slate-800 disabled:opacity-30"
+                >
+                  Last
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+
+              {/* Items Per Page */}
+              <div className="flex items-center gap-2 text-sm text-slate-400">
+                <span>Per page:</span>
+                <select
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    setItemsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white text-sm focus:border-[#3DB60F]/50 focus:ring-[#3DB60F]/20"
+                >
+                  <option value={12}>12</option>
+                  <option value={24}>24</option>
+                  <option value={48}>48</option>
+                  <option value={96}>96</option>
+                </select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {filteredDevices.length === 0 && (
         <Card className="bg-slate-900 border-slate-800">
@@ -1377,7 +1497,7 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
       fetchParameters();
       fetchErrors();
       fetchEvents();
-      fetchProcessData();
+      // fetchProcessData(); // Lazy loaded when Process Data tab is opened
       fetchDocumentInfo();
       fetchDeviceFeatures();
       fetchCommunicationProfile();
@@ -1509,6 +1629,9 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
     }
     if (value === 'menus' && !configSchema) {
       fetchConfigSchema();
+    }
+    if (value === 'processdata' && processData.length === 0 && !loadingProcessData) {
+      fetchProcessData();
     }
   };
 

@@ -1,5 +1,8 @@
 # EDS Detail Page Redesign - COMPLETE ✓
 
+⚠️ **STATUS: UNDER DEVELOPMENT**
+This feature is currently in active development and testing. While all core functionality is implemented and working, it is not yet recommended for production use. Use with caution and report any issues.
+
 ## All Issues Fixed!
 
 ### ✅ Task 1: Raw EDS Content Display - FIXED
@@ -220,4 +223,18 @@ Files with Capacity: 13/13 (100.0%) ✓
 ✓ CORS configured correctly
 ✓ Data quality: 100%
 
-**Ready for production use!**
+## Production Readiness
+
+⚠️ **NOT YET PRODUCTION READY**
+
+While all features are implemented and tested with sample data, additional work is needed before production deployment:
+
+- [ ] Comprehensive testing with diverse EDS files from multiple vendors
+- [ ] Performance testing with large datasets (100+ EDS files)
+- [ ] Error handling for malformed EDS files
+- [ ] Security review of file upload and parsing
+- [ ] User acceptance testing
+- [ ] Documentation for end users
+- [ ] Backup and recovery procedures
+
+**Current Status**: Feature complete, undergoing testing and refinement.

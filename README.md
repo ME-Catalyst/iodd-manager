@@ -30,6 +30,7 @@ IODD Manager is a comprehensive solution for importing, managing, and analyzing 
 - 📦 **Multi-File Import** - Support for single files, ZIP packages, and nested ZIP archives
 - 🖥️ **Modern Web UI** - React-based dashboard with interactive device configuration
 - 📊 **Interactive Menus** - Full IODD menu rendering with parameter controls
+- ⚡ **EDS File Support** *(under development)* - EtherNet/IP Electronic Data Sheet parsing and management
 - 🚀 **REST API** - Full-featured FastAPI backend with OpenAPI documentation
 - 💾 **Database Storage** - SQLite/PostgreSQL with Alembic migrations
 - ⚙️ **Configuration Management** - Environment-based configuration with .env support

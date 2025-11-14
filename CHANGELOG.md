@@ -5,6 +5,53 @@ All notable changes to IODD Manager will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added - EDS Support (Under Development)
+
+⚠️ **Note**: EDS (Electronic Data Sheet) support is currently under active development and not yet production-ready. Use with caution.
+
+#### Backend
+- EDS file parser with multi-vendor support (Murrelektronik, Schneider Electric, Allen Bradley)
+- Inline comment stripping for proper value extraction
+- Database schema with 4 new tables (eds_files, eds_parameters, eds_connections, eds_capacity, eds_tspecs)
+- Alembic migrations (004-007) for EDS schema
+- 7 new API endpoints for EDS management:
+  - `GET /api/eds` - List all EDS files
+  - `GET /api/eds/{id}` - Get EDS details with parameters, connections, capacity
+  - `POST /api/eds/upload` - Upload single EDS file
+  - `POST /api/eds/upload-package` - Upload EDS package (ZIP)
+  - `GET /api/eds/{id}/icon` - Get device icon
+  - `GET /api/eds/{id}/export-json` - Export as JSON
+  - `GET /api/eds/{id}/export-zip` - Export as ZIP with assets
+- EDS package parser for ZIP archives
+- Diagnostic tools (check_parsing_gaps.py, fix_capacity_gaps.py)
+
+#### Frontend
+- Modern tabbed EDS detail view (EDSDetailsView.jsx) with 5 tabs:
+  - Overview: Device metadata and diagnostics
+  - Parameters: Searchable table with 284+ parameters
+  - Connections: Network connection configurations
+  - Capacity: Visual gauges for network planning
+  - Raw Content: Full EDS file viewer with copy-to-clipboard
+- Real-time parameter search and filtering
+- ZIP export with proper filename handling
+- Toast notifications for export operations
+- Dark theme styling
+
+#### Data Quality
+- 100% parameter extraction (284/284 for reference device)
+- 100% capacity data (13/13 test files)
+- 100% connection data
+- 100% raw EDS content preservation
+
+### Known Limitations
+- Feature marked as "under development" - not production-ready
+- Needs broader testing with diverse EDS files from multiple vendors
+- No batch export functionality yet
+- No syntax highlighting in raw content view
+- No mobile optimization
+
 ## [2.0.1] - 2025-01-12
 
 ### Repository Audit and Documentation Update

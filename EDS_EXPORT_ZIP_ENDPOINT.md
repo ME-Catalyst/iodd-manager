@@ -1,5 +1,10 @@
 # EDS Export ZIP Endpoint - Implementation Plan
 
+⚠️ **STATUS: IMPLEMENTED - UNDER DEVELOPMENT**
+This endpoint has been implemented and is functional. See implementation notes at the end of this document.
+
+---
+
 ## Endpoint Specification
 
 **Route**: `GET /api/eds/{eds_id}/export-zip`
@@ -114,3 +119,99 @@ Archive:  test_export.zip
 ---------                     -------
     69674                     3 files
 ```
+
+---
+
+## Implementation Notes
+
+### ✅ Current Implementation Status
+
+**File**: `eds_routes.py` (lines 633-702)
+
+The endpoint has been successfully implemented with the following features:
+
+1. **ZIP Creation** ✅
+   - Creates ZIP file in memory using BytesIO
+   - Includes original EDS file content (from database)
+   - Includes icon file if available
+   - Includes metadata.json with device info and export timestamp
+
+2. **Filename Handling** ✅
+   - Generates safe filenames by sanitizing vendor/product names
+   - Format: `{vendor}_{product}_{code}_v{major}.{minor}.zip`
+   - Example: `Murrelektronik_GmbH_IMPACT67_Pro_E_DIO8_IOL8_5P_54631_v1.8.zip`
+
+3. **CORS Configuration** ✅
+   - Added `expose_headers=["content-disposition"]` to CORS middleware in `api.py:251`
+   - Allows frontend to read Content-Disposition header for proper filename extraction
+
+4. **Frontend Integration** ✅
+   - File: `frontend/src/App.jsx` (lines 4335-4377)
+   - Handles blob download
+   - Extracts filename from Content-Disposition header with improved regex
+   - Fallback filename generation if header parsing fails
+   - Toast notifications for success/failure
+
+5. **Error Handling** ✅
+   - Returns 404 if EDS file not found
+   - Handles missing icon gracefully
+   - Proper database connection cleanup
+
+### Testing Results
+
+**Backend Test** (via curl):
+```bash
+curl -o test.zip http://localhost:8000/api/eds/1/export-zip
+# Result: Successfully downloads ZIP file
+```
+
+**Frontend Test** (via browser):
+- Created `test_zip_export.html` for standalone testing
+- Successfully downloads ZIP with proper filename
+- Content-Disposition header properly exposed via CORS
+- Blob download triggers correctly in browser
+
+### Known Limitations
+
+1. **Production Readiness** ⚠️
+   - Feature is functional but marked as "under development"
+   - Needs broader testing with various EDS file formats
+   - Should validate EDS content exists before creating ZIP
+
+2. **Future Enhancements**
+   - Add progress indication for large files
+   - Support batch export (multiple EDS files in one ZIP)
+   - Add option to include/exclude icon
+   - Validate ZIP integrity after creation
+
+### Files Modified
+
+1. `eds_routes.py` - Added export-zip endpoint
+2. `api.py` - Updated CORS configuration
+3. `frontend/src/App.jsx` - Added handleExportZIP function
+4. `frontend/src/components/EDSDetailsView.jsx` - Wired up ZIP export button
+
+### Verification
+
+To verify the implementation:
+
+1. **Check endpoint exists**:
+   ```bash
+   curl -I http://localhost:8000/api/eds/1/export-zip
+   # Should return 200 OK with Content-Type: application/zip
+   ```
+
+2. **Test download**:
+   ```bash
+   curl -o test.zip http://localhost:8000/api/eds/1/export-zip
+   unzip -l test.zip
+   # Should list: .eds file, .ico file (if available), metadata.json
+   ```
+
+3. **Test in UI**:
+   - Navigate to any EDS detail page
+   - Click "Export ZIP" button in header
+   - Verify ZIP downloads with proper filename
+   - Extract and verify contents
+
+**Conclusion**: Endpoint is fully functional and integrated into the UI. Ready for testing with broader EDS file samples before production deployment.

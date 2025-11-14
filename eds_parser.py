@@ -343,11 +343,9 @@ class EDSParser:
             for part in parts:
                 part = part.strip()
                 if part.startswith('0x') or part.startswith('0X'):
-                    try:
-                        size = self._parse_int(part)
+                    size = self._parse_hex(part)
+                    if size is not None:
                         break
-                    except:
-                        pass
 
             fixed_assemblies.append({
                 'assembly_number': assembly_num,

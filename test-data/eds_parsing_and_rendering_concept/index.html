@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDS Visualizer - Universal EDS Parser</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.45);
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-left: 4px solid;
+        }
+        
+        .tab-active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .connection-card {
+            background: linear-gradient(to right, #f8f9fa, #ffffff);
+            border-left: 6px solid;
+        }
+        
+        .param-badge {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            color: #1a202c;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .icon-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 12px;
+            border-radius: 12px;
+            display: inline-flex;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .data-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .data-table tr:hover td {
+            background-color: #f7fafc;
+        }
+        
+        .badge-success {
+            background: #48bb78;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+        }
+        
+        .badge-info {
+            background: #4299e1;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+        }
+        
+        .badge-warning {
+            background: #ed8936;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+        }
+        
+        .hex-badge {
+            font-family: 'Courier New', monospace;
+            background: #2d3748;
+            color: #68d391;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+        
+        .network-diagram {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .node {
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .connection-line {
+            position: absolute;
+            height: 3px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            transform-origin: left center;
+        }
+        
+        .topology-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            min-height: 300px;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        // Icon components
+        const ChipIcon = () => (
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+            </svg>
+        );
+        
+        const NetworkIcon = () => (
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+            </svg>
+        );
+        
+        const DatabaseIcon = () => (
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+            </svg>
+        );
+        
+        const PlugIcon = () => (
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+        );
+        
+        function EDSVisualizer() {
+            const [data, setData] = useState(null);
+            const [activeTab, setActiveTab] = useState('overview');
+            const [loading, setLoading] = useState(true);
+            
+            useEffect(() => {
+                // Load the parsed EDS data
+                Promise.resolve({"source": {"file_path": "/mnt/user-data/uploads/TM221_Generic.eds", "file_hash": "8403cd964c94bdb809a79df0fd005c5a970bb18cf8796cdd61837ae698be8f47", "dialect_id": "CIP_INI", "parsed_at": "2025-11-13T18:19:21.769047"}, "file_info": {"desc_text": "Network Interface Module EtherNet/IP", "create_date": "10-22-2014", "create_time": "10:48:30", "mod_date": "05-07-2015", "mod_time": "09:41:13", "revision": "1.5", "home_url": "http://www.schneider-electric.com"}, "device_identity": {"vendor_code": 243, "vendor_name": "Schneider Electric", "product_type": 14, "product_type_str": "Programmable Logic Controller", "product_code": 4099, "major_revision": 1, "minor_revision": 4, "product_name": "TM221_Generic", "catalog": "TM221_Generic", "icon": "M221.ico", "icon_contents": "AAABAAEAEBAAAAAAGABoAwAAFgAAACgAAAAQAAAAIAAAAAEAGAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAD///////////////////8Apk8Apk8Apk8Apk/IxcX9/f3///////////////////////////////////////8Apk////////8Apk+koJ+/vLz7+/r///////////////////////////////////8Apk////8Apk8Apk+koJ+koJ+yrq3///////////////////////////////////8Apk////////8Apk+koJ+koJ+koJ////////////////////////////////////8Apk////8Apk8Apk+koJ+koJ+koJ////////////////////////////////////8Apk////////8Apk+koJ+koJ+koJ////////////////////////////////////8Apk////8Apk8Apk+koJ+koJ+koJ////////////////////////////////////8Apk////////8Apk+koJ+koJ+koJ////////////////////////////////////8Apk////////8Apk+koJ+koJ+koJ////////////////////////////////////8Apk////////8Apk+koJ+koJ+koJ////////////////////////////////////8Apk////8Apk8Apk+koJ+koJ+koJ////////////////////////////////////8Apk////8Apk8Apk+koJ+koJ+koJ////////////////////////////////////8Apk////8Apk8Apk+koJ+koJ+yr67///////////////////////////////////8Apk////////8Apk+koJ+5trb39/f///////////////////////////////////8Apk8Apk8Apk8Apk/Nysr+/v7///////////////////////////////////////////////////////////////////////////////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"}, "device_classification": {"Class1": "EtherNetIP", "Class2": "1_RSNetWorx_Connectable_Module"}, "parameters": [{"param_id": "Param1", "index": 1, "name": "RPI", "data_type": "4", "default_value": "10000", "min_value": "100000", "max_value": "60000000", "units": null, "access": null, "description": null, "raw_values": ["0", "", "", "0x0000", "0xC8", "4", "\"RPI\"", "\"\"", "\"\"", "10000", "60000000", "100000", "", "", "", "", "", "", "", "", ""]}, {"param_id": "Param2", "index": 2, "name": "Size 2", "data_type": "2", "default_value": "2", "min_value": "40", "max_value": "40", "units": null, "access": null, "description": null, "raw_values": ["0", "", "", "0x0000", "0xC7", "2", "\"Size 2\"", "\"\"", "\"\"", "2", "40", "40", "", "", "", "", "", "", "", "", ""]}, {"param_id": "Param3", "index": 3, "name": "Size 3", "data_type": "2", "default_value": "2", "min_value": "40", "max_value": "40", "units": null, "access": null, "description": null, "raw_values": ["0", "", "", "0x0000", "0xC7", "2", "\"Size 3\"", "\"\"", "\"\"", "2", "40", "40", "", "", "", "", "", "", "", "", ""]}], "connections": [{"connection_id": "Connection1", "index": 1, "name": "Write Data to 150", "trigger_transport": "0x04030002", "connection_params": "0x44643405", "ot_rpi": "Param1", "ot_size": "Param3", "ot_format": null, "to_rpi": "Param1", "to_size": "0", "to_format": null, "description": null, "help_string": "Output Assembly (Originator --> Target, %IW)", "path": "20 04 24 03 2C 96 2C C6\";"}, {"connection_id": "Connection2", "index": 2, "name": "Read From 100 / Write to 150", "trigger_transport": "0x04030002", "connection_params": "0x44640405", "ot_rpi": "Param1", "ot_size": "Param2", "ot_format": null, "to_rpi": "Param1", "to_size": "Param3", "to_format": null, "description": null, "help_string": "Read Input Assembly (Target --> Originator, %QW) and Write Output Assembly (Originator --> Target, %IW) ", "path": "20 04 24 03 2C 96 2C 64\";"}, {"connection_id": "Connection3", "index": 3, "name": "Read Data from 100", "trigger_transport": "0x02030002", "connection_params": "0x44640305", "ot_rpi": "Param1", "ot_size": "0", "ot_format": null, "to_rpi": "Param1", "to_size": "Param3", "to_format": null, "description": null, "help_string": "Input Assembly (Target --> Originator, %QW)", "path": "20 04 24 03 2C C6 2C 64\";"}], "ports": [{"port_id": "Port2", "index": 2, "protocol": "TCP", "name": "Ethernet Port", "path": "20 F5 24 01", "port_number": 2}], "capacity": {"max_msg_connections": 8, "max_io_producers": 32, "max_io_consumers": 32, "tspecs": [{"type": "TxRx", "value1": 4, "value2": 100}, {"type": "TxRx", "value1": 496, "value2": 100}]}, "extensions": {}})
+                    .then(jsonData => {
+                        setData(jsonData);
+                        setLoading(false);
+                    })
+                    .catch(err => {
+                        console.error('Error loading data:', err);
+                        setLoading(false);
+                    });
+            }, []);
+            
+            if (loading) {
+                return (
+                    <div className="flex items-center justify-center min-h-screen">
+                        <div className="text-white text-2xl">Loading EDS Data...</div>
+                    </div>
+                );
+            }
+            
+            if (!data) {
+                return (
+                    <div className="flex items-center justify-center min-h-screen">
+                        <div className="text-white text-2xl">No data available</div>
+                    </div>
+                );
+            }
+            
+            return (
+                <div className="min-h-screen p-8">
+                    <div className="max-w-7xl mx-auto">
+                        {/* Header */}
+                        <div className="glass rounded-2xl p-8 mb-8 fade-in">
+                            <div className="flex items-start justify-between">
+                                <div className="flex items-start space-x-6">
+                                    <div className="icon-container">
+                                        <ChipIcon />
+                                    </div>
+                                    <div>
+                                        <h1 className="text-4xl font-bold gradient-text mb-2">
+                                            {data.device_identity?.product_name || 'EDS Device'}
+                                        </h1>
+                                        <p className="text-gray-600 text-lg mb-4">
+                                            {data.file_info?.desc_text || 'Electronic Data Sheet Visualization'}
+                                        </p>
+                                        <div className="flex items-center space-x-4">
+                                            <span className="badge-success">
+                                                {data.device_classification?.Class1 || 'Unknown Protocol'}
+                                            </span>
+                                            <span className="text-gray-500">
+                                                Vendor: {data.device_identity?.vendor_name}
+                                            </span>
+                                            <span className="text-gray-500">
+                                                Rev {data.device_identity?.major_revision}.{data.device_identity?.minor_revision}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-sm text-gray-500">File Hash</div>
+                                    <div className="hex-badge mt-1">
+                                        {data.source?.file_hash?.substring(0, 16)}...
+                                    </div>
+                                    <div className="text-xs text-gray-400 mt-2">
+                                        Parsed: {new Date(data.source?.parsed_at).toLocaleString()}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Metrics Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 fade-in">
+                            <MetricCard
+                                title="Parameters"
+                                value={data.parameters?.length || 0}
+                                color="border-purple-500"
+                                icon="📊"
+                            />
+                            <MetricCard
+                                title="Connections"
+                                value={data.connections?.length || 0}
+                                color="border-blue-500"
+                                icon="🔌"
+                            />
+                            <MetricCard
+                                title="Network Ports"
+                                value={data.ports?.length || 0}
+                                color="border-green-500"
+                                icon="🌐"
+                            />
+                            <MetricCard
+                                title="Product Code"
+                                value={`0x${data.device_identity?.product_code?.toString(16).toUpperCase() || '0'}`}
+                                color="border-orange-500"
+                                icon="🏷️"
+                            />
+                        </div>
+                        
+                        {/* Tab Navigation */}
+                        <div className="glass rounded-t-2xl p-2 flex space-x-2">
+                            <TabButton active={activeTab === 'overview'} onClick={() => setActiveTab('overview')}>
+                                Overview
+                            </TabButton>
+                            <TabButton active={activeTab === 'parameters'} onClick={() => setActiveTab('parameters')}>
+                                Parameters
+                            </TabButton>
+                            <TabButton active={activeTab === 'connections'} onClick={() => setActiveTab('connections')}>
+                                Connections
+                            </TabButton>
+                            <TabButton active={activeTab === 'network'} onClick={() => setActiveTab('network')}>
+                                Network
+                            </TabButton>
+                            <TabButton active={activeTab === 'capacity'} onClick={() => setActiveTab('capacity')}>
+                                Capacity
+                            </TabButton>
+                        </div>
+                        
+                        {/* Tab Content */}
+                        <div className="glass rounded-b-2xl rounded-tr-2xl p-8 fade-in">
+                            {activeTab === 'overview' && <OverviewTab data={data} />}
+                            {activeTab === 'parameters' && <ParametersTab data={data} />}
+                            {activeTab === 'connections' && <ConnectionsTab data={data} />}
+                            {activeTab === 'network' && <NetworkTab data={data} />}
+                            {activeTab === 'capacity' && <CapacityTab data={data} />}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        
+        function MetricCard({ title, value, color, icon }) {
+            return (
+                <div className={`glass rounded-xl p-6 card-hover metric-card ${color}`}>
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <div className="text-gray-600 text-sm mb-2">{title}</div>
+                            <div className="text-3xl font-bold gradient-text">{value}</div>
+                        </div>
+                        <div className="text-4xl">{icon}</div>
+                    </div>
+                </div>
+            );
+        }
+        
+        function TabButton({ active, onClick, children }) {
+            return (
+                <button
+                    onClick={onClick}
+                    className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                        active ? 'tab-active' : 'hover:bg-gray-100'
+                    }`}
+                >
+                    {children}
+                </button>
+            );
+        }
+        
+        function OverviewTab({ data }) {
+            return (
+                <div className="space-y-8">
+                    {/* Device Identity */}
+                    <div>
+                        <h2 className="text-2xl font-bold gradient-text mb-4 flex items-center">
+                            <span className="icon-container mr-3">
+                                <ChipIcon />
+                            </span>
+                            Device Identity
+                        </h2>
+                        <div className="grid grid-cols-2 gap-6">
+                            <InfoCard label="Vendor Code" value={data.device_identity?.vendor_code} />
+                            <InfoCard label="Vendor Name" value={data.device_identity?.vendor_name} />
+                            <InfoCard label="Product Type" value={data.device_identity?.product_type_str} />
+                            <InfoCard label="Product Code" value={`0x${data.device_identity?.product_code?.toString(16).toUpperCase()}`} />
+                            <InfoCard label="Catalog Number" value={data.device_identity?.catalog} />
+                            <InfoCard label="Revision" value={`${data.device_identity?.major_revision}.${data.device_identity?.minor_revision}`} />
+                        </div>
+                    </div>
+                    
+                    {/* File Information */}
+                    <div>
+                        <h2 className="text-2xl font-bold gradient-text mb-4 flex items-center">
+                            <span className="icon-container mr-3">
+                                <DatabaseIcon />
+                            </span>
+                            File Information
+                        </h2>
+                        <div className="grid grid-cols-2 gap-6">
+                            <InfoCard label="Description" value={data.file_info?.desc_text} />
+                            <InfoCard label="Revision" value={data.file_info?.revision} />
+                            <InfoCard label="Created" value={`${data.file_info?.create_date} ${data.file_info?.create_time}`} />
+                            <InfoCard label="Modified" value={`${data.file_info?.mod_date} ${data.file_info?.mod_time}`} />
+                            <InfoCard label="Home URL" value={data.file_info?.home_url} link />
+                            <InfoCard label="Dialect" value={data.source?.dialect_id} />
+                        </div>
+                    </div>
+                    
+                    {/* Device Classification */}
+                    {Object.keys(data.device_classification || {}).length > 0 && (
+                        <div>
+                            <h2 className="text-2xl font-bold gradient-text mb-4">Device Classification</h2>
+                            <div className="grid grid-cols-2 gap-6">
+                                {Object.entries(data.device_classification).map(([key, value]) => (
+                                    <InfoCard key={key} label={key} value={value} />
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+        
+        function InfoCard({ label, value, link }) {
+            return (
+                <div className="bg-gradient-to-br from-gray-50 to-white p-4 rounded-lg border border-gray-200">
+                    <div className="text-sm text-gray-500 mb-1">{label}</div>
+                    {link && value ? (
+                        <a href={value} target="_blank" rel="noopener noreferrer" className="text-lg font-semibold text-blue-600 hover:text-blue-800">
+                            {value}
+                        </a>
+                    ) : (
+                        <div className="text-lg font-semibold text-gray-800">{value || 'N/A'}</div>
+                    )}
+                </div>
+            );
+        }
+        
+        function ParametersTab({ data }) {
+            return (
+                <div>
+                    <h2 className="text-2xl font-bold gradient-text mb-6">Device Parameters</h2>
+                    {data.parameters && data.parameters.length > 0 ? (
+                        <div className="overflow-x-auto rounded-lg border border-gray-200">
+                            <table className="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Data Type</th>
+                                        <th>Default</th>
+                                        <th>Min</th>
+                                        <th>Max</th>
+                                        <th>Access</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {data.parameters.map((param, idx) => (
+                                        <tr key={idx}>
+                                            <td><span className="param-badge">{param.param_id}</span></td>
+                                            <td className="font-semibold">{param.name}</td>
+                                            <td><span className="hex-badge">{param.data_type || 'N/A'}</span></td>
+                                            <td>{param.default_value || 'N/A'}</td>
+                                            <td>{param.min_value || 'N/A'}</td>
+                                            <td>{param.max_value || 'N/A'}</td>
+                                            <td>{param.access || 'N/A'}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <div className="text-center py-12 text-gray-500">
+                            No parameters defined
+                        </div>
+                    )}
+                </div>
+            );
+        }
+        
+        function ConnectionsTab({ data }) {
+            return (
+                <div>
+                    <h2 className="text-2xl font-bold gradient-text mb-6">Connection Manager</h2>
+                    {data.connections && data.connections.length > 0 ? (
+                        <div className="space-y-6">
+                            {data.connections.map((conn, idx) => (
+                                <div key={idx} className="connection-card rounded-xl p-6 border-blue-500">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div>
+                                            <h3 className="text-xl font-bold text-gray-800 mb-2">{conn.name}</h3>
+                                            <span className="badge-info">{conn.connection_id}</span>
+                                        </div>
+                                        <div className="pulse-dot bg-green-500"></div>
+                                    </div>
+                                    
+                                    {conn.help_string && (
+                                        <div className="bg-blue-50 p-4 rounded-lg mb-4">
+                                            <div className="text-sm text-gray-600 mb-1">Description</div>
+                                            <div className="text-gray-800">{conn.help_string}</div>
+                                        </div>
+                                    )}
+                                    
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div>
+                                            <div className="text-sm font-semibold text-gray-600 mb-3">Originator → Target</div>
+                                            <div className="space-y-2">
+                                                <ParamDisplay label="RPI" value={conn.ot_rpi} />
+                                                <ParamDisplay label="Size" value={conn.ot_size} />
+                                                <ParamDisplay label="Format" value={conn.ot_format} />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-semibold text-gray-600 mb-3">Target → Originator</div>
+                                            <div className="space-y-2">
+                                                <ParamDisplay label="RPI" value={conn.to_rpi} />
+                                                <ParamDisplay label="Size" value={conn.to_size} />
+                                                <ParamDisplay label="Format" value={conn.to_format} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mt-4 pt-4 border-t border-gray-200">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <ParamDisplay label="Trigger & Transport" value={conn.trigger_transport} hex />
+                                            <ParamDisplay label="Connection Parameters" value={conn.connection_params} hex />
+                                        </div>
+                                        {conn.path && (
+                                            <div className="mt-3">
+                                                <ParamDisplay label="Path" value={conn.path} hex />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-12 text-gray-500">
+                            No connections defined
+                        </div>
+                    )}
+                </div>
+            );
+        }
+        
+        function ParamDisplay({ label, value, hex }) {
+            if (!value && value !== 0) return null;
+            return (
+                <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">{label}:</span>
+                    <span className={hex ? "hex-badge" : "font-semibold text-gray-800"}>
+                        {value}
+                    </span>
+                </div>
+            );
+        }
+        
+        function NetworkTab({ data }) {
+            return (
+                <div>
+                    <h2 className="text-2xl font-bold gradient-text mb-6">Network Configuration</h2>
+                    
+                    {/* Network Topology Visualization */}
+                    <div className="network-diagram mb-8">
+                        <div className="topology-container">
+                            <div className="node">
+                                <div className="text-center">
+                                    <div className="text-2xl mb-2">🌐</div>
+                                    <div className="font-bold">Network</div>
+                                    <div className="text-sm text-gray-600">EtherNet/IP</div>
+                                </div>
+                            </div>
+                            
+                            <div className="node">
+                                <div className="text-center">
+                                    <div className="text-2xl mb-2">📡</div>
+                                    <div className="font-bold">{data.device_identity?.product_name}</div>
+                                    <div className="text-sm text-gray-600">
+                                        {data.ports?.length || 0} Port{data.ports?.length !== 1 ? 's' : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="node">
+                                <div className="text-center">
+                                    <div className="text-2xl mb-2">🖥️</div>
+                                    <div className="font-bold">Controller</div>
+                                    <div className="text-sm text-gray-600">I/O Scanner</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Ports */}
+                    {data.ports && data.ports.length > 0 && (
+                        <div className="mb-8">
+                            <h3 className="text-xl font-bold text-gray-800 mb-4">Network Ports</h3>
+                            <div className="grid gap-4">
+                                {data.ports.map((port, idx) => (
+                                    <div key={idx} className="connection-card rounded-xl p-6 border-green-500">
+                                        <div className="flex items-start justify-between">
+                                            <div>
+                                                <h4 className="text-lg font-bold text-gray-800 mb-2">{port.name}</h4>
+                                                <span className="badge-success">{port.protocol}</span>
+                                            </div>
+                                            <span className="text-3xl">🔌</span>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4 mt-4">
+                                            <ParamDisplay label="Port ID" value={port.port_id} />
+                                            <ParamDisplay label="Port Number" value={port.port_number} />
+                                            <ParamDisplay label="Path" value={port.path} hex />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+        
+        function CapacityTab({ data }) {
+            const capacity = data.capacity || {};
+            
+            return (
+                <div>
+                    <h2 className="text-2xl font-bold gradient-text mb-6">Device Capacity</h2>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <CapacityCard
+                            title="Message Connections"
+                            value={capacity.max_msg_connections || 0}
+                            icon="💬"
+                            color="bg-blue-100 text-blue-800"
+                        />
+                        <CapacityCard
+                            title="I/O Producers"
+                            value={capacity.max_io_producers || 0}
+                            icon="📤"
+                            color="bg-green-100 text-green-800"
+                        />
+                        <CapacityCard
+                            title="I/O Consumers"
+                            value={capacity.max_io_consumers || 0}
+                            icon="📥"
+                            color="bg-purple-100 text-purple-800"
+                        />
+                    </div>
+                    
+                    {capacity.tspecs && capacity.tspecs.length > 0 && (
+                        <div>
+                            <h3 className="text-xl font-bold text-gray-800 mb-4">Transport Specifications</h3>
+                            <div className="overflow-x-auto rounded-lg border border-gray-200">
+                                <table className="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Value 1</th>
+                                            <th>Value 2</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {capacity.tspecs.map((spec, idx) => (
+                                            <tr key={idx}>
+                                                <td><span className="badge-info">{spec.type}</span></td>
+                                                <td>{spec.value1 || 'N/A'}</td>
+                                                <td>{spec.value2 || 'N/A'}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+        
+        function CapacityCard({ title, value, icon, color }) {
+            return (
+                <div className="glass rounded-xl p-6 card-hover">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className={`text-4xl ${color} rounded-full w-16 h-16 flex items-center justify-center`}>
+                            {icon}
+                        </div>
+                        <div className="text-4xl font-bold gradient-text">{value}</div>
+                    </div>
+                    <div className="text-gray-600 font-semibold">{title}</div>
+                </div>
+            );
+        }
+        
+        ReactDOM.render(<EDSVisualizer />, document.getElementById('root'));
+    </script>
+</body>
+</html>

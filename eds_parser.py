@@ -220,6 +220,125 @@ class EDSParser:
 
         return params
 
+    def get_enums(self) -> Dict[int, List[Dict[str, Any]]]:
+        """Extract enum definitions from [Params] section.
+
+        Returns a dictionary mapping param numbers to their enum values.
+        Example: {22: [{"value": 0, "label": "Default configuration", "is_default": True}, ...]}
+        """
+        if 'Params' not in self.sections:
+            return {}
+
+        enums = {}
+        content = self.sections['Params']
+
+        # Parse Enum definitions - they follow the pattern:
+        # Enum22 =
+        #     0,"Label for value 0 (default)",
+        #     1,"Label for value 1",
+        #     2,"Label for value 2";
+        enum_pattern = r'Enum(\d+)\s*=\s*(.*?);'
+        matches = re.finditer(enum_pattern, content, re.MULTILINE | re.DOTALL)
+
+        for match in matches:
+            param_num = int(match.group(1))
+            enum_data = match.group(2).strip()
+
+            # Remove comments
+            lines = []
+            for line in enum_data.split('\n'):
+                if '$' in line:
+                    line = line.split('$')[0]
+                line = line.strip()
+                if line:
+                    lines.append(line)
+
+            enum_data = ' '.join(lines)
+
+            # Parse comma-separated enum entries
+            # Format: value,"label (default)" or value,"label"
+            enum_values = []
+
+            # Match pattern: number,"text" or number,"text (default)"
+            entry_pattern = r'(\d+)\s*,\s*"([^"]+)"'
+            entry_matches = re.finditer(entry_pattern, enum_data)
+
+            for entry_match in entry_matches:
+                value = int(entry_match.group(1))
+                label = entry_match.group(2).strip()
+
+                # Check if this is marked as default
+                is_default = False
+                if '(default' in label.lower():
+                    is_default = True
+                    # Remove the (default) marker from the label
+                    label = re.sub(r'\s*\(default[^)]*\)', '', label, flags=re.IGNORECASE).strip()
+
+                # Remove trailing commas and clean up
+                label = label.rstrip(',').strip()
+
+                enum_values.append({
+                    'value': value,
+                    'label': label,
+                    'is_default': is_default
+                })
+
+            if enum_values:
+                enums[param_num] = enum_values
+
+        return enums
+
+    def get_assemblies(self) -> Dict[str, List[Dict[str, Any]]]:
+        """Extract assembly definitions from [Assembly] section.
+
+        Returns a dictionary with two keys:
+        - 'fixed': List of fixed assemblies (Assem100, Assem119, etc.)
+        - 'variable': List of variable assemblies (AssemExa134, AssemExa135, etc.)
+        """
+        if 'Assembly' not in self.sections:
+            return {'fixed': [], 'variable': []}
+
+        fixed_assemblies = []
+        variable_assemblies = []
+        content = self.sections['Assembly']
+
+        # Pattern 1: Fixed assemblies
+        # Assem100 = "Digital Input", 0x64, 0, 1, 0x0000, , "20 04 24 65 30 03", , ;
+        fixed_pattern = r'Assem(\d+)\s*=\s*"([^"]+)",\s*(\w+),\s*(\d+),\s*(\d+),\s*(\w+),\s*,\s*"([^"]*)",\s*,\s*;'
+        fixed_matches = re.finditer(fixed_pattern, content, re.MULTILINE)
+
+        for match in fixed_matches:
+            fixed_assemblies.append({
+                'assembly_number': int(match.group(1)),
+                'assembly_name': match.group(2),
+                'assembly_type': self._parse_int(match.group(3)),  # 0x64
+                'unknown_field1': int(match.group(4)),
+                'size': int(match.group(5)),
+                'unknown_field2': self._parse_int(match.group(6)),  # 0x0000
+                'path': match.group(7),
+                'help_string': '',
+                'is_variable': False
+            })
+
+        # Pattern 2: Variable assemblies
+        # AssemExa134 = 34, 32, "IO-Link Process Data from IO Device";
+        variable_pattern = r'AssemExa(\d+)\s*=\s*(\d+),\s*(\d+),\s*"([^"]+)"\s*;'
+        variable_matches = re.finditer(variable_pattern, content, re.MULTILINE)
+
+        for match in variable_matches:
+            variable_assemblies.append({
+                'assembly_number': int(match.group(1)),
+                'assembly_name': f"AssemExa{match.group(1)}",
+                'unknown_value1': int(match.group(2)),
+                'max_size': int(match.group(3)),
+                'description': match.group(4)
+            })
+
+        return {
+            'fixed': fixed_assemblies,
+            'variable': variable_assemblies
+        }
+
     def get_connections(self) -> List[Dict[str, Any]]:
         """Extract connection definitions from [Connection Manager] section."""
         if 'Connection Manager' not in self.sections:
@@ -447,6 +566,21 @@ def parse_eds_file(content: str, file_path: str = None, strict_mode: bool = Fals
         collector.set_file_path(file_path)
 
     # Parse all sections
+    parameters = parser.get_parameters()
+    enums = parser.get_enums()
+
+    # Link enum values to their corresponding parameters
+    for param in parameters:
+        param_num = param.get('param_number')
+        if param_num in enums:
+            # Store enum values as JSON string
+            param['enum_values'] = json.dumps(enums[param_num])
+        else:
+            param['enum_values'] = None
+
+    # Extract assemblies
+    assemblies = parser.get_assemblies()
+
     parsed_data = {
         'source': {
             'file_path': file_path,
@@ -458,8 +592,9 @@ def parse_eds_file(content: str, file_path: str = None, strict_mode: bool = Fals
         'file_info': parser.get_file_info(),
         'device': parser.get_device_info(),
         'device_classification': parser.get_device_classification(),
-        'parameters': parser.get_parameters(),
+        'parameters': parameters,
         'connections': parser.get_connections(),
+        'assemblies': assemblies,  # New: assembly definitions
         'ports': parser.get_ports(),
         'capacity': parser.get_capacity(),
         'all_sections': parser.get_all_sections(),

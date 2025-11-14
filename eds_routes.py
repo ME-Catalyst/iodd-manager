@@ -169,15 +169,15 @@ async def upload_eds_file(file: UploadFile = File(...)):
                 datetime.now().isoformat()
             ))
 
-        # Insert parameters with all fields
+        # Insert parameters with all fields including enum_values
         for param in parsed_data.get('parameters', []):
             cursor.execute("""
                 INSERT INTO eds_parameters (
                     eds_file_id, param_number, param_name, data_type,
                     data_size, default_value, min_value, max_value,
                     description, link_path_size, link_path, descriptor,
-                    help_string_1, help_string_2, help_string_3
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    help_string_1, help_string_2, help_string_3, enum_values
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 eds_id,
                 param.get('param_number'),
@@ -193,7 +193,8 @@ async def upload_eds_file(file: UploadFile = File(...)):
                 param.get('descriptor'),
                 param.get('help_string_1'),
                 param.get('help_string_2'),
-                param.get('help_string_3')
+                param.get('help_string_3'),
+                param.get('enum_values')  # JSON string or None
             ))
 
         # Insert connections with all fields
@@ -222,6 +223,46 @@ async def upload_eds_file(file: UploadFile = File(...)):
                 conn_info.get('path'),
                 conn_info.get('trigger_transport_comment'),
                 conn_info.get('connection_params_comment')
+            ))
+
+        # Insert assemblies
+        assemblies = parsed_data.get('assemblies', {})
+
+        # Insert fixed assemblies
+        for assembly in assemblies.get('fixed', []):
+            cursor.execute("""
+                INSERT INTO eds_assemblies (
+                    eds_file_id, assembly_number, assembly_name, assembly_type,
+                    unknown_field1, size, unknown_field2, path,
+                    help_string, is_variable
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                eds_id,
+                assembly.get('assembly_number'),
+                assembly.get('assembly_name'),
+                assembly.get('assembly_type'),
+                assembly.get('unknown_field1'),
+                assembly.get('size'),
+                assembly.get('unknown_field2'),
+                assembly.get('path'),
+                assembly.get('help_string'),
+                assembly.get('is_variable', False)
+            ))
+
+        # Insert variable assemblies
+        for var_assembly in assemblies.get('variable', []):
+            cursor.execute("""
+                INSERT INTO eds_variable_assemblies (
+                    eds_file_id, assembly_name, assembly_number,
+                    unknown_value1, max_size, description
+                ) VALUES (?, ?, ?, ?, ?, ?)
+            """, (
+                eds_id,
+                var_assembly.get('assembly_name'),
+                var_assembly.get('assembly_number'),
+                var_assembly.get('unknown_value1'),
+                var_assembly.get('max_size'),
+                var_assembly.get('description')
             ))
 
         # Insert ports

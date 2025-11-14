@@ -1,0 +1,66 @@
+================================================================================
+EDS PARSING REPORT
+================================================================================
+
+FILE INFORMATION
+--------------------------------------------------------------------------------
+Source File: /mnt/user-data/uploads/TM221_Generic.eds
+File Hash: 8403cd964c94bdb809a79df0fd005c5a970bb18cf8796cdd61837ae698be8f47
+Parsed At: 2025-11-13T18:19:21.769047
+Dialect: CIP_INI
+
+DEVICE IDENTITY
+--------------------------------------------------------------------------------
+Product Name: TM221_Generic
+Vendor: Schneider Electric (Code: 243)
+Product Type: Programmable Logic Controller
+Product Code: 4099
+Revision: 1.4
+Catalog: TM221_Generic
+
+STATISTICS
+--------------------------------------------------------------------------------
+Parameters: 3
+Connections: 3
+Ports: 1
+Capacity - Max Msg Connections: 8
+Capacity - Max I/O Producers: 32
+Capacity - Max I/O Consumers: 32
+
+PARAMETERS
+--------------------------------------------------------------------------------
+  Param1: RPI
+    Type: 4
+    Default: 10000
+    Range: [100000, 60000000]
+
+  Param2: Size 2
+    Type: 2
+    Default: 2
+    Range: [40, 40]
+
+  Param3: Size 3
+    Type: 2
+    Default: 2
+    Range: [40, 40]
+
+CONNECTIONS
+--------------------------------------------------------------------------------
+  Connection1: Write Data to 150
+    Trigger & Transport: 0x04030002
+    O->T: RPI=Param1, Size=Param3
+    T->O: RPI=Param1, Size=0
+    Description: Output Assembly (Originator --> Target, %IW)
+
+  Connection2: Read From 100 / Write to 150
+    Trigger & Transport: 0x04030002
+    O->T: RPI=Param1, Size=Param2
+    T->O: RPI=Param1, Size=Param3
+    Description: Read Input Assembly (Target --> Originator, %QW) and Write Output Assembly (Originator --> Target, %IW) 
+
+  Connection3: Read Data from 100
+    Trigger & Transport: 0x02030002
+    O->T: RPI=Param1, Size=0
+    T->O: RPI=Param1, Size=Param3
+    Description: Input Assembly (Target --> Originator, %QW)
+

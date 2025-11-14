@@ -1,0 +1,219 @@
+{
+  "source": {
+    "file_path": "/mnt/user-data/uploads/TM221_Generic.eds",
+    "file_hash": "8403cd964c94bdb809a79df0fd005c5a970bb18cf8796cdd61837ae698be8f47",
+    "dialect_id": "CIP_INI",
+    "parsed_at": "2025-11-13T18:19:21.769047"
+  },
+  "file_info": {
+    "desc_text": "Network Interface Module EtherNet/IP",
+    "create_date": "10-22-2014",
+    "create_time": "10:48:30",
+    "mod_date": "05-07-2015",
+    "mod_time": "09:41:13",
+    "revision": "1.5",
+    "home_url": "http://www.schneider-electric.com"
+  },
+  "device_identity": {
+    "vendor_code": 243,
+    "vendor_name": "Schneider Electric",
+    "product_type": 14,
+    "product_type_str": "Programmable Logic Controller",
+    "product_code": 4099,
+    "major_revision": 1,
+    "minor_revision": 4,
+    "product_name": "TM221_Generic",
+    "catalog": "TM221_Generic",
+    "icon": "M221.ico",
+    "icon_contents": "AAABAAEAEBAAAAAAGABoAwAAFgAAACgAAAAQAAAAIAAAAAEAGAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAD///////////////////8Apk8Apk8Apk8Apk/IxcX9/f3///////////////////////////////////////8Apk////////8Apk+koJ+/vLz7+/r///////////////////////////////////8Apk////8Apk8Apk+koJ+koJ+yrq3///////////////////////////////////8Apk////////8Apk+koJ+koJ+koJ////////////////////////////////////8Apk////8Apk8Apk+koJ+koJ+koJ////////////////////////////////////8Apk////////8Apk+koJ+koJ+koJ////////////////////////////////////8Apk////8Apk8Apk+koJ+koJ+koJ////////////////////////////////////8Apk////////8Apk+koJ+koJ+koJ////////////////////////////////////8Apk////////8Apk+koJ+koJ+koJ////////////////////////////////////8Apk////////8Apk+koJ+koJ+koJ////////////////////////////////////8Apk////8Apk8Apk+koJ+koJ+koJ////////////////////////////////////8Apk////8Apk8Apk+koJ+koJ+koJ////////////////////////////////////8Apk////8Apk8Apk+koJ+koJ+yr67///////////////////////////////////8Apk////////8Apk+koJ+5trb39/f///////////////////////////////////8Apk8Apk8Apk8Apk/Nysr+/v7///////////////////////////////////////////////////////////////////////////////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  },
+  "device_classification": {
+    "Class1": "EtherNetIP",
+    "Class2": "1_RSNetWorx_Connectable_Module"
+  },
+  "parameters": [
+    {
+      "param_id": "Param1",
+      "index": 1,
+      "name": "RPI",
+      "data_type": "4",
+      "default_value": "10000",
+      "min_value": "100000",
+      "max_value": "60000000",
+      "units": null,
+      "access": null,
+      "description": null,
+      "raw_values": [
+        "0",
+        "",
+        "",
+        "0x0000",
+        "0xC8",
+        "4",
+        "\"RPI\"",
+        "\"\"",
+        "\"\"",
+        "10000",
+        "60000000",
+        "100000",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "param_id": "Param2",
+      "index": 2,
+      "name": "Size 2",
+      "data_type": "2",
+      "default_value": "2",
+      "min_value": "40",
+      "max_value": "40",
+      "units": null,
+      "access": null,
+      "description": null,
+      "raw_values": [
+        "0",
+        "",
+        "",
+        "0x0000",
+        "0xC7",
+        "2",
+        "\"Size 2\"",
+        "\"\"",
+        "\"\"",
+        "2",
+        "40",
+        "40",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "param_id": "Param3",
+      "index": 3,
+      "name": "Size 3",
+      "data_type": "2",
+      "default_value": "2",
+      "min_value": "40",
+      "max_value": "40",
+      "units": null,
+      "access": null,
+      "description": null,
+      "raw_values": [
+        "0",
+        "",
+        "",
+        "0x0000",
+        "0xC7",
+        "2",
+        "\"Size 3\"",
+        "\"\"",
+        "\"\"",
+        "2",
+        "40",
+        "40",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "connection_id": "Connection1",
+      "index": 1,
+      "name": "Write Data to 150",
+      "trigger_transport": "0x04030002",
+      "connection_params": "0x44643405",
+      "ot_rpi": "Param1",
+      "ot_size": "Param3",
+      "ot_format": null,
+      "to_rpi": "Param1",
+      "to_size": "0",
+      "to_format": null,
+      "description": null,
+      "help_string": "Output Assembly (Originator --> Target, %IW)",
+      "path": "20 04 24 03 2C 96 2C C6\";"
+    },
+    {
+      "connection_id": "Connection2",
+      "index": 2,
+      "name": "Read From 100 / Write to 150",
+      "trigger_transport": "0x04030002",
+      "connection_params": "0x44640405",
+      "ot_rpi": "Param1",
+      "ot_size": "Param2",
+      "ot_format": null,
+      "to_rpi": "Param1",
+      "to_size": "Param3",
+      "to_format": null,
+      "description": null,
+      "help_string": "Read Input Assembly (Target --> Originator, %QW) and Write Output Assembly (Originator --> Target, %IW) ",
+      "path": "20 04 24 03 2C 96 2C 64\";"
+    },
+    {
+      "connection_id": "Connection3",
+      "index": 3,
+      "name": "Read Data from 100",
+      "trigger_transport": "0x02030002",
+      "connection_params": "0x44640305",
+      "ot_rpi": "Param1",
+      "ot_size": "0",
+      "ot_format": null,
+      "to_rpi": "Param1",
+      "to_size": "Param3",
+      "to_format": null,
+      "description": null,
+      "help_string": "Input Assembly (Target --> Originator, %QW)",
+      "path": "20 04 24 03 2C C6 2C 64\";"
+    }
+  ],
+  "ports": [
+    {
+      "port_id": "Port2",
+      "index": 2,
+      "protocol": "TCP",
+      "name": "Ethernet Port",
+      "path": "20 F5 24 01",
+      "port_number": 2
+    }
+  ],
+  "capacity": {
+    "max_msg_connections": 8,
+    "max_io_producers": 32,
+    "max_io_consumers": 32,
+    "tspecs": [
+      {
+        "type": "TxRx",
+        "value1": 4,
+        "value2": 100
+      },
+      {
+        "type": "TxRx",
+        "value1": 496,
+        "value2": 100
+      }
+    ]
+  },
+  "extensions": {}
+}

@@ -12,12 +12,54 @@
 
 /**
  * Parse enum values from parameter data
- * @param {Object} param - Parameter object with default_value and help_string fields
+ * @param {Object} param - Parameter object with enum_values or default_value and help_string fields
  * @returns {Object|null} Enum info object or null if not an enum
  */
 export function parseEnumValues(param) {
   if (!param) return null;
 
+  // PRIORITY 1: Check if we have pre-parsed enum_values from EDS Enum section
+  if (param.enum_values) {
+    try {
+      const enumValues = typeof param.enum_values === 'string'
+        ? JSON.parse(param.enum_values)
+        : param.enum_values;
+
+      if (Array.isArray(enumValues) && enumValues.length >= 2) {
+        // Find default value
+        let defaultEnumValue = null;
+        const defaultEntry = enumValues.find(ev => ev.is_default);
+        if (defaultEntry) {
+          defaultEnumValue = defaultEntry.value;
+        }
+
+        // If no explicit default, try to get from default_value field
+        if (defaultEnumValue === null && param.default_value) {
+          const defaultStr = String(param.default_value);
+          const match = defaultStr.match(/^(\d+)/);
+          if (match) {
+            defaultEnumValue = parseInt(match[1], 10);
+          }
+        }
+
+        return {
+          isEnum: true,
+          values: enumValues.map(ev => ({
+            value: ev.value,
+            label: ev.label,
+            isDefault: ev.is_default || ev.value === defaultEnumValue
+          })),
+          defaultValue: defaultEnumValue,
+          count: enumValues.length
+        };
+      }
+    } catch (e) {
+      console.warn('Failed to parse enum_values:', e);
+      // Fall through to legacy parsing
+    }
+  }
+
+  // PRIORITY 2: Legacy fallback - parse from help strings
   const enumValues = [];
   let defaultEnumValue = null;
 

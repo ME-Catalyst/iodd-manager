@@ -310,6 +310,96 @@ async def websocket_endpoint(websocket: WebSocket):
         if websocket in websocket_clients:
             websocket_clients.remove(websocket)
 
+@router.post("/connect")
+async def connect_mqtt():
+    """Manually connect/reconnect to MQTT broker"""
+    global mqtt_client, mqtt_connected
+
+    if not MQTT_AVAILABLE:
+        raise HTTPException(status_code=503, detail="MQTT support not available. Install paho-mqtt package.")
+
+    try:
+        if mqtt_client is not None:
+            # Disconnect existing client
+            mqtt_client.loop_stop()
+            mqtt_client.disconnect()
+
+        # Setup new client
+        client = setup_mqtt_client()
+
+        if client and mqtt_connected:
+            return {
+                "success": True,
+                "message": "Connected to MQTT broker",
+                "broker": MQTT_BROKER,
+                "port": MQTT_PORT
+            }
+        else:
+            raise HTTPException(status_code=503, detail="Failed to connect to MQTT broker")
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Connection error: {str(e)}")
+
+@router.post("/disconnect")
+async def disconnect_mqtt():
+    """Disconnect from MQTT broker"""
+    global mqtt_client, mqtt_connected
+
+    if not MQTT_AVAILABLE:
+        raise HTTPException(status_code=503, detail="MQTT support not available")
+
+    try:
+        if mqtt_client is not None:
+            mqtt_client.loop_stop()
+            mqtt_client.disconnect()
+            mqtt_connected = False
+            return {
+                "success": True,
+                "message": "Disconnected from MQTT broker"
+            }
+        else:
+            return {
+                "success": True,
+                "message": "Already disconnected"
+            }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Disconnect error: {str(e)}")
+
+@router.post("/restart")
+async def restart_mqtt_connection():
+    """Restart MQTT connection"""
+    global mqtt_client, mqtt_connected
+
+    if not MQTT_AVAILABLE:
+        raise HTTPException(status_code=503, detail="MQTT support not available")
+
+    try:
+        # Disconnect
+        if mqtt_client is not None:
+            mqtt_client.loop_stop()
+            mqtt_client.disconnect()
+            mqtt_connected = False
+
+        # Wait a moment
+        await asyncio.sleep(1)
+
+        # Reconnect
+        client = setup_mqtt_client()
+
+        if client and mqtt_connected:
+            return {
+                "success": True,
+                "message": "MQTT connection restarted successfully",
+                "broker": MQTT_BROKER,
+                "port": MQTT_PORT
+            }
+        else:
+            raise HTTPException(status_code=503, detail="Failed to restart MQTT connection")
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Restart error: {str(e)}")
+
 # Initialize MQTT client on module load
 if MQTT_AVAILABLE:
     setup_mqtt_client()

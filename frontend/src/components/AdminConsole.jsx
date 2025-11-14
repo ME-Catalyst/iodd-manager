@@ -3,7 +3,8 @@ import {
   Settings, Database, HardDrive, Activity, AlertTriangle, CheckCircle,
   Download, Trash2, BarChart3, Server, Cpu, Clock, Package, FileText,
   RefreshCw, Shield, Zap, TrendingUp, Users, Calendar, Info, BookOpen,
-  ExternalLink, Home, Rocket, Terminal, Github, Bug, Eye, Search, GitBranch
+  ExternalLink, Home, Rocket, Terminal, Github, Bug, Eye, Search, GitBranch,
+  Wifi, WifiOff, Play, StopCircle, RotateCw
 } from 'lucide-react';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from './ui';
@@ -227,6 +228,34 @@ const AdminConsole = ({ API_BASE, toast, onNavigate }) => {
  * Hub Tab - Visual starting point with quick links and resources
  */
 const HubTab = ({ overview, onNavigate }) => {
+  const [mqttStatus, setMqttStatus] = useState(null);
+  const [mqttLoading, setMqttLoading] = useState(false);
+
+  useEffect(() => {
+    fetchMqttStatus();
+  }, []);
+
+  const fetchMqttStatus = async () => {
+    try {
+      const response = await axios.get(`/api/mqtt/status`);
+      setMqttStatus(response.data);
+    } catch (error) {
+      console.error('Failed to fetch MQTT status:', error);
+    }
+  };
+
+  const handleMqttAction = async (action) => {
+    setMqttLoading(true);
+    try {
+      await axios.post(`/api/mqtt/${action}`);
+      await fetchMqttStatus();
+    } catch (error) {
+      console.error(`Failed to ${action} MQTT:`, error);
+    } finally {
+      setMqttLoading(false);
+    }
+  };
+
   const quickActions = [
     {
       title: 'Browse Devices',
@@ -402,6 +431,198 @@ const HubTab = ({ overview, onNavigate }) => {
               </Card>
             );
           })}
+        </div>
+      </div>
+
+      {/* IoT Platform Services */}
+      <div>
+        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          <Server className="w-5 h-5 text-cyan-500" />
+          IoT Platform Services
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* MQTT Broker */}
+          <Card className="bg-slate-900 border-slate-800">
+            <CardHeader>
+              <CardTitle className="text-white text-sm flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  {mqttStatus?.connected ? (
+                    <Wifi className="w-4 h-4 text-green-400" />
+                  ) : (
+                    <WifiOff className="w-4 h-4 text-red-400" />
+                  )}
+                  MQTT Broker
+                </span>
+                <Badge className={mqttStatus?.connected ? "bg-green-500/20 text-green-400 border-green-500/30" : "bg-red-500/20 text-red-400 border-red-500/30"}>
+                  {mqttStatus?.connected ? 'Online' : 'Offline'}
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between text-slate-400">
+                  <span>Port:</span>
+                  <span className="text-slate-300">{mqttStatus?.mqtt_port || 1883}</span>
+                </div>
+                <div className="flex justify-between text-slate-400">
+                  <span>Host:</span>
+                  <span className="text-slate-300">{mqttStatus?.broker || 'localhost'}</span>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                {!mqttStatus?.connected ? (
+                  <Button
+                    size="sm"
+                    onClick={() => handleMqttAction('connect')}
+                    disabled={mqttLoading}
+                    className="flex-1 bg-green-600 hover:bg-green-500"
+                  >
+                    <Play className="w-3 h-3 mr-1" />
+                    Connect
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      size="sm"
+                      onClick={() => handleMqttAction('restart')}
+                      disabled={mqttLoading}
+                      className="flex-1"
+                    >
+                      <RotateCw className="w-3 h-3 mr-1" />
+                      Restart
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleMqttAction('disconnect')}
+                      disabled={mqttLoading}
+                      className="flex-1"
+                    >
+                      <StopCircle className="w-3 h-3 mr-1" />
+                      Stop
+                    </Button>
+                  </>
+                )}
+              </div>
+              <a
+                href="http://localhost:1883"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
+              >
+                <ExternalLink className="w-3 h-3" />
+                Broker Details
+              </a>
+            </CardContent>
+          </Card>
+
+          {/* Grafana */}
+          <Card className="bg-slate-900 border-slate-800">
+            <CardHeader>
+              <CardTitle className="text-white text-sm flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-orange-400" />
+                Grafana
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-xs text-slate-400">
+                Visualization & dashboarding platform for device telemetry
+              </p>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between text-slate-400">
+                  <span>Port:</span>
+                  <span className="text-slate-300">3001</span>
+                </div>
+                <div className="flex justify-between text-slate-400">
+                  <span>Default:</span>
+                  <span className="text-slate-300">admin/admin123</span>
+                </div>
+              </div>
+              <a
+                href="http://localhost:3001"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block"
+              >
+                <Button size="sm" className="w-full bg-orange-600 hover:bg-orange-500">
+                  <ExternalLink className="w-3 h-3 mr-1" />
+                  Open Grafana
+                </Button>
+              </a>
+            </CardContent>
+          </Card>
+
+          {/* Node-RED */}
+          <Card className="bg-slate-900 border-slate-800">
+            <CardHeader>
+              <CardTitle className="text-white text-sm flex items-center gap-2">
+                <Zap className="w-4 h-4 text-red-400" />
+                Node-RED
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-xs text-slate-400">
+                Flow-based automation & data processing
+              </p>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between text-slate-400">
+                  <span>Port:</span>
+                  <span className="text-slate-300">1880</span>
+                </div>
+                <div className="flex justify-between text-slate-400">
+                  <span>Flows:</span>
+                  <span className="text-slate-300">Pre-loaded</span>
+                </div>
+              </div>
+              <a
+                href="http://localhost:1880"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block"
+              >
+                <Button size="sm" className="w-full bg-red-600 hover:bg-red-500">
+                  <ExternalLink className="w-3 h-3 mr-1" />
+                  Open Node-RED
+                </Button>
+              </a>
+            </CardContent>
+          </Card>
+
+          {/* InfluxDB */}
+          <Card className="bg-slate-900 border-slate-800">
+            <CardHeader>
+              <CardTitle className="text-white text-sm flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-blue-400" />
+                InfluxDB
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-xs text-slate-400">
+                Time-series database for device telemetry
+              </p>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between text-slate-400">
+                  <span>Port:</span>
+                  <span className="text-slate-300">8086</span>
+                </div>
+                <div className="flex justify-between text-slate-400">
+                  <span>Bucket:</span>
+                  <span className="text-slate-300">device-telemetry</span>
+                </div>
+              </div>
+              <a
+                href="http://localhost:8086"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block"
+              >
+                <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-500">
+                  <ExternalLink className="w-3 h-3 mr-1" />
+                  Open InfluxDB
+                </Button>
+              </a>
+            </CardContent>
+          </Card>
         </div>
       </div>
 

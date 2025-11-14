@@ -311,6 +311,21 @@ async def upload_eds_file(file: UploadFile = File(...)):
                 module.get('raw_definition')
             ))
 
+        # Insert groups
+        for group in parsed_data.get('groups', []):
+            cursor.execute("""
+                INSERT INTO eds_groups (
+                    eds_file_id, group_number, group_name,
+                    parameter_count, parameter_list
+                ) VALUES (?, ?, ?, ?, ?)
+            """, (
+                eds_id,
+                group.get('group_number'),
+                group.get('group_name'),
+                group.get('parameter_count'),
+                group.get('parameter_list')
+            ))
+
         # Insert capacity
         capacity = parsed_data.get('capacity', {})
         if capacity:
@@ -1577,4 +1592,58 @@ async def get_eds_modules(eds_id: int):
     return {
         "modules": modules,
         "total_count": len(modules)
+    }
+
+
+@router.get("/{eds_id}/groups")
+async def get_eds_groups(eds_id: int):
+    """
+    Get parameter group definitions for an EDS file.
+
+    Groups organize parameters into logical categories for easier navigation
+    and configuration. Each group contains a list of parameter numbers that
+    belong to that category.
+
+    Args:
+        eds_id: EDS file ID
+
+    Returns:
+        List of group definitions with name, count, and parameter list
+    """
+    conn = sqlite3.connect(get_db_path())
+    cursor = conn.cursor()
+
+    # Get groups
+    cursor.execute("""
+        SELECT
+            id, group_number, group_name,
+            parameter_count, parameter_list
+        FROM eds_groups
+        WHERE eds_file_id = ?
+        ORDER BY group_number
+    """, (eds_id,))
+
+    groups = []
+    for row in cursor.fetchall():
+        parameter_list_str = row[4]
+        parameter_numbers = []
+        if parameter_list_str:
+            try:
+                parameter_numbers = [int(p.strip()) for p in parameter_list_str.split(',') if p.strip()]
+            except ValueError:
+                pass
+
+        groups.append({
+            "id": row[0],
+            "group_number": row[1],
+            "group_name": row[2],
+            "parameter_count": row[3],
+            "parameter_numbers": parameter_numbers
+        })
+
+    conn.close()
+
+    return {
+        "groups": groups,
+        "total_count": len(groups)
     }

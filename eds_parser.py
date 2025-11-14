@@ -523,6 +523,78 @@ class EDSParser:
 
         return modules
 
+    def get_groups(self) -> List[Dict[str, Any]]:
+        """
+        Extract parameter group definitions from [Groups] section.
+
+        Groups organize parameters into logical categories for better UI organization.
+        Format: GroupN = "Name", count, param1,param2,...;
+        """
+        if 'Groups' not in self.sections:
+            return []
+
+        groups = []
+        content = self.sections['Groups']
+
+        # Pattern for Group entries: Group1 = "Name", count, param_numbers;
+        group_pattern = r'Group(\d+)\s*=\s*(.+?)(?:;|(?=Group\d+\s*=)|$)'
+        matches = re.finditer(group_pattern, content, re.MULTILINE | re.DOTALL)
+
+        for match in matches:
+            group_num = int(match.group(1))
+            group_data = match.group(2).strip()
+
+            # Remove comments
+            group_data = re.sub(r'\$.*', '', group_data)
+
+            # Parse the group definition
+            # Format: "Name", count, param1,param2,param3,...
+
+            # Extract the group name (quoted string)
+            name_match = re.search(r'"([^"]+)"', group_data)
+            if not name_match:
+                continue  # Skip malformed groups
+
+            group_name = name_match.group(1)
+
+            # Remove the name from data to parse remaining fields
+            remaining_data = group_data[name_match.end():].strip()
+            if remaining_data.startswith(','):
+                remaining_data = remaining_data[1:].strip()
+
+            # Parse count and parameter list
+            # Remove all whitespace and newlines for easier parsing
+            remaining_data = re.sub(r'\s+', '', remaining_data)
+
+            # Split by comma to get count and parameters
+            parts = [p.strip() for p in remaining_data.split(',') if p.strip()]
+
+            parameter_count = None
+            parameter_numbers = []
+
+            if len(parts) > 0:
+                # First part is the count
+                try:
+                    parameter_count = int(parts[0])
+                except ValueError:
+                    pass
+
+                # Remaining parts are parameter numbers
+                for part in parts[1:]:
+                    try:
+                        parameter_numbers.append(int(part))
+                    except ValueError:
+                        pass
+
+            groups.append({
+                'group_number': group_num,
+                'group_name': group_name,
+                'parameter_count': parameter_count,
+                'parameter_list': ','.join(map(str, parameter_numbers)) if parameter_numbers else None
+            })
+
+        return groups
+
     def get_capacity(self) -> Dict[str, Any]:
         """
         Extract capacity information from [Capacity] section with support for multiple vendor formats.
@@ -672,6 +744,7 @@ def parse_eds_file(content: str, file_path: str = None, strict_mode: bool = Fals
         'assemblies': assemblies,  # New: assembly definitions
         'ports': parser.get_ports(),
         'modules': parser.get_modules(),  # New: module definitions for modular devices
+        'groups': parser.get_groups(),  # New: parameter group organization
         'capacity': parser.get_capacity(),
         'all_sections': parser.get_all_sections(),
         'checksum': parser.get_checksum(),

@@ -25,6 +25,7 @@ def clear_eds_data():
         'eds_variable_assemblies',
         'eds_ports',
         'eds_modules',
+        'eds_groups',
         'eds_capacity',
         'eds_tspecs',
         'eds_packages',
@@ -55,6 +56,9 @@ def clear_eds_data():
 
     cursor.execute("DELETE FROM eds_modules")
     print("  [OK] Deleted modules")
+
+    cursor.execute("DELETE FROM eds_groups")
+    print("  [OK] Deleted groups")
 
     cursor.execute("DELETE FROM eds_variable_assemblies")
     print("  [OK] Deleted variable assemblies")
@@ -347,6 +351,21 @@ def import_package(package_path):
                     module.get('vendor_code'),
                     module.get('product_code'),
                     module.get('raw_definition')
+                ))
+
+            # Insert groups
+            for group in parsed_data.get('groups', []):
+                cursor.execute("""
+                    INSERT INTO eds_groups (
+                        eds_file_id, group_number, group_name,
+                        parameter_count, parameter_list
+                    ) VALUES (?, ?, ?, ?, ?)
+                """, (
+                    eds_id,
+                    group.get('group_number'),
+                    group.get('group_name'),
+                    group.get('parameter_count'),
+                    group.get('parameter_list')
                 ))
 
             # Insert capacity

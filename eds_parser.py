@@ -5,6 +5,7 @@ Parses EDS files for EtherNet/IP devices with comprehensive section extraction
 
 import re
 import base64
+import json
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Any
 import hashlib

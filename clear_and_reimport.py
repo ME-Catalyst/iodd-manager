@@ -14,6 +14,8 @@ def clear_eds_data():
     print("="*80)
 
     conn = sqlite3.connect('iodd_manager.db')
+    # Enable foreign keys for this connection
+    conn.execute("PRAGMA foreign_keys = ON")
     cursor = conn.cursor()
 
     # Get counts before deletion
@@ -126,6 +128,8 @@ def import_package(package_path):
         return True
 
     conn = sqlite3.connect('iodd_manager.db')
+    # Enable foreign keys for this connection
+    conn.execute("PRAGMA foreign_keys = ON")
     cursor = conn.cursor()
 
     # Insert package record

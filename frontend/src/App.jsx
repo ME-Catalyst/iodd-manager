@@ -40,7 +40,11 @@ import {
   translateBitrate,
   decodeProfileCharacteristics,
   getWireColorInfo,
-  formatCycleTime
+  formatCycleTime,
+  getAccessRightInfo,
+  getDataTypeDisplay,
+  decodeMSequence,
+  getConnectionTypeInfo
 } from './utils/iolinkConstants';
 
 // ============================================================================
@@ -1647,11 +1651,19 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
               Value: {item.button_value}
             </Badge>
           </div>
-          {item.access_right_restriction && (
-            <div className="mt-2 text-xs text-slate-400">
-              Access: <Badge className="ml-1 bg-slate-700 text-slate-300 text-xs">{item.access_right_restriction}</Badge>
-            </div>
-          )}
+          {item.access_right_restriction && (() => {
+            const accessInfo = getAccessRightInfo(item.access_right_restriction);
+            return (
+              <div className="mt-2 text-xs text-slate-400">
+                Access: <Badge
+                  className={`ml-1 bg-${accessInfo?.color || 'slate'}-500/20 text-${accessInfo?.color || 'slate'}-300 border-${accessInfo?.color || 'slate'}-500/50 text-xs`}
+                  title={accessInfo?.description || item.access_right_restriction}
+                >
+                  {accessInfo?.icon} {accessInfo?.label || item.access_right_restriction}
+                </Badge>
+              </div>
+            );
+          })()}
         </div>
       );
     }
@@ -1697,11 +1709,19 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
                 Subindex: <Badge className="ml-1 bg-slate-700 text-slate-300 text-xs">{item.subindex}</Badge>
               </div>
             )}
-            {item.access_right_restriction && (
-              <div className="text-slate-400">
-                Access: <Badge className="ml-1 bg-slate-700 text-slate-300 text-xs">{item.access_right_restriction}</Badge>
-              </div>
-            )}
+            {item.access_right_restriction && (() => {
+              const accessInfo = getAccessRightInfo(item.access_right_restriction);
+              return (
+                <div className="text-slate-400">
+                  Access: <Badge
+                    className={`ml-1 bg-${accessInfo?.color || 'slate'}-500/20 text-${accessInfo?.color || 'slate'}-300 border-${accessInfo?.color || 'slate'}-500/50 text-xs`}
+                    title={accessInfo?.description || item.access_right_restriction}
+                  >
+                    {accessInfo?.icon} {accessInfo?.label || item.access_right_restriction}
+                  </Badge>
+                </div>
+              );
+            })()}
             {item.display_format && (
               <div className="text-slate-400">
                 Format: <Badge className="ml-1 bg-slate-700 text-slate-300 text-xs">{item.display_format}</Badge>
@@ -1752,11 +1772,19 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
             )}
           </div>
           <div className="space-y-1 text-xs">
-            {item.access_right_restriction && (
-              <div className="text-slate-400">
-                Access: <Badge className="ml-1 bg-slate-700 text-slate-300 text-xs">{item.access_right_restriction}</Badge>
-              </div>
-            )}
+            {item.access_right_restriction && (() => {
+              const accessInfo = getAccessRightInfo(item.access_right_restriction);
+              return (
+                <div className="text-slate-400">
+                  Access: <Badge
+                    className={`ml-1 bg-${accessInfo?.color || 'slate'}-500/20 text-${accessInfo?.color || 'slate'}-300 border-${accessInfo?.color || 'slate'}-500/50 text-xs`}
+                    title={accessInfo?.description || item.access_right_restriction}
+                  >
+                    {accessInfo?.icon} {accessInfo?.label || item.access_right_restriction}
+                  </Badge>
+                </div>
+              );
+            })()}
             {item.display_format && (
               <div className="text-slate-400">
                 Format: <Badge className="ml-1 bg-slate-700 text-slate-300 text-xs">{item.display_format}</Badge>
@@ -2080,7 +2108,9 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div className="p-2 rounded bg-slate-800 border border-slate-700">
                 <p className="text-xs text-slate-500 mb-1">Data Type</p>
-                <p className="text-xs font-mono text-white">{param.data_type}</p>
+                <p className="text-xs font-mono text-white" title={param.data_type}>
+                  {getDataTypeDisplay(param.data_type)}
+                </p>
               </div>
               {param.bit_length && (
                 <div className="p-2 rounded bg-slate-800 border border-slate-700">
@@ -3392,7 +3422,9 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
                         {communicationProfile.msequence_capability && (
                           <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-slate-700">
                             <p className="text-xs text-slate-400 mb-1">M-Sequence Capability</p>
-                            <p className="text-lg font-bold text-green-400">{communicationProfile.msequence_capability} bytes</p>
+                            <p className="text-lg font-bold text-green-400" title={`${communicationProfile.msequence_capability} bytes`}>
+                              {decodeMSequence(communicationProfile.msequence_capability)}
+                            </p>
                           </div>
                         )}
                         <div className={`p-4 rounded-lg border ${communicationProfile.sio_supported ? 'bg-green-500/10 border-green-500/30' : 'bg-slate-800/50 border-slate-700'}`}>
@@ -3405,15 +3437,24 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
                     </div>
 
                     {/* Physical Connection */}
-                    {communicationProfile.connection_type && (
-                      <div>
-                        <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Physical Connection</h3>
-                        <div className="p-4 rounded-lg bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700">
-                          <p className="text-xs text-slate-400 mb-2">Connection Type</p>
-                          <p className="text-lg font-bold text-white">{communicationProfile.connection_type}</p>
+                    {communicationProfile.connection_type && (() => {
+                      const connInfo = getConnectionTypeInfo(communicationProfile.connection_type);
+                      return (
+                        <div>
+                          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Physical Connection</h3>
+                          <div className="p-4 rounded-lg bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700">
+                            <p className="text-xs text-slate-400 mb-2">Connection Type</p>
+                            <p className="text-lg font-bold text-white">{communicationProfile.connection_type}</p>
+                            {connInfo.description !== communicationProfile.connection_type && (
+                              <p className="text-xs text-slate-400 mt-2">{connInfo.description}</p>
+                            )}
+                            {connInfo.pins > 0 && (
+                              <p className="text-xs text-green-400 mt-1">{connInfo.pins} pins</p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      );
+                    })()}
 
                     {/* Wire Configuration */}
                     {communicationProfile.wire_config && Object.keys(communicationProfile.wire_config).length > 0 && (

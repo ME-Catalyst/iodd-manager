@@ -2916,6 +2916,86 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
                       className="pl-11 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus:border-purple-500/50 focus:ring-purple-500/20 transition-all"
                     />
                   </div>
+
+                  {/* Filter Toggle and Advanced Filters */}
+                  <div className="mt-3">
+                    <button
+                      onClick={() => setParamShowFilters(!paramShowFilters)}
+                      className="flex items-center gap-2 text-sm text-slate-400 hover:text-purple-400 transition-colors"
+                    >
+                      <Filter className="w-4 h-4" />
+                      {paramShowFilters ? 'Hide Filters' : 'Show Filters'}
+                    </button>
+
+                    {paramShowFilters && (
+                      <div className="mt-3 p-4 rounded-lg bg-slate-800/50 border border-slate-700">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {/* Access Rights Filter */}
+                          <div>
+                            <label className="block text-xs text-slate-400 mb-2">Access Rights</label>
+                            <select
+                              value={paramAccessFilter}
+                              onChange={(e) => setParamAccessFilter(e.target.value)}
+                              className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white text-sm focus:border-purple-500/50 focus:ring-purple-500/20 transition-all"
+                            >
+                              <option value="all">All Access Rights</option>
+                              <option value="ro">🔒 Read Only (ro)</option>
+                              <option value="rw">🔓 Read/Write (rw)</option>
+                              <option value="wo">✏️ Write Only (wo)</option>
+                            </select>
+                          </div>
+
+                          {/* Data Type Filter */}
+                          <div>
+                            <label className="block text-xs text-slate-400 mb-2">Data Type</label>
+                            <select
+                              value={paramDataTypeFilter}
+                              onChange={(e) => setParamDataTypeFilter(e.target.value)}
+                              className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700 text-white text-sm focus:border-purple-500/50 focus:ring-purple-500/20 transition-all"
+                            >
+                              <option value="all">All Data Types</option>
+                              <option value="boolean">Boolean</option>
+                              <option value="integer">Integer</option>
+                              <option value="uinteger">Unsigned Integer</option>
+                              <option value="float">Float</option>
+                              <option value="string">String</option>
+                              <option value="octetstring">Octet String</option>
+                              <option value="record">Record</option>
+                              <option value="array">Array</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Active Filters Summary */}
+                        {(paramAccessFilter !== 'all' || paramDataTypeFilter !== 'all') && (
+                          <div className="mt-3 pt-3 border-t border-slate-700">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs text-slate-400">Active filters:</span>
+                              {paramAccessFilter !== 'all' && (
+                                <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/50 text-xs">
+                                  Access: {paramAccessFilter.toUpperCase()}
+                                </Badge>
+                              )}
+                              {paramDataTypeFilter !== 'all' && (
+                                <Badge className="bg-green-500/20 text-green-300 border-green-500/50 text-xs">
+                                  Type: {paramDataTypeFilter}
+                                </Badge>
+                              )}
+                              <button
+                                onClick={() => {
+                                  setParamAccessFilter('all');
+                                  setParamDataTypeFilter('all');
+                                }}
+                                className="text-xs text-slate-400 hover:text-red-400 transition-colors ml-auto"
+                              >
+                                Clear all filters
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {filteredParameters.length > 0 ? (

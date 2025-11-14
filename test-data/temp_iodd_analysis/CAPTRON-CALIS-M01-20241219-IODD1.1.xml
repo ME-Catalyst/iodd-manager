@@ -1,0 +1,618 @@
+<?xml version="1.0" encoding="utf-8"?>
+<IODevice xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.io-link.com/IODD/2010/10" xsi:schemaLocation="http://www.io-link.com/IODD/2010/10 IODD1.1.xsd">
+	<DocumentInfo version="V1.0" releaseDate="2024-12-19" copyright="Copyright © CAPTRON Electronic GmbH" />
+	<ProfileHeader>
+		<ProfileIdentification>IO Device Profile</ProfileIdentification>
+		<ProfileRevision>1.1</ProfileRevision>
+		<ProfileName>Device Profile for IO Devices</ProfileName>
+		<ProfileSource>IO-Link Consortium</ProfileSource>
+		<ProfileClassID>Device</ProfileClassID>
+		<ISO15745Reference>
+			<ISO15745Part>1</ISO15745Part>
+			<ISO15745Edition>1</ISO15745Edition>
+			<ProfileTechnology>IODD</ProfileTechnology>
+		</ISO15745Reference>
+	</ProfileHeader>
+	<ProfileBody>
+		<DeviceIdentity vendorId="1239" vendorName="CAPTRON Electronic GmbH" deviceId="2305">
+			<VendorText textId="TN_VendorText" />
+			<VendorUrl textId="TN_VendorUrl" />
+			<VendorLogo name="CAPTRON-logo.png" />
+			<DeviceName textId="TN_DeviceName" />
+			<DeviceFamily textId="TN_DeviceFamily" />
+			<DeviceVariantCollection>
+				<DeviceVariant productId="CAS-MQEU-M01" deviceSymbol="CAPTRON-CALIS-pic.png" deviceIcon="CAPTRON-CALIS-icon.png">
+					<Name textId="TN_Variant_CAS-MQEU-M01" />
+					<Description textId="TD_Variant_CAS-MQEU-M01" />
+				</DeviceVariant>
+			</DeviceVariantCollection>
+		</DeviceIdentity>
+		<DeviceFunction>
+			<Features blockParameter="true" dataStorage="true" profileCharacteristic="49 16384">
+				<!-- profileCharacteristics indicate supported profiles:
+						49 (0x31) - Firmware Update
+						16384 (0x4000) - Identification and Diagnosis
+				-->
+				<SupportedAccessLocks localUserInterface="false" dataStorage="false" parameter="false" localParameterization="false" />
+			</Features>
+			<DatatypeCollection>
+				<Datatype id="D_Distance" xsi:type="UIntegerT" bitLength="16">
+					<ValueRange lowerValue="0" upperValue="1200" />
+				</Datatype>
+				<Datatype id="D_IO_Status_All" xsi:type="UIntegerT" bitLength="8">
+					<SingleValue value="0">
+						<Name textId="TN_SV_IO_Status_Out_Unset" />
+					</SingleValue>
+					<SingleValue value="1">
+						<Name textId="TN_SV_IO_Status_Out_Set" />
+					</SingleValue>
+				</Datatype>
+				<Datatype id="D_LevelOutput" xsi:type="RecordT" bitLength="56" subindexAccessSupported="true">
+					<RecordItem subindex="1" bitOffset="0">
+						<DatatypeRef datatypeId="D_OutputFunction" />
+						<Name textId="TN_RI_OutputFunction" />
+					</RecordItem>
+					<RecordItem subindex="2" bitOffset="8">
+						<DatatypeRef datatypeId="D_Percentage" />
+						<Name textId="TN_RI_OutputSetPoint" />
+						<Description textId="TD_RI_OutputSetPoint" />
+					</RecordItem>
+					<RecordItem subindex="3" bitOffset="16">
+						<DatatypeRef datatypeId="D_Percentage" />
+						<Name textId="TN_RI_OutputHysteresis" />
+						<Description textId="TD_RI_OutputHysteresis" />
+					</RecordItem>
+					<RecordItem subindex="4" bitOffset="24">
+						<SimpleDatatype xsi:type="UIntegerT" bitLength="32">
+							<ValueRange lowerValue="10" upperValue="300000" />
+						</SimpleDatatype>
+						<Name textId="TN_RI_OutputMinImpulseTime" />
+						<Description textId="TD_RI_OutputMinImpulseTime" />
+					</RecordItem>
+				</Datatype>
+				<Datatype id="D_OutputFunction" xsi:type="UIntegerT" bitLength="8">
+					<SingleValue value="0">
+						<Name textId="TN_SV_OutputNO" />
+					</SingleValue>
+					<SingleValue value="1">
+						<Name textId="TN_SV_OutputNC" />
+					</SingleValue>
+				</Datatype>
+				<Datatype id="D_Percentage" xsi:type="UIntegerT" bitLength="8">
+					<ValueRange lowerValue="0" upperValue="100" />
+				</Datatype>
+				<Datatype id="D_Reference" xsi:type="RecordT" bitLength="40" subindexAccessSupported="true">
+					<RecordItem subindex="1" bitOffset="0">
+						<SimpleDatatype xsi:type="IntegerT" bitLength="8">
+							<SingleValue value="-1">
+								<Name textId="TN_SV_ReferenceNotSet" />
+							</SingleValue>
+							<ValueRange lowerValue="0" upperValue="100" />
+						</SimpleDatatype>
+						<Name textId="TN_RI_Reference_Level" />
+					</RecordItem>
+					<RecordItem subindex="2" bitOffset="8">
+						<SimpleDatatype xsi:type="UIntegerT" bitLength="32">
+							<SingleValue value="0">
+								<Name textId="TN_SV_ReferenceNotSet" />
+							</SingleValue>
+							<ValueRange lowerValue="1" upperValue="1200" />
+						</SimpleDatatype>
+						<Name textId="TN_RI_Reference_Value" />
+					</RecordItem>
+				</Datatype>
+			</DatatypeCollection>
+			<VariableCollection>
+				<StdVariableRef id="V_DirectParameters_1" />
+				<StdVariableRef id="V_SystemCommand"> <!-- 0x0002 -->
+					<!--
+						Commands for Firmware Update Profile
+						IODD Checker V1.1.x does not support checking, but will issue warnings.
+					-->
+					<SingleValue value="80">
+						<Name textId="TN_SystemCommand_BM_UNLOCK_S"/>
+					</SingleValue>
+					<SingleValue value="81">
+						<Name textId="TN_SystemCommand_BM_UNLOCK_F"/>
+					</SingleValue>
+					<SingleValue value="82">
+						<Name textId="TN_SystemCommand_BM_UNLOCK_T"/>
+					</SingleValue>
+					<!--
+						END Commands for Firmware Update Profile
+					-->
+					<StdSingleValueRef value="128" /> <!-- 0x80 - Device Reset -->
+					<StdSingleValueRef value="129" /> <!-- 0x81 - Application Reset -->
+					<StdSingleValueRef value="130" /> <!-- 0x82 - Factory Settings -->
+					<StdSingleValueRef value="131" /> <!-- 0x83 - Back-To-Box -->
+					<!-- 131-159 = reserved -->
+					<!-- 160-255 = vendor specific -->
+					<SingleValue value="164">
+						<Name textId="TN_SystemCommand_StartCalibrationLowLevel"/>
+					</SingleValue>
+					<SingleValue value="165">
+						<Name textId="TN_SystemCommand_StartCalibrationHighLevel"/>
+					</SingleValue>
+					<SingleValue value="167">
+						<Name textId="TN_SystemCommand_SetAdditionalReference0" />
+					</SingleValue>
+					<SingleValue value="168">
+						<Name textId="TN_SystemCommand_SetAdditionalReference1" />
+					</SingleValue>
+					<SingleValue value="169">
+						<Name textId="TN_SystemCommand_SetAdditionalReference2" />
+					</SingleValue>
+					<SingleValue value="170">
+						<Name textId="TN_SystemCommand_SetAdditionalReference3" />
+					</SingleValue>
+				</StdVariableRef>
+				<StdVariableRef id="V_VendorName" defaultValue="CAPTRON Electronic GmbH" />
+				<StdVariableRef id="V_ProductName" defaultValue="CALIS" />
+				<StdVariableRef id="V_ProductText" />
+				<StdVariableRef id="V_ProductID" defaultValue="CAS-MQEU-M01" />
+				<StdVariableRef id="V_SerialNumber" />
+				<StdVariableRef id="V_HardwareRevision" />
+				<StdVariableRef id="V_FirmwareRevision" />
+				<StdVariableRef id="V_ApplicationSpecificTag" excludedFromDataStorage="false" />
+				<StdVariableRef id="V_DeviceStatus" defaultValue="0" />
+				<StdVariableRef id="V_DetailedDeviceStatus" fixedLengthRestriction="8" />				
+
+				<Variable id="V_CP_FunctionTag" index="25" accessRights="rw"  excludedFromDataStorage="false">
+				  <Datatype xsi:type="StringT" fixedLength="32" encoding="UTF-8" />
+				  <Name textId="TN_V_CP_FunctionTag" />
+				  <Description textId="TD_V_CP_FunctionTag"/>
+				</Variable>
+				<Variable id="V_CP_LocationTag" index="26" accessRights="rw"  excludedFromDataStorage="false">
+				  <Datatype xsi:type="StringT" fixedLength="32" encoding="UTF-8" />
+				  <Name textId="TN_V_CP_LocationTag" />
+				  <Description textId="TD_V_CP_LocationTag"/>
+				</Variable>
+				<Variable id="V_SupplyVoltage" index="256" accessRights="ro" dynamic="true">
+					<Datatype xsi:type="UIntegerT" bitLength="16" />
+					<Name textId="TN_V_SupplyVoltage" />
+				</Variable>
+				<Variable id="V_SensorTemperature" index="257" accessRights="ro" dynamic="true">
+					<Datatype xsi:type="IntegerT" bitLength="16" />
+					<Name textId="TN_V_SensorTemperature" />
+				</Variable>
+				<Variable id="V_ChargeCode" index="280" accessRights="ro">
+					<Datatype xsi:type="UIntegerT" bitLength="32" />
+					<Name textId="TN_V_ChargeCode" />
+				</Variable>
+				<Variable id="V_Errorcode" index="282" accessRights="ro" dynamic="true">
+					<Datatype xsi:type="UIntegerT" bitLength="16" />
+					<Name textId="TN_V_Errorcode" />
+				</Variable>
+				<Variable id="V_LEDBrightness" index="285" accessRights="rw">
+					<Datatype xsi:type="UIntegerT" bitLength="8" >
+						<ValueRange lowerValue="1" upperValue="100" />
+					</Datatype>
+					<Name textId="TN_V_LEDBrightness" />
+				</Variable>
+				<Variable id="V_ContainerLowLevel" index="286" accessRights="rw">
+					<DatatypeRef datatypeId="D_Percentage" />
+					<Name textId="TN_V_ContainerLowLevel" />
+				</Variable>
+				<Variable id="V_ContainerHighLevel" index="287" accessRights="rw">
+					<DatatypeRef datatypeId="D_Percentage" />
+					<Name textId="TN_V_ContainerHighLevel" />
+				</Variable>
+				<Variable id="V_SensorLowLevel" index="288" accessRights="rw">
+					<DatatypeRef datatypeId="D_Distance" />
+					<Name textId="TN_V_SensorLowLevel" />
+				</Variable>
+				<Variable id="V_SensorHighLevel" index="289" accessRights="rw">
+					<DatatypeRef datatypeId="D_Distance" />
+					<Name textId="TN_V_SensorHighLevel" />
+				</Variable>
+				<Variable id="V_OutputType_Pin4" index="316" accessRights="rw">
+					<Datatype xsi:type="UIntegerT" bitLength="8">
+						<SingleValue value="0">
+							<Name textId="TN_SV_OutputType_NPN" />
+						</SingleValue>
+						<SingleValue value="1">
+							<Name textId="TN_SV_OutputType_PNP" />
+						</SingleValue>
+						<SingleValue value="2">
+							<Name textId="TN_SV_OutputType_PushPull" />
+						</SingleValue>
+					</Datatype>
+					<Name textId="TN_V_OutputType_Pin4" />
+				</Variable>
+				<Variable id="V_LevelOutput_Pin4" index="319" accessRights="rw">
+					<DatatypeRef datatypeId="D_LevelOutput" />
+					<Name textId="TN_V_LevelOutput_Pin4" />
+				</Variable>
+				<Variable id="V_AdditionalReference0" index="328" accessRights="rw">
+					<DatatypeRef datatypeId="D_Reference" />
+					<Name textId="TN_V_AdditionalReference0" />
+				</Variable>
+				<Variable id="V_AdditionalReference1" index="329" accessRights="rw">
+					<DatatypeRef datatypeId="D_Reference" />
+					<Name textId="TN_V_AdditionalReference1" />
+				</Variable>
+				<Variable id="V_AdditionalReference2" index="330" accessRights="rw">
+					<DatatypeRef datatypeId="D_Reference" />
+					<Name textId="TN_V_AdditionalReference2" />
+				</Variable>
+				<Variable id="V_AdditionalReference3" index="331" accessRights="rw">
+					<DatatypeRef datatypeId="D_Reference" />
+					<Name textId="TN_V_AdditionalReference3" />
+				</Variable>
+				<Variable id="V_ValidRange" index="333" accessRights="rw">
+					<DatatypeRef datatypeId="D_Distance" />
+					<Name textId="TN_V_ValidRange" />
+				</Variable>
+				<Variable id="V_FU_HW_ID_Key" index="17342" accessRights="ro">
+					<Datatype xsi:type="StringT" encoding="UTF-8" fixedLength="16"/>
+					<Name textId="TN_V_FU_HW_ID_Key"/>
+				</Variable>
+				<Variable id="V_FU_BootmodeStatus" index="17343" accessRights="ro">
+					<Datatype xsi:type="UIntegerT" bitLength="8">
+						<SingleValue value="0">
+							<Name textId="TN_SV_BootmodeStatus_Inactive"/>
+						</SingleValue>
+						<SingleValue value="1">
+							<Name textId="TN_SV_BootmodeStatus_Active"/>
+						</SingleValue>
+					</Datatype>
+					<Name textId="TN_V_FU_BootmodeStatus"/>
+				</Variable>
+			</VariableCollection>
+			<ProcessDataCollection>
+				<ProcessData id="P_Data">
+					<ProcessDataIn id="PI_Data" bitLength="64">
+						<Datatype xsi:type="RecordT" bitLength="64">
+							<RecordItem subindex="1" bitOffset="0">
+								<SimpleDatatype xsi:type="IntegerT" bitLength="16" />
+								<Name textId="TN_PI_FillLevel" />
+							</RecordItem>
+							<RecordItem subindex="2" bitOffset="16">
+								<SimpleDatatype xsi:type="UIntegerT" bitLength="16" />
+								<Name textId="TN_PI_Distance" />
+							</RecordItem>
+							<RecordItem subindex="3" bitOffset="32">
+								<DatatypeRef datatypeId="D_IO_Status_All" />
+								<Name textId="TN_PI_IO_Status_Pin4" />
+							</RecordItem>
+						</Datatype>
+						<Name textId="TN_PI_Data" />
+					</ProcessDataIn>
+				</ProcessData>
+			</ProcessDataCollection>
+			<ErrorTypeCollection>
+				<StdErrorTypeRef additionalCode="0" /> <!-- 0x8000 Device application error -->
+				<StdErrorTypeRef additionalCode="17" /> <!-- 0x8011 Index not available -->
+				<StdErrorTypeRef additionalCode="18" /> <!-- 0x8012 Subindex not available -->
+				<StdErrorTypeRef additionalCode="48" /> <!-- 0x8030 Parameter value out of range  -->
+				<StdErrorTypeRef additionalCode="53" /> <!-- 0x8035 Function not available -->
+				<StdErrorTypeRef additionalCode="65"/> <!-- 0x8041 Inconsistent parameter set -->
+			</ErrorTypeCollection>
+			<EventCollection>
+				<StdEventRef code="16912" />
+				<StdEventRef code="20496" /> <!-- 0x5010 Component malfunction – Repair or exchange. -->
+				<StdEventRef code="20752" />
+				<StdEventRef code="20753" />
+				<StdEventRef code="25376" />
+				<Event code="6144" type="Error">
+					<Name textId="TN_E_Overload" />
+					<Description textId="TD_E_Overload" />
+				</Event>
+			</EventCollection>
+			<UserInterface>
+				<ProcessDataRefCollection>
+					<ProcessDataRef processDataId="PI_Data">
+						<ProcessDataRecordItemInfo subindex="3" />
+						<ProcessDataRecordItemInfo subindex="1" unitCode="1342" gradient="0.01" offset="0" displayFormat="Dec.2" />
+						<ProcessDataRecordItemInfo subindex="2" unitCode="1013" />
+					</ProcessDataRef>
+				</ProcessDataRefCollection>
+				<MenuCollection>
+					<Menu id="M_OR_Ident">
+						<VariableRef variableId="V_VendorName" />
+						<VariableRef variableId="V_ProductName" />
+						<VariableRef variableId="V_ProductText" />
+						<VariableRef variableId="V_ProductID" />
+						<VariableRef variableId="V_SerialNumber" />
+						<VariableRef variableId="V_HardwareRevision" />
+						<VariableRef variableId="V_FirmwareRevision" />
+						<VariableRef variableId="V_ApplicationSpecificTag" accessRightRestriction="ro" />
+						<VariableRef variableId="V_CP_FunctionTag" accessRightRestriction="ro" />
+						<VariableRef variableId="V_CP_LocationTag" accessRightRestriction="ro" />
+						<VariableRef variableId="V_FU_HW_ID_Key"/>
+					</Menu>
+					<Menu id="M_MSR_Ident">
+						<VariableRef variableId="V_VendorName" />
+						<VariableRef variableId="V_ProductName" />
+						<VariableRef variableId="V_ProductText" />
+						<VariableRef variableId="V_ProductID" />
+						<VariableRef variableId="V_SerialNumber" />
+						<VariableRef variableId="V_HardwareRevision" />
+						<VariableRef variableId="V_FirmwareRevision" />
+						<VariableRef variableId="V_ApplicationSpecificTag" />
+						<VariableRef variableId="V_CP_FunctionTag" />
+						<VariableRef variableId="V_CP_LocationTag" />
+						<VariableRef variableId="V_FU_HW_ID_Key"/>
+					</Menu>
+					<Menu id="M_Parameter">
+						<MenuRef menuId="M_Measurement" />
+						<MenuRef menuId="M_TeachIn" />
+						<MenuRef menuId="M_Pin4" />
+						<MenuRef menuId="M_LED" />
+					</Menu>
+					<Menu id="M_Measurement">
+						<Name textId="TN_M_Measurement" />
+						<VariableRef variableId="V_ValidRange" unitCode="1013" />
+					</Menu>
+					<Menu id="M_TeachIn">
+						<Name textId="TN_M_TeachIn" />
+						<MenuRef menuId="M_TeachInHighLevel" />
+						<MenuRef menuId="M_TeachInLowLevel" />
+						<MenuRef menuId="M_TeachInAdditional0" />
+						<MenuRef menuId="M_TeachInAdditional1" />
+						<MenuRef menuId="M_TeachInAdditional2" />
+						<MenuRef menuId="M_TeachInAdditional3" />
+					</Menu>
+					<Menu id="M_TeachInHighLevel">
+						<Name textId="TN_M_TeachInHighLevel" />
+						<VariableRef variableId="V_ContainerHighLevel" gradient="1" offset="0" unitCode="1342" displayFormat="Dec.0" /> <!-- % -->
+						<VariableRef variableId="V_SystemCommand">
+							<Button buttonValue="165">
+								<Description textId="TD_SystemCommand_StartCalibrationHighLevel" />
+								<ActionStartedMessage textId="TD_SystemCommand_ActionStartedMessage" />
+							</Button>
+						</VariableRef>
+						<VariableRef variableId="V_SensorHighLevel" unitCode="1013" />
+					</Menu>
+					<Menu id="M_TeachInLowLevel">
+						<Name textId="TN_M_TeachInLowLevel" />
+						<VariableRef variableId="V_ContainerLowLevel" gradient="1" offset="0" unitCode="1342" displayFormat="Dec.0" /> <!-- % -->
+						<VariableRef variableId="V_SystemCommand">
+							<Button buttonValue="164">
+								<Description textId="TD_SystemCommand_StartCalibrationLowLevel" />
+								<ActionStartedMessage textId="TD_SystemCommand_ActionStartedMessage" />
+							</Button>
+						</VariableRef>
+						<VariableRef variableId="V_SensorLowLevel" unitCode="1013" />
+					</Menu>
+					<Menu id="M_TeachInAdditional0">
+						<Name textId="TN_M_TeachInAdditional0" />
+						<RecordItemRef variableId="V_AdditionalReference0" subindex="1" unitCode="1342" /> <!-- % -->
+						<VariableRef variableId="V_SystemCommand">
+							<Button buttonValue="167">
+								<Description textId="TD_SystemCommand_SetAdditionalReference0" />
+								<ActionStartedMessage textId="TD_SystemCommand_ActionStartedMessage" />
+							</Button>
+						</VariableRef>
+						<RecordItemRef variableId="V_AdditionalReference0" subindex="2" unitCode="1013" />
+					</Menu>
+					<Menu id="M_TeachInAdditional1">
+						<Name textId="TN_M_TeachInAdditional1" />
+						<RecordItemRef variableId="V_AdditionalReference1" subindex="1" unitCode="1342" /> <!-- % -->
+						<VariableRef variableId="V_SystemCommand">
+							<Button buttonValue="168">
+								<Description textId="TD_SystemCommand_SetAdditionalReference1" />
+								<ActionStartedMessage textId="TD_SystemCommand_ActionStartedMessage" />
+							</Button>
+						</VariableRef>
+						<RecordItemRef variableId="V_AdditionalReference1" subindex="2" unitCode="1013" />
+					</Menu>
+					<Menu id="M_TeachInAdditional2">
+						<Name textId="TN_M_TeachInAdditional2" />
+						<RecordItemRef variableId="V_AdditionalReference2" subindex="1" unitCode="1342" /> <!-- % -->
+						<VariableRef variableId="V_SystemCommand">
+							<Button buttonValue="169">
+								<Description textId="TD_SystemCommand_SetAdditionalReference2" />
+								<ActionStartedMessage textId="TD_SystemCommand_ActionStartedMessage" />
+							</Button>
+						</VariableRef>
+						<RecordItemRef variableId="V_AdditionalReference2" subindex="2" unitCode="1013" />
+					</Menu>
+					<Menu id="M_TeachInAdditional3">
+						<Name textId="TN_M_TeachInAdditional3" />
+						<RecordItemRef variableId="V_AdditionalReference3" subindex="1" unitCode="1342" /> <!-- % -->
+						<VariableRef variableId="V_SystemCommand">
+							<Button buttonValue="170">
+								<Description textId="TD_SystemCommand_SetAdditionalReference3" />
+								<ActionStartedMessage textId="TD_SystemCommand_ActionStartedMessage" />
+							</Button>
+						</VariableRef>
+						<RecordItemRef variableId="V_AdditionalReference3" subindex="2" unitCode="1013" />
+					</Menu>
+					<Menu id="M_Pin4">
+						<Name textId="TN_M_Pin4" />
+						<VariableRef variableId="V_OutputType_Pin4" />
+						<RecordItemRef variableId="V_LevelOutput_Pin4" subindex="1" />
+						<RecordItemRef variableId="V_LevelOutput_Pin4" subindex="2" unitCode="1342" />
+						<RecordItemRef variableId="V_LevelOutput_Pin4" subindex="3" unitCode="1342" />
+						<RecordItemRef variableId="V_LevelOutput_Pin4" subindex="4" unitCode="1056" />						
+					</Menu>
+					<Menu id="M_LED">
+						<Name textId="TN_M_LED" />
+						<VariableRef variableId="V_LEDBrightness" unitCode="1342" />
+					</Menu>
+					<Menu id="M_Observation">
+						<VariableRef variableId="V_SupplyVoltage" gradient="0.001" offset="0" unitCode="1240" displayFormat="Dec.1" /> <!-- V -->
+						<VariableRef variableId="V_SensorTemperature" gradient="0.1" offset="0" unitCode="1001" displayFormat="Dec.1" /> <!-- in °C -->
+					</Menu>
+					<Menu id="M_OMSR_CP_Diag_DeviceStatusInfo">
+						<Name textId="TN_M_CP_Diag_DeviceStatusInfo"/>
+						<VariableRef variableId="V_DeviceStatus"/>
+						<VariableRef variableId="V_DetailedDeviceStatus"/>
+					</Menu>
+					<Menu id="M_ResetFunction">
+						<Name textId="TN_M_ResetFunction"/>
+						<VariableRef variableId="V_SystemCommand">
+							<Button buttonValue="128">
+								<Description textId="TD_STD_SystemCommand_DeviceReset"/>
+							</Button>
+						</VariableRef>
+						<VariableRef variableId="V_SystemCommand">
+							<Button buttonValue="129">
+								<Description textId="TD_STD_SystemCommand_ApplicationReset"/>
+							</Button>
+						</VariableRef>
+						<VariableRef variableId="V_SystemCommand">
+							<Button buttonValue="130">
+								<Description textId="TD_STD_SystemCommand_RestoreFactorySettings"/>
+							</Button>
+						</VariableRef>
+						<VariableRef variableId="V_SystemCommand">
+							<Button buttonValue="131">
+								<Description textId="TD_STD_SystemCommand_BackToBox"/>
+							</Button>
+						</VariableRef>
+					</Menu>
+					<Menu id="M_Diagnosis">
+						<MenuRef menuId="M_ResetFunction" />
+						<MenuRef menuId="M_OMSR_CP_Diag_DeviceStatusInfo" />
+						<VariableRef variableId="V_Errorcode" displayFormat="Hex" />
+						<VariableRef variableId="V_ChargeCode" displayFormat="Hex" />
+					</Menu>
+				</MenuCollection>
+				<ObserverRoleMenuSet>
+					<IdentificationMenu menuId="M_OR_Ident" />
+					<ObservationMenu menuId="M_Observation" />
+				</ObserverRoleMenuSet>
+				<MaintenanceRoleMenuSet>
+					<IdentificationMenu menuId="M_MSR_Ident" />
+					<ObservationMenu menuId="M_Observation" />
+					<DiagnosisMenu menuId="M_Diagnosis" />
+				</MaintenanceRoleMenuSet>
+				<SpecialistRoleMenuSet>
+					<IdentificationMenu menuId="M_MSR_Ident" />
+					<ParameterMenu menuId="M_Parameter" />
+					<ObservationMenu menuId="M_Observation" />
+					<DiagnosisMenu menuId="M_Diagnosis" />
+				</SpecialistRoleMenuSet>
+			</UserInterface>
+		</DeviceFunction>
+	</ProfileBody>
+	<CommNetworkProfile xsi:type="IOLinkCommNetworkProfileT" iolinkRevision="V1.1">
+		<TransportLayers>
+			<PhysicalLayer minCycleTime="14800" sioSupported="true" bitrate="COM2" mSequenceCapability="61">
+				<Connection xsi:type="M12-5ConnectionT">
+					<ProductRef productId="CAS-MQEU-M01" />
+					<Wire1 color="BN" function="L+" />
+					<Wire2 color="WH" function="Other">
+					</Wire2>
+					<Wire3 color="BU" function="L-" />
+					<Wire4 color="BK" function="C/Q" />
+					<Wire5 color="GY" function="NC">
+					</Wire5>
+				</Connection>
+			</PhysicalLayer>
+		</TransportLayers>
+		<Test>
+			<Config1 index="253" testValue="0x74,0x65,0x73,0x74,0x31" />
+			<Config2 index="16383" testValue="0x74,0x65,0x73,0x74,0x32" />
+			<Config3 index="254" testValue="0x2d,0x2d,0x2d,0x2d,0x2d,0x74,0x65,0x73,0x74,0x33,0x2d,0x2d,0x2d,0x2d,0x2d,0x2d" />
+			<Config7 index="16382">
+				<EventTrigger appearValue="170" disappearValue="173"/>
+				<EventTrigger appearValue="186" disappearValue="189"/>
+			</Config7>
+		</Test>
+	</CommNetworkProfile>
+	<ExternalTextCollection>
+		<PrimaryLanguage xml:lang="en">
+			<Text id="TN_DeviceName" value="CALIS Level Sensor"/>
+			<Text id="TN_DeviceFamily" value="CALIS series" />
+			<Text id="TN_VendorText" value="CAPTRON Electronic GmbH" />
+			<Text id="TN_VendorUrl" value="http://www.captron.com" />
+
+			<Text id="TN_Variant_CAS-MQEU-M01" value="CALIS Level Sensor" />
+			<Text id="TD_Variant_CAS-MQEU-M01" value="ToF Level Sensor with M22 flange and M12 connector " />
+
+			<Text id="TN_M_CP_Diag_DeviceStatusInfo" value="Device Status Information" />
+			<Text id="TN_M_LED" value="LED" />
+			<Text id="TN_M_Measurement" value="Measurement Configuration" />
+			<Text id="TN_M_Pin4" value="Pin 4 Configuration" />
+			<Text id="TN_M_ResetFunction" value="Reset" />
+			<Text id="TN_M_TeachIn" value="Container Teach In" />
+			<Text id="TN_M_TeachInAdditional0" value="Additional Reference Point 1" />
+			<Text id="TN_M_TeachInAdditional1" value="Additional Reference Point 2" />
+			<Text id="TN_M_TeachInAdditional2" value="Additional Reference Point 3" />
+			<Text id="TN_M_TeachInAdditional3" value="Additional Reference Point 4" />
+			<Text id="TN_M_TeachInHighLevel" value="High Fill Level" />
+			<Text id="TN_M_TeachInLowLevel" value="Low Fill Level" />
+
+			<Text id="TD_E_Overload" value="Output current too high - max. 200 mA" />
+
+			<Text id="TD_RI_OutputMinImpulseTime" value="Minimum Time the output will keep its state once it has been changed" />
+			<Text id="TD_RI_OutputSetPoint" value="Fill level above which output is set" />
+			<Text id="TD_RI_OutputHysteresis" value="Output is reset when fill level below set point minus this value" />
+
+			<Text id="TD_STD_SystemCommand_ApplicationReset" value="The parameter of the technology-specific application are set to default values. Identification parameter remain unchanged. An upload to the data storage of the master will be executed, if activated in the port configuration of the master."/>
+			<Text id="TD_STD_SystemCommand_BackToBox" value="The parameter of the device are set to factory default values and communication will be inhibited until the next power cycle. Note: Directly detach the device from the master port!"/>
+			<Text id="TD_STD_SystemCommand_DeviceReset" value="A warm start is triggered and the device will be set to an initial state. The communication will be interrupted by the device and then reinitiated by the master."/>
+			<Text id="TD_STD_SystemCommand_RestoreFactorySettings" value="The parameter of the device are reset to factory settings. Note: A download of the data storage may be executed on the next power cycle and overwrite the factory default settings!"/>
+			<Text id="TD_SystemCommand_ActionStartedMessage" value="Done" />
+			<Text id="TD_SystemCommand_SetAdditionalReference0" value="Stores the current distance as additional reference point 1" />
+			<Text id="TD_SystemCommand_SetAdditionalReference1" value="Stores the current distance as additional reference point 2" />
+			<Text id="TD_SystemCommand_SetAdditionalReference2" value="Stores the current distance as additional reference point 3" />
+			<Text id="TD_SystemCommand_SetAdditionalReference3" value="Stores the current distance as additional reference point 4" />
+			<Text id="TD_SystemCommand_StartCalibrationLowLevel" value="Stores the current distance as Low Level reference point"/>
+			<Text id="TD_SystemCommand_StartCalibrationHighLevel" value="Stores the current distance as High Level reference point"/>
+
+			<Text id="TD_V_CP_FunctionTag" value="Possibility to mark a device with function-specific information."/>
+			<Text id="TD_V_CP_LocationTag" value="Possibility to mark a device with location-specific information."/>
+
+			<Text id="TN_E_Overload" value="Output Overload" />
+
+			<Text id="TN_PI_Data" value="Process Data Input" />
+			<Text id="TN_PI_Distance" value="Distance" />
+			<Text id="TN_PI_FillLevel" value="Fill Level" />
+			<Text id="TN_PI_IO_Status_Pin4" value="Pin 4" />
+
+			<Text id="TN_RI_OutputFunction" value="Output Function" />
+			<Text id="TN_RI_OutputMinImpulseTime" value="Output Minimum Impulse Time" />
+			<Text id="TN_RI_OutputSetPoint" value="Output Set Point" />
+			<Text id="TN_RI_OutputHysteresis" value="Output Hysteresis" />
+			<Text id="TN_RI_Reference_Level" value="Level" />
+			<Text id="TN_RI_Reference_Value" value="Distance" />
+
+			<Text id="TN_SV_BootmodeStatus_Inactive" value="Boot loader is inactive"/>
+			<Text id="TN_SV_BootmodeStatus_Active" value="Boot loader is active"/>
+			<Text id="TN_SV_IO_Status_Out_Unset" value="Output - OFF" />
+			<Text id="TN_SV_IO_Status_Out_Set" value="Output - ON" />
+			<Text id="TN_SV_OutputNO" value="NO (Normally Open)" />
+			<Text id="TN_SV_OutputNC" value="NC (Normally Closed)" />
+			<Text id="TN_SV_OutputType_NPN" value="NPN" />
+			<Text id="TN_SV_OutputType_PNP" value="PNP" />
+			<Text id="TN_SV_OutputType_PushPull" value="PushPull" />
+			<Text id="TN_SV_ReferenceNotSet" value="not set" />
+
+			<Text id="TN_SystemCommand_BM_UNLOCK_S" value="Start unlocking sequence"/>
+			<Text id="TN_SystemCommand_BM_UNLOCK_F" value="Unlocking command 1"/>
+			<Text id="TN_SystemCommand_BM_UNLOCK_T" value="Unlocking command 2"/>
+			<Text id="TN_SystemCommand_SetAdditionalReference0" value="Set Additional Reference 1" />
+			<Text id="TN_SystemCommand_SetAdditionalReference1" value="Set Additional Reference 2" />
+			<Text id="TN_SystemCommand_SetAdditionalReference2" value="Set Additional Reference 3" />
+			<Text id="TN_SystemCommand_SetAdditionalReference3" value="Set Additional Reference 4" />
+			<Text id="TN_SystemCommand_StartCalibrationLowLevel" value="Calibrate Low Level"/>
+			<Text id="TN_SystemCommand_StartCalibrationHighLevel" value="Calibrate High Level"/>
+
+			<Text id="TN_V_AdditionalReference0" value="Additional Reference Point 1" />
+			<Text id="TN_V_AdditionalReference1" value="Additional Reference Point 2" />
+			<Text id="TN_V_AdditionalReference2" value="Additional Reference Point 3" />
+			<Text id="TN_V_AdditionalReference3" value="Additional Reference Point 4" />
+			<Text id="TN_V_ChargeCode" value="Charge Code" />
+			<Text id="TN_V_CP_FunctionTag" value="Function Tag"/>
+			<Text id="TN_V_CP_LocationTag" value="Location Tag"/>
+			<Text id="TN_V_ContainerLowLevel" value="Container Low Fill Level" />
+			<Text id="TN_V_ContainerHighLevel" value="Container High Fill Level" />
+			<Text id="TN_V_Errorcode" value="Error Code" />
+			<Text id="TN_V_FU_BootmodeStatus" value="Bootmode status"/>
+			<Text id="TN_V_FU_HW_ID_Key" value="Hardware Identification Key"/>
+			<Text id="TN_V_LEDBrightness" value="LED Brightness" />
+			<Text id="TN_V_LevelOutput_Pin4" value="Pin 4 Output Settings" />
+			<Text id="TN_V_OutputType_Pin4" value="Pin 4 Function" />
+			<Text id="TN_V_SensorHighLevel" value="Distance &quot;High Level&quot;" />
+			<Text id="TN_V_SensorLowLevel" value="Distance &quot;Low Level&quot;" />
+			<Text id="TN_V_SensorTemperature" value="Sensor Temperature" />
+			<Text id="TN_V_SupplyVoltage" value="Supply Voltage" />
+			<Text id="TN_V_ValidRange" value="Overfill warning Distance" />
+		</PrimaryLanguage>
+	</ExternalTextCollection>
+	<Stamp crc="3744248752"><Checker name="IODD-Checker V1.1.11" version="V1.1.11.0"/></Stamp>
+</IODevice>

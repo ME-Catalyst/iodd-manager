@@ -3,17 +3,26 @@ Ticket/Bug Tracking System API Routes
 Handles ticket CRUD operations, comments, and CSV export
 """
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, UploadFile, File
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
 import sqlite3
 import csv
 import io
+import os
+import shutil
+import zipfile
+from pathlib import Path
 
 router = APIRouter(prefix="/api/tickets", tags=["Tickets"])
 
 DB_PATH = "iodd_manager.db"
+ATTACHMENTS_DIR = Path("ticket_attachments")
+
+# Ensure attachments directory exists
+ATTACHMENTS_DIR.mkdir(exist_ok=True)
 
 
 # Pydantic models for request/response
@@ -54,7 +63,7 @@ def generate_ticket_number(conn):
 
 
 def get_ticket_with_details(conn, ticket_id: int):
-    """Get ticket with all comments"""
+    """Get ticket with all comments and attachments"""
     cursor = conn.cursor()
 
     # Get ticket
@@ -79,6 +88,16 @@ def get_ticket_with_details(conn, ticket_id: int):
     """, (ticket_id,))
 
     comments = cursor.fetchall()
+
+    # Get attachments
+    cursor.execute("""
+        SELECT id, filename, file_size, content_type, uploaded_at
+        FROM ticket_attachments
+        WHERE ticket_id = ?
+        ORDER BY uploaded_at DESC
+    """, (ticket_id,))
+
+    attachments = cursor.fetchall()
 
     return {
         'id': ticket[0],
@@ -106,6 +125,15 @@ def get_ticket_with_details(conn, ticket_id: int):
                 'created_at': c[2],
                 'created_by': c[3]
             } for c in comments
+        ],
+        'attachments': [
+            {
+                'id': a[0],
+                'filename': a[1],
+                'file_size': a[2],
+                'content_type': a[3],
+                'uploaded_at': a[4]
+            } for a in attachments
         ]
     }
 
@@ -436,10 +464,283 @@ async def export_tickets_csv(
     conn.close()
 
     # Return CSV as response
-    from fastapi.responses import StreamingResponse
     output.seek(0)
     return StreamingResponse(
         iter([output.getvalue()]),
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=tickets.csv"}
+    )
+
+
+@router.post("/{ticket_id}/attachments")
+async def upload_attachment(ticket_id: int, file: UploadFile = File(...)):
+    """Upload an attachment to a ticket"""
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute("PRAGMA foreign_keys = ON")
+    cursor = conn.cursor()
+
+    # Verify ticket exists
+    cursor.execute("SELECT id FROM tickets WHERE id = ?", (ticket_id,))
+    if not cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=404, detail="Ticket not found")
+
+    # Create ticket-specific directory
+    ticket_dir = ATTACHMENTS_DIR / str(ticket_id)
+    ticket_dir.mkdir(exist_ok=True)
+
+    # Generate safe filename
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    safe_filename = f"{timestamp}_{file.filename}"
+    file_path = ticket_dir / safe_filename
+
+    # Save file
+    try:
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as e:
+        conn.close()
+        raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
+
+    # Get file size
+    file_size = os.path.getsize(file_path)
+
+    # Store in database
+    now = datetime.now().isoformat()
+    cursor.execute("""
+        INSERT INTO ticket_attachments (
+            ticket_id, filename, file_path, file_size, content_type, uploaded_at
+        ) VALUES (?, ?, ?, ?, ?, ?)
+    """, (ticket_id, file.filename, str(file_path), file_size, file.content_type, now))
+
+    attachment_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+
+    return {
+        "id": attachment_id,
+        "ticket_id": ticket_id,
+        "filename": file.filename,
+        "file_size": file_size,
+        "content_type": file.content_type,
+        "uploaded_at": now
+    }
+
+
+@router.get("/{ticket_id}/attachments")
+async def get_attachments(ticket_id: int):
+    """Get all attachments for a ticket"""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT id, filename, file_size, content_type, uploaded_at
+        FROM ticket_attachments
+        WHERE ticket_id = ?
+        ORDER BY uploaded_at DESC
+    """, (ticket_id,))
+
+    attachments = cursor.fetchall()
+    conn.close()
+
+    return [
+        {
+            "id": row[0],
+            "filename": row[1],
+            "file_size": row[2],
+            "content_type": row[3],
+            "uploaded_at": row[4]
+        }
+        for row in attachments
+    ]
+
+
+@router.get("/{ticket_id}/attachments/{attachment_id}/download")
+async def download_attachment(ticket_id: int, attachment_id: int):
+    """Download a specific attachment"""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT filename, file_path, content_type
+        FROM ticket_attachments
+        WHERE id = ? AND ticket_id = ?
+    """, (attachment_id, ticket_id))
+
+    result = cursor.fetchone()
+    conn.close()
+
+    if not result:
+        raise HTTPException(status_code=404, detail="Attachment not found")
+
+    filename, file_path, content_type = result
+
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found on disk")
+
+    return FileResponse(
+        path=file_path,
+        filename=filename,
+        media_type=content_type or "application/octet-stream"
+    )
+
+
+@router.delete("/{ticket_id}/attachments/{attachment_id}")
+async def delete_attachment(ticket_id: int, attachment_id: int):
+    """Delete an attachment"""
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute("PRAGMA foreign_keys = ON")
+    cursor = conn.cursor()
+
+    # Get file path before deleting
+    cursor.execute("""
+        SELECT file_path FROM ticket_attachments
+        WHERE id = ? AND ticket_id = ?
+    """, (attachment_id, ticket_id))
+
+    result = cursor.fetchone()
+    if not result:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Attachment not found")
+
+    file_path = result[0]
+
+    # Delete from database
+    cursor.execute("""
+        DELETE FROM ticket_attachments
+        WHERE id = ? AND ticket_id = ?
+    """, (attachment_id, ticket_id))
+
+    conn.commit()
+    conn.close()
+
+    # Delete file from disk
+    try:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+    except Exception as e:
+        print(f"Warning: Failed to delete file {file_path}: {e}")
+
+    return {"message": "Attachment deleted successfully"}
+
+
+@router.get("/export-with-attachments")
+async def export_tickets_with_attachments(
+    status: Optional[str] = Query(None),
+    priority: Optional[str] = Query(None),
+    device_type: Optional[str] = Query(None),
+    category: Optional[str] = Query(None)
+):
+    """Export tickets as CSV with all attachments in a ZIP file"""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    # Build query with filters
+    query = """
+        SELECT
+            t.ticket_number, t.device_type, t.device_name, t.vendor_name,
+            t.product_code, t.title, t.description, t.eds_reference,
+            t.status, t.priority, t.category, t.created_at, t.updated_at,
+            t.resolved_at, t.id
+        FROM tickets t
+        WHERE 1=1
+    """
+    params = []
+
+    if status:
+        query += " AND t.status = ?"
+        params.append(status)
+    if priority:
+        query += " AND t.priority = ?"
+        params.append(priority)
+    if device_type:
+        query += " AND t.device_type = ?"
+        params.append(device_type)
+    if category:
+        query += " AND t.category = ?"
+        params.append(category)
+
+    query += " ORDER BY t.created_at DESC"
+
+    cursor.execute(query, params)
+    tickets = cursor.fetchall()
+
+    # Create in-memory ZIP file
+    zip_buffer = io.BytesIO()
+
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        # Create CSV
+        csv_output = io.StringIO()
+        writer = csv.writer(csv_output)
+
+        # Write header
+        writer.writerow([
+            'Ticket Number', 'Device Type', 'Device Name', 'Vendor', 'Product Code',
+            'Title', 'Description', 'EDS Reference', 'Status', 'Priority', 'Category',
+            'Created At', 'Updated At', 'Resolved At', 'Comments', 'Attachments'
+        ])
+
+        # Write tickets with comments and attachments
+        for ticket in tickets:
+            ticket_id = ticket[14]
+            ticket_number = ticket[0]
+
+            # Get comments
+            cursor.execute("""
+                SELECT comment_text FROM ticket_comments
+                WHERE ticket_id = ?
+                ORDER BY created_at ASC
+            """, (ticket_id,))
+            comments = cursor.fetchall()
+            all_comments = " | ".join([c[0] for c in comments])
+
+            # Get attachments
+            cursor.execute("""
+                SELECT filename, file_path FROM ticket_attachments
+                WHERE ticket_id = ?
+                ORDER BY uploaded_at ASC
+            """, (ticket_id,))
+            attachments = cursor.fetchall()
+
+            # Add attachments to ZIP with ticket folder structure
+            attachment_names = []
+            for filename, file_path in attachments:
+                if os.path.exists(file_path):
+                    arc_name = f"{ticket_number}/{filename}"
+                    zip_file.write(file_path, arc_name)
+                    attachment_names.append(filename)
+
+            all_attachments = " | ".join(attachment_names)
+
+            writer.writerow([
+                ticket[0],  # ticket_number
+                ticket[1],  # device_type
+                ticket[2],  # device_name
+                ticket[3],  # vendor_name
+                ticket[4],  # product_code
+                ticket[5],  # title
+                ticket[6],  # description
+                ticket[7],  # eds_reference
+                ticket[8],  # status
+                ticket[9],  # priority
+                ticket[10], # category
+                ticket[11], # created_at
+                ticket[12], # updated_at
+                ticket[13], # resolved_at
+                all_comments,
+                all_attachments
+            ])
+
+        # Add CSV to ZIP
+        csv_output.seek(0)
+        zip_file.writestr("tickets.csv", csv_output.getvalue())
+
+    conn.close()
+
+    # Return ZIP file
+    zip_buffer.seek(0)
+    return StreamingResponse(
+        iter([zip_buffer.getvalue()]),
+        media_type="application/zip",
+        headers={"Content-Disposition": "attachment; filename=tickets_with_attachments.zip"}
     )

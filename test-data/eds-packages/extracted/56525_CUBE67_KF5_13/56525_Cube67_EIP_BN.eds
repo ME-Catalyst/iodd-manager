@@ -1,0 +1,697 @@
+$ EZ-EDS Version 3.11 (Beta, May-09, 2012) Generated Electronic Data Sheet
+
+[File]
+        DescText = "EDS for CUBE67+ BN EIP";
+        CreateDate = 10-16-2014;
+        CreateTime = 15:18:44;
+        ModDate = 12-08-2015;
+        ModTime = 16:00:32;
+        Revision = 1.3;                 $ EDS revision.
+        HomeURL = "http://www.murrelektronik.com/";
+
+[Device]
+        VendCode = 640;
+        VendName = "Murrelektronik GmbH";
+        ProdType = 12;
+        ProdTypeStr = "Communications Adapter";
+        ProdCode = 56525;
+        MajRev = 1;
+        MinRev = 1;
+        ProdName = "Cube67+ BN-EIP";
+        Catalog = "56525";
+        Icon = "56525_new.ico";
+        IconContents =
+                "AAABAAEATWcAAAEAGABUYgAAFgAAACgAAABNAAAAzgAAAAEAGAAAAAAAAAAA"
+                "AGAAAABgAAAAAAAAAAAAAAD/////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "//////////////////////////////8A////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////AP//////////////////"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "/////////////////////////////////////////////////wD/////////"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "//////////////////////////////////////////////////////////8A"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "////////AP//////////////////////////////////////////////////"
+                "//////////////////////39/d/g4cTIx8TIyMXIyMfJyc3OztTU1NPT09LS"
+                "0tbY1tna2dXX1dXX1tXZ2dTW1szOzsrMzMrMzMrMzMnMzMnMzMjLysbKysjM"
+                "zM7S0tPX1tLV1dHS0tXW1dXW1NDS0dTW1tjb29PX18vOz8vPz8vPz8vOztnb"
+                "2/j5+f//////////////////////////////////////////////////////"
+                "/////////////////wD/////////////////////////////////////////"
+                "///////////////////////////////5+fmXmZpQU1NSVVVXWFhQUVJYWlp9"
+                "fX2JioqOkZGEiIaBhoKKjoyKjoyKjox6fn5XWltSUlJRUlFOUE9OUE9JT0tR"
+                "WVRQVlFGS0hVW1ltcXB2eXh8f310dnR0eHZ8gH96fHyChIR0d3dQVFVRU1RS"
+                "VVRMTk50dnbo6en/////////////////////////////////////////////"
+                "//////////////////////////8A////////////////////////////////"
+                "////////////////////////////////////////+Pj4k5WVUVNTVVZWW1tb"
+                "SEpKREdGf4KBj5GPVlpYMzg2OD45R0xGdHdxj5KObXJxSExMTExMSElHSEhH"
+                "R0hHQUZCU1xTVFtUOkA7Q0hHa25td3p3REhEKi4qLDIwSU5MfYB+fX9/YGNj"
+                "SExNSkxMTE1NRkhGa21t5ufn////////////////////////////////////"
+                "////////////////////////////////////AP//////////////////////"
+                "//////////////////////////////////////////////////j4+JGTk0xP"
+                "TlFTUldZWXJ0dIKGhomPjUxSTDE1MT5EQEFFQEJFOj9CNn6CeoyPjHt9fV1e"
+                "XkRHRUVJRURHRUFFQkdNSExSTmVpaHV4dn2AfD1BOywvKTs/PDE2MyswKkVJ"
+                "Q3yAfHZ5eHJ0dFVXV0lKSkVHRmhqauXm5v//////////////////////////"
+                "/////////////////////////////////////////////wD/////////////"
+                "///////////////////////////////////////////////////////////6"
+                "+/uho6JER0VCRENPUlKHiomZnpt7gns5QDlDSENITUpDR0VMTkdCRjhkaVmY"
+                "m5WSlJNjZWY6PTs5PDg4Ozk3OjkzNzVHTEp5fXyPkI9tcWktNCk2OzY4PDs0"
+                "OTg3PDczNzBdYVqEhoSDg4RXWVk1NzcxMjN3eHns7e3/////////////////"
+                "//////////////////////////////////////////////////////8A////"
+                "////////////////////////////////////////////////////////////"
+                "/////////Pz8uLq6W1xaV1hXZmholJiXnaOdcXhuPUM6SU5LRktKQUVFRkpJ"
+                "REk5V1xGmJuSmJqbcnR1T1BPS0xLRkhIRUZGREVFW19egISEk5aTZGldICYY"
+                "LDEvNDg7NDk4MjYzNDgxSUxEfX57ioqLZGZmRUZHQkFDnZ6f9vb2////////"
+                "////////////////////////////////////////////////////////////"
+                "////AP//////////////////////////////////////////////////////"
+                "//////////////////z8/LO1tVpaWllZWmBiY4SIiZabmX+FekFHO0pOSERJ"
+                "R0VJSktQT0BGOVNYRpiclZaamm5yc1VXV1BSUkxOTktMTEtNTVteXXp+fYyP"
+                "i2twYC4zITM3Mzc6PjQ3N0FEPTo+M0RHPnp9eYCCgmBjYkxOTkdISZiamvT0"
+                "9P//////////////////////////////////////////////////////////"
+                "/////////////wD/////////////////////////////////////////////"
+                "///////////////////////////4+fmVmJdOTk5RUVJPUlJKUU9udnGSmI9N"
+                "UkU+QjU5PjQ1OjFBRjwzOCpxeGp+iIBQWVVFSklITktCSUVCRkVERkZGR0dE"
+                "RkZKUE5rdG18g3M+QS8uMiY8Pzg2ODA5PC4zOCpcYFhcYlw8Qz5CRkRERkQ9"
+                "Pz9ucHDo6en/////////////////////////////////////////////////"
+                "//////////////////////8A////////////////////////////////////"
+                "////////////////////////////////////+Pj4k5aUUlNSVlZWU1hWSlRO"
+                "ZHFnhI2Ff4Z4UldDMzgiLTMdQ0cybXJkiZKJbXxzRE9JRElHWGJaWmVbSU5L"
+                "SkxMSUtLRUdHQ0xIYG9leIF3cnZoRkgzMDIbMDEcOT4pVFpLZ2xmSVJMOkU8"
+                "QEZBRkdGQEFCaGpq5ebm////////////////////////////////////////"
+                "////////////////////////////////AP//////////////////////////"
+                "//////////////////////////////////////////////j4+JOWlVJTUlVW"
+                "VlVXV0pQTTxDP1VaV42Si46Shnl9cHR3aoiLfp2gmXd+ez9IRD1DQUxRTl1p"
+                "Xmh0alFXU05SUUpOTUZJSDxDQDhBOk9VT3l9dXh6bmBjVVlcT2ptYYGEfF5i"
+                "XyswLTQ6NkFCQERGRD5AQGdpaebm5v//////////////////////////////"
+                "/////////////////////////////////////////wD/////////////////"
+                "///////////////////////////////////////////////////////3+PiT"
+                "lZVQUlJSVFRcXV5+gICJi4uTlZWmqKisrq2sr6ysrqysrq2mqKeho6OXl5h+"
+                "fn5bXlxQWFFDTUUzODY5PTxDSEZMT01xc3J5e3uHiYiWmJacnZ2dn52bnpya"
+                "nJmdn52Mj45ydXRtbm1NTk1BQ0I9Pz9maGjl5ub/////////////////////"
+                "//////////////////////////////////////////////////8A////////"
+                "////////////////////////////////////////////////////////////"
+                "////9/j4k5SUUlJSTU1Nc3V13N3d+Pj49/j4+vv7////+/389/n4/f7+////"
+                "////+/v78fHxlZiXMTQyERQSDA8NDxIQIiUjYmZl4OLh9vb29PX18/X08/b1"
+                "8/b18vX08vXz8PLx8fTz9Pb26+zsd3l5Ojw8PT4+ZWdn5ebm////////////"
+                "////////////////////////////////////////////////////////////"
+                "AP//////////////////////////////////////////////////////////"
+                "//////////////j4+JOVllFTU0xOTnN1deDh4fz7/Pj6+/j6+vj6+vj6+fj7"
+                "+vj6+/n6+vj6+vz8/Pn5+YmNjBgaGBISERQXFBUXFBUXFVdaWeXn5vf6+vL2"
+                "9PH19PL29fL29PH29PL29O/08u7z8fH18+ns63Z5eDo7Ozw8PGNlZOXm5v//"
+                "////////////////////////////////////////////////////////////"
+                "/////////wD/////////////////////////////////////////////////"
+                "///////////////////////4+PiUlpZPUVFLTU1xdXXe4OD6+/z4+fv4+fv4"
+                "+fn4+fn4+fn4+fr4+fr5+vr8/f34+fmAhYQWGRcbHBodHhscHRkeHxtXWVjl"
+                "5ub3+/vx9vTw9fPw9fTw9fPv9PLu9PPv9PPu8/Hw9PPo6+p1eHc4Ojk7Ozli"
+                "ZGTl5ub/////////////////////////////////////////////////////"
+                "//////////////////8A////////////////////////////////////////"
+                "////////////////////////////////+Pj4lJWUUFFQTE9NdHh33+Pi/f//"
+                "+/7++/7+/P///P///P///P//+////P///f//+fr6i4+PICIhJCQiLSwoJSUg"
+                "IiIeYWRi6Onp+/7++Pz79/z79/389/379/379vz69vz69fv59fr57O3teHp6"
+                "ODo5OTw6YWRi5eXl////////////////////////////////////////////"
+                "////////////////////////////AP//////////////////////////////"
+                "//////////////////////////////////////////r6+qKjoklKSEFDQVxg"
+                "Xquvrr/DxLzCwb3CwLe8urW5uLa7uLm+vcTJyMjNzMzOz8rMzHt9fTEyMSgn"
+                "JS0tKSwrKDEwLlZZV6uvrsvOzb7Dwq2zsqWqqaOqqKWrqKiurK60sa60srS6"
+                "uLS3t1xfXzI0My4yMG9ycerr6///////////////////////////////////"
+                "/////////////////////////////////////wD/////////////////////"
+                "///////////////////////////////////////////////////7+/uoqalN"
+                "UE5LTkxPUlBQUlFWWFhfYmJgZGNVWVVVWVVXWlZXWlZkaWdobG1jZmZYWlpM"
+                "T05HSEZAPz45Ojg/Pz1HSEVHSkdFSUdUWVhbYF5QVVNBRkJARUJARUFBRkJN"
+                "UU9OUlBKTUw/QUE5PDo5PDswMjJ/gYHu7+//////////////////////////"
+                "//////////////////////////////////////////////8A////////////"
+                "////////////////////////////////////////////////////////////"
+                "+Pj4k5SUT1FPUlRRVVhWTVFQVllYe318hYiGg4iDb3RrbHFneH52hYmFiI2L"
+                "cHZ1S1FPTVBOUFJRTlBPT1FOTFFLTVVMS1FMQUZEUFVUc3d1f4N/c3dxW2BY"
+                "WmBXbXJsd3t4eXx5XmBfPD8+PUE/P0FANjc1YmRj5ebm////////////////"
+                "////////////////////////////////////////////////////////AP//"
+                "////////////////////////////////////////////////////////////"
+                "//////////j4+JOUlFFSUFdYVlZZWFBUU1tdXYKEgXZ5dTpAOSszKTQ9MDY9"
+                "MVddU4eOh3V7eVFXVVFUUk1QT0tNTUlOSkdPR15oXlVcV0hNTF1iYoGFgGtv"
+                "ZzE2LSguJCwyJzM6MFpfWnN3dE9SUT1BQEBDQj9BPzk6OGJkY+Xm5v//////"
+                "////////////////////////////////////////////////////////////"
+                "/////wD/////////////////////////////////////////////////////"
+                "///////////////////5+fmSlZNFSEZFSEZNTk53eXmMj41/g31ART05PjQ+"
+                "RT8+RD1HTT44Pi1udGeSl5KGioleY2BCRURBQ0NARUJAR0FOVU9PVlN2fHuO"
+                "k5B3fXI0OSsxNi49QTw0ODMzNywyNyxbYFtwc3JrbW1ISkk3OTgxMTFkZmbm"
+                "6Oj/////////////////////////////////////////////////////////"
+                "//////////////8A////////////////////////////////////////////"
+                "/////////////////////////////Pz8sLOxREZEPUA+UFNRhoiIkZWRcnht"
+                "O0E1Q0dAQEZDPUJAP0U7PkYzWmJOkpaOjpKRY2hnPT8/PD49PD8+O0A8Nz04"
+                "TVNQh4yLlZqWYWZYLDEfMjYvODs6ODo5ODs0NzsySU9Idnp2d3p4Sk1LMjQy"
+                "LCwsioyL8/Pz////////////////////////////////////////////////"
+                "////////////////////////AP//////////////////////////////////"
+                "//////////////////////////////////////39/cTGxl9gX1laWGdraZGU"
+                "k5aalGtzZDk/M0dNSEBGRjpAQUBGRT1ENFBXQIuRh5GXlnF2dVVYVlNWVFVW"
+                "V1RXVlNXVGVqaI+Uk5ecmGBlVScrGC0yLDU6Ojc5OjM3NDI2MEVKQXd8dX6B"
+                "flhbWUFDQTk7OaOlpPj5+f//////////////////////////////////////"
+                "/////////////////////////////////wD/////////////////////////"
+                "///////////////////////////////////////////////7/PyusLBXWVlW"
+                "WFhcX15zd3aGjYd4f3Q8RDZDST8/REFBRkZES0Y6QjJVXEmGi4R5fn1kaWhU"
+                "WlhVWFZXWVlXWFlYWVlbX194fX2Nk49obl00OiU1OzE1OTkxNTU8QDg3OzBU"
+                "WVF2e3Zna2lOUU9CRUM4OTmOkJDz8/P/////////////////////////////"
+                "//////////////////////////////////////////8A////////////////"
+                "////////////////////////////////////////////////////////9/j4"
+                "j5GRSkxMTlBQTVBQRU1KanRtiI+IT1RIO0AvMjcqLzUqPkQ2OUAycXhsdH12"
+                "Q0tIQ0hGVF9VUVxSSU1LTExMTU9OSE1LSlNPc352foZ3REo2MjcoNzwxMjgu"
+                "MzgsQkc7cHZvVl5YNz45Oj47PT8+MTMzY2Vl5ufn////////////////////"
+                "////////////////////////////////////////////////////AP//////"
+                "////////////////////////////////////////////////////////////"
+                "//////f394+RkU1NTVFQUVFVVE1YT1pnXG93cHuBdVRaSD1DLTxCKk9UP3h+"
+                "coCIgl5tY0NPR0dOSWR1Y2R4Y0pSS05PT09RUEtQTkxXUFdoXXB7cnV5b1BT"
+                "QTk/KTc9KkVKPGxwaGluaUhTSj1JPz1BPD8/PTQ2M2FkY+Xm5v//////////"
+                "////////////////////////////////////////////////////////////"
+                "/wD/////////////////////////////////////////////////////////"
+                "///////////////29/ePkZBMTUtPUE9QU1FGTEg2PThNU1CEh4KEhn9ydmxw"
+                "dWqChXyQlI9xdnQ4Pzs7Qj5HTEhRXFBRXlBKUUtOUE9NUE5LTkw/RUEvODNV"
+                "XFp/g4B2enFpa2Foa2F2eXGEhoNeYF0tMi0wNzE6Pjs8PTwzMzJjZWXm5+f/"
+                "////////////////////////////////////////////////////////////"
+                "//////////8A////////////////////////////////////////////////"
+                "////////////////////////9vf2jpGPTE5NS01LX2JgoqSjtLW1ub27v8PC"
+                "w8XFwsXGw8bGxMbGwcPEvsDAtba2qauqa25sSExJTVFOT1NQTlFPSUxKZ2lo"
+                "qKqqrK6vtLe3ur69u769vL69u728ubu7ury7sLOypKelkpWTSk1MOTo6MjMy"
+                "YmVl5ufn////////////////////////////////////////////////////"
+                "////////////////////AP//////////////////////////////////////"
+                "//////////////////////////////////X394+SkE1QTkVKSXF0dODh4fv8"
+                "/Pz9/fr8/Pz+/vv9/f7///z9/fz9/f7+/vz8/PX29Y+TkEhLSU5QTkxOTk1O"
+                "TUdJSIOGhe7v7vv8/Pr8/P3+/v3+/vz+/vn7+/n8+/n7+/f6+fr8++Tm5V1i"
+                "YDM3NS8yMGFkZObn5///////////////////////////////////////////"
+                "/////////////////////////////wD/////////////////////////////"
+                "///////////////////////////////////////////19vaPkZBMT05ESEdt"
+                "cHDj5OT5+/v0+fj0+fj0+fj6/Pz1+fj2+vn7/fz2+fn6/Pvy9fSKj45HSUhK"
+                "TEtMTk5MTk1GSEeChoXu8PD3+vr2+Pf0+Pf0+Pfz+Pfx9/bz9/by9/bv9vPz"
+                "+Pbe4eBaX1wzNzUvMTBiZGTm5+f/////////////////////////////////"
+                "//////////////////////////////////////8A////////////////////"
+                "////////////////////////////////////////////////////9fb2jpCP"
+                "TE9NRUhGbW9v4OHh+fz89/v69/v69/v6+vz89Pr49Pn49Pr49Pn4+/z88/b1"
+                "i5CPREdHR0lKSkxMSkxMRUhIgoaG7/Hw9/v69vr59fn49vn59Pn48/j38vf2"
+                "8fb18Pf08/n33+HhW19dNDc2LzIxYmRk5ufn////////////////////////"
+                "////////////////////////////////////////////////AP//////////"
+                "////////////////////////////////////////////////////////////"
+                "//b29o2Pj0lLSUNFQ2ptbdjc2/j6+vb4+PP19fL19fL09PH08/Hz8/P19fP1"
+                "9fT39+7x8IqPjkFEREdISEdIR0hKSENFRX6Dgujr6vj7+/T39/L19PDz8vDz"
+                "8vHz8/H08/L19PH09PP29d3f3ltgXjU4NjEyMWJkZObn5///////////////"
+                "/////////////////////////////////////////////////////////wD/"
+                "////////////////////////////////////////////////////////////"
+                "///////////6+/ulp6dHSEdBQkFRVFOEiIejqKaanpyLj42AhIN9gYB+goF/"
+                "g4KNkZCQlJOTl5aNkpFbX188Pj8/QUFCREJCQ0E+QD9WWlmOk5KmqqmUmZmG"
+                "jIt5fXt4fHt5fX18gICGioqGiomLj42AhYNCRkUzNjQrLiyChIPw8fH/////"
+                "////////////////////////////////////////////////////////////"
+                "//////8A////////////////////////////////////////////////////"
+                "////////////////////9/n5mJubSkxLTE1MSk1LREdFQ0ZEQ0dFQURCODo5"
+                "Nzg4Njc3Njg3P0JAQURCQURCPkE/REdFR0lISElJS0xKS0xJSktKSEpIQURC"
+                "QkVDP0JBOj09MTM0MDIxLjEwMTMyNzk5Nzo5ODo4Nzo4Ozw9Ojw7MDMxenx8"
+                "7e7u////////////////////////////////////////////////////////"
+                "////////////////AP//////////////////////////////////////////"
+                "//////////////////////////////T394mMjEdKSEpMSkpOTEpNS0pNS01Q"
+                "Tk9SUE1QTk9RT01OTUtNTkpNTEpMSktMSkpLSUtMSkpNS0xQTUtNTUtMS0xP"
+                "TU1QTU1QTEdLR0VIR0hKSUpMS0lMSkZJR0dKSERGRkJFRUBDQT0/PTs9PDo8"
+                "OjEyMWJkZObn5///////////////////////////////////////////////"
+                "/////////////////////////wD/////////////////////////////////"
+                "///////////////////////////////////////09veLjY5IS0lKTUtLTkxK"
+                "TUtLTkxOUU9JTEpER0VMT01FSEdCRERJS0pIS0lJSkhLTEpHSEZHSUdJTEpD"
+                "RERISkpIS0pDRkJITEdGS0ZFR0RIS0lFR0ZCRUNHSkhDRUQ/Q0FBRUQ/QkA9"
+                "QD46PTs6PDozMzJmaGfn5+f/////////////////////////////////////"
+                "//////////////////////////////////8A////////////////////////"
+                "////////////////////////////////////////////////9ff3jI6OR0pI"
+                "Sk1KTE9NTE5MTE1LT1BOSEpJQEJCTk9ORUdFQEFBSEpJSExJS09KS05KQ0ZE"
+                "RUdFSElHP0FBR0pJSEtJP0I/REhGRklHSUpHSktJQUJAPD48RkhFPD48Oj48"
+                "PkRBPUE+PUA+PD89PD48MjUzZmhn5+fn////////////////////////////"
+                "////////////////////////////////////////////AP//////////////"
+                "//////////////////////////////////////////////////////////X3"
+                "94uNjUhLSUtOTEtOTExOTE1OTE1PTU5QUE1PUE1PTk9SUExOTklMS0tOS05R"
+                "Tk5QTUtPTUtNS0xPTUpNS0lMS0tOTExOTEhKR0dLSUpMSUdMRUlSSUxUTEdN"
+                "RklSSUhRSEBFQUBCQUBBQD5BPz1APjM2NGhraufp6f//////////////////"
+                "/////////////////////////////////////////////////////wD/////"
+                "////////////////////////////////////////////////////////////"
+                "///////39/eMjY5ER0VGSUdGSUZFR0VHSEZHSUdHS0lDSUdCRkRER0VCRERC"
+                "RUNER0VHR0ZFRkRER0VGSUdFSEZER0VDRkRERkVCREJAQ0FCRkRDREI/R0BO"
+                "XlBSXlJDTEJQXlBKVkk7QDs9Pj07PTw8Pzw6PTsxNDJpa2vo6en/////////"
+                "////////////////////////////////////////////////////////////"
+                "//8A////////////////////////////////////////////////////////"
+                "////////////////+/v7qaqqRkZGQkNDSEpKWFpaXmFgXmFfXmBfSk1NREdF"
+                "RUhGSElIVlhXWVxaV1lXU1VTREdFQENBP0FBQURCQ0ZEQUNBREdGVFZWVlhX"
+                "VFVVSlBNOUI9NT45NDo3O0I8RUtGRUdFQkVDPUA+Nzs4NDk3LTAtjY+P8/T0"
+                "////////////////////////////////////////////////////////////"
+                "////////////AP//////////////////////////////////////////////"
+                "//////////////////////////j4+JSXlkxNTUZHR21vb9TV1e7u7uzu7ezu"
+                "7enq6ufq6efq6Ojp6ejq6ufq6enr6t3g3n6CgENGRUVIR0VIRkZJR0JFRHZ5"
+                "et7g4Ojq6uXo5+Dl5Nvg39rf3tjb3NbZ2djb29nc2tjb2sHEw1ZaWTg6OTI1"
+                "M3l7e+3u7v//////////////////////////////////////////////////"
+                "/////////////////////wD/////////////////////////////////////"
+                "///////////////////////////////////09/aJjYxJS0tER0ZydnXi5OT+"
+                "///+///9/v79/f3+///+///+///9/v79//7////x9POHjIpBR0VDR0VDRkRE"
+                "RkVAQ0N/g4Pv8PD6/f34/Pv4/Pv6/Pz6/f34+/v4+/v4+/v4+/v8/f3k5eVf"
+                "YWE0NjYuMDBmaGjn6Oj/////////////////////////////////////////"
+                "//////////////////////////////8A////////////////////////////"
+                "////////////////////////////////////////////9Pf3i46OSkxLQ0dG"
+                "cXZ14ePj/v7+/////Pz8+Pn59/n59vn59fn49vn59Pj3+fv77vHxg4eGQkZE"
+                "SExKSUxKSUxKQEJBfYKB7fDw9Pn48vf18vf18fb18fb08PXz7/Xz7/Xz7/Tz"
+                "9fn34OHhW15cNTc2LjAwaWxs6Onp////////////////////////////////"
+                "////////////////////////////////////////AP//////////////////"
+                "//////////////////////////////////////////////////////X394yO"
+                "jkpLSkNGRHJ3dePm5v7+/v3+/vr9/fv8/Pv8/Pr8/Pr8/Pn8/Pr8/Pz9/fH0"
+                "84WKiUNHRkxPTVBTUU5RT0FEQoGGhPDy8vv9/ff7+fb6+fX5+fr8/Pz9/ff6"
+                "+ff6+fT49/f7+uDi4VhbWTM2NS4wMGttbejq6v//////////////////////"
+                "/////////////////////////////////////////////////wD/////////"
+                "////////////////////////////////////////////////////////////"
+                "///39/eMj45IS0lESENlame9wsDc4N7X3drT2dXW29jV2tbW29jX29jX3NnT"
+                "1tXT1tXIy8tyd3U4PDo1ODY0ODcxNjQxNjVobWvBxMLS1NPP0tHT19XS19XV"
+                "29jV3NjU3NjW3trZ3tvc39zEyMRQVFEzNzQtMC1sb27p6ur/////////////"
+                "//////////////////////////////////////////////////////////8A"
+                "////////////////////////////////////////////////////////////"
+                "////////////9/j4jI+PR0tIR01HUlxTZnNncYNzcIRxbYFvaX5ra31sYnRj"
+                "cIJvZ3NpeH97oqamoKSjkZWVgoaFeHx7d3x7dXl4fYGAhomIkJOSnZ6dgIOC"
+                "Vl5XXWxfX3BgZHZlZnpoZHlmZXZlYW9gXGlbTFpMRlRGNUA2bXJu6erq////"
+                "////////////////////////////////////////////////////////////"
+                "////////AP//////////////////////////////////////////////////"
+                "//////////////////////f4+IyQkEZJSEVLRU5aTllsWlJpUlNrUVZwVVNs"
+                "U1duV0xjS1dvVktaTJqgne3v7/P19PX4+Pb6+ff6+vf6+vb5+ff4+Pf4+PT1"
+                "9fPz87/Bv0tTSkpbSUheRkdeRUpgSEdeRkZdRj1QPT5PPkZZRkZYRTlHOmxz"
+                "b+nq6v//////////////////////////////////////////////////////"
+                "/////////////////wD/////////////////////////////////////////"
+                "///////////////////////////////3+PiNj49GR0ZHSkdFTEZFTEVFTURD"
+                "TEJCS0BDTEFGTkVFTURGUEZASEKdo6H29/f4+/v1+fj0+Pf0+Pf0+Pf0+Pf0"
+                "+Pfz9/b09/f5+vrJy8tPU1A9Qzw9RT07RTw7Qzs6Qjo3QDk4Pzk3Pjg2PTY2"
+                "PTYrMSxwc3Hq6+v/////////////////////////////////////////////"
+                "//////////////////////////8A////////////////////////////////"
+                "////////////////////////////////////////+Pj4jY+ORUVFR0hHR0pI"
+                "SEhISUpJSkpJSEhGSElHSUlJS0tLTE1MQUZEnaKh9vj49Pf38PX08PX08/f2"
+                "7/Tz7/Tz8PX08PX08fT0+/z8ysvLUFBQQ0FBRkRDQ0NDQkJCQEBAOzs7Ozw6"
+                "PT08Ozw6OTo5Li4udHV16+zs////////////////////////////////////"
+                "////////////////////////////////////AP//////////////////////"
+                "//////////////////////////////////////////////////j4+I2PjUVG"
+                "REhKSEhMSklLSUpLSUtMSklKSEpKSEdJRkZJR0lKSEJEQ6Gmpff5+Pv7+/n6"
+                "+vn6+vv7+/n6+vj5+fn7+vn6+vr7+/v8/MfJyU1OT0JBQENEQUFCQEBBP0BB"
+                "Pz0+PDw9Oz0+PDs9PTk6OjAvL3Z3d+zs7P//////////////////////////"
+                "/////////////////////////////////////////////wD/////////////"
+                "///////////////////////////////////////////////////////////4"
+                "+PiPkI9ERUNGR0VJS0lHSUdISkhHSEZFRkVISEhGSEdCRUNCQkI9Pj5pbWub"
+                "nZyipaSTmJaRlJSTlZWTlpWTlpaVmZiXnZudoZ+jpaSEiIdOUlBDRkRBQ0E+"
+                "QT89Pz4+QD87Pj06PDo8PTs5Ozk4OjkuMC91d3fs7Oz/////////////////"
+                "//////////////////////////////////////////////////////8A////"
+                "////////////////////////////////////////////////////////////"
+                "////////+Pj4j4+PQUJAQ0VCRkdEREZFQkVDR0hGRUZFP0BANjk3MjUzNTc3"
+                "Njg4MTMyMzQzNDc2NDg2Njk4Njg4NTc3Njc3ODo5OTw6OT07S1BOYWZkTlJQ"
+                "NTg2LS8uKCwqKy0tMzU1PUA/PD8+ODk3Njk3ODo4Ky4sc3Z16+zs////////"
+                "////////////////////////////////////////////////////////////"
+                "////AP//////////////////////////////////////////////////////"
+                "//////////////////j4+IyPjUBDQUJFQ0JFQ0JDQ0hHSEFEQjw/Pjk7OzU3"
+                "NjE0MzI0NDg6Ojo+PTo9PTU4NzY5Nzs8Ojw+Ozo9Oz0+PEBBPj4/PUlMSlNY"
+                "VzU6ORsdHRUWFRQVFRUXFxYVFxYWFyAjIjM4Njs+PDc4ODY4NywvLnZ4d+zt"
+                "7f//////////////////////////////////////////////////////////"
+                "/////////////wD/////////////////////////////////////////////"
+                "///////////////////////////4+PiMjo4/QkFCRUNCRUNHSUlFRkY+QD43"
+                "OTgzNjUyNjUwNDIwMjIxNTQ9Q0FLUE9IS0o2OTc3ODc9Pj0+QD5AQT4/QD1A"
+                "QkBHS0otMDARFBQXGRklJiYqLCwpLCokJSUdHR4SExQVFxctLy45OzsyNDMq"
+                "LCt3eXjs7u7/////////////////////////////////////////////////"
+                "//////////////////////8A////////////////////////////////////"
+                "////////////////////////////////////+Pj4i4yMP0FBQURBTlFPV1lY"
+                "R0lJNDc1Ky8vJyssJSorIygoJSkqLDEwLTIwQEZFS1BPODw6MDEwOTg4PD07"
+                "PD07OTo5P0JCMzc2GRoaHR8fKSstMjg7P0RFRUlIPEFDLDEzIiMjFBYWExYW"
+                "Ki8uNTg3KCspdXd37O3t////////////////////////////////////////"
+                "////////////////////////////////AP//////////////////////////"
+                "//////////////////////////////////////////////n6+pKVlTEyMTY5"
+                "NlxgX19iYjY5NywvLh8oKigzOCgvMy01Ny06PR4nKSsuLi4xMT9EQzA0MyUm"
+                "JSYmJiYpJyYoJi8yMDc5ORweHhocHCstLDlAQ0dUYE9aY1NaXUlXYUNQWTY6"
+                "PCAhIRIUFBocHC0wLyIkJIeJifPz8///////////////////////////////"
+                "/////////////////////////////////////////wD/////////////////"
+                "///////////////////////////////////////////////////////8/Pyv"
+                "sLA2NzY4OjhZXFxER0YzNTMwNTMwOzxRX2M7RUc+R0lGVFcfKSolKSkvMDA4"
+                "Ozs0OTgeISEgISEhJCIhJCIxNDInKikUFhYiIyM7PTxWXmJoeIZmdH9PWF1a"
+                "anZicnxSWFgwMzEVFxgXGRknKikqLS2rrq78/f3/////////////////////"
+                "//////////////////////////////////////////////////8A////////"
+                "////////////////////////////////////////////////////////////"
+                "/////f39vb29QEJAOz49S05ONTk4LDAvKjEyPEZHQElMP0dIPUVGLzY4LjM1"
+                "Njo7OTo6Njc3PD8/HyIiHyEhJiYkKCkoNjg4IiclFhoYJygoPD08T1VYYm53"
+                "Y252UFhbVWJrWmhwS1VVPkNCHB4eExUVICIiLjMysLOy+vv7////////////"
+                "////////////////////////////////////////////////////////////"
+                "AP//////////////////////////////////////////////////////////"
+                "//////////////39/b/BwEVGRTs+PUZJSTM3NiMpKjVESllmbUhRVUpRU1BY"
+                "V0pQT0FGRlBVVEtNTTQ2NjxBQSIlJSEhISkqKSstLT9CQzY8OxcaGisrKzc5"
+                "OElNT1FZXE9XV1BVVUpQVEVUX0Zca0BNVCAiIRIUExwfHjI2NamsrPb29v//"
+                "////////////////////////////////////////////////////////////"
+                "/////////wD/////////////////////////////////////////////////"
+                "///////////////////////8/f29v79MTUw/QUBJTUw0NjYpLjAsO0E+TVRB"
+                "S1BLUlVLU1RASko8QkI+QkE8Pz41OTg+QkEkJSQlJiMwMC4xMjFARURBRUQY"
+                "GhopKys8Pz9NUFJRVlhNUlNOU1JJTlBQXWdZbYJGU10dIR8RExMeIiEyNza6"
+                "vr3+////////////////////////////////////////////////////////"
+                "//////////////////8A////////////////////////////////////////"
+                "/////////////////////////////////Pz8srS0UVNRQENCRkpKNTg5LzIz"
+                "LDMzLjk8RFBVRE1RRE5RQU9ULTU4KSwqMTQyODs5Oz09ICIgKispNTYzODk4"
+                "Nzk5KCoqFRcXJScnOTs7S1BSTVddS1RXS1JSRlBURE5VTVNZPkNFFxsbEhYW"
+                "JCkoLjMyrK+v+/z8////////////////////////////////////////////"
+                "////////////////////////////AP//////////////////////////////"
+                "//////////////////////////////////////////n5+ZOWlERGRDxAPT1C"
+                "QT5BQTEyMzAzMjA2OU1XXDU8PjY9P0hTVyQrLi8xMTg6OUBDQjI2NRweHSYn"
+                "JS4wLTAyMTIzMyEiIhMUFB0fHjg7OlFYWlppdWJud05XWlRmcVlnc0dKSy8w"
+                "MBASEx4jIjA1NCUqKYaKifLz8///////////////////////////////////"
+                "/////////////////////////////////////wD/////////////////////"
+                "///////////////////////////////////////////////////4+PiIjIo+"
+                "Qj0+QT02Ojg8Pz44OTkvMzIsMjMkKy8kKSorMDAlKywnLS0yNTQ9Pz9FSUkl"
+                "KigeIR8nKCYrLiwwMS8wMS8qKioXFxcUFhUjJiQ3PkJLWGZaZ3BLVFhGV2ZH"
+                "V2Y0ODoYGRkTFRUqLi0xNjUjKCd7f3/v8PD/////////////////////////"
+                "//////////////////////////////////////////////8A////////////"
+                "////////////////////////////////////////////////////////////"
+                "+Pj4jY2MQUNAQURBOj07MjUzNzk4NTc3NTk4Mjc4MjU1NTc2MjU0Mzg2O0A+"
+                "QkZFMTU0HyIhJiknLC8sMDMxMTMxLS8tKy4sJCYmGBoaFRYWGx8hJiwwNjs/"
+                "PEBCLjc6ICgsFxoaExUVIyYmLTExMDY1KCwsgYSE8PHx////////////////"
+                "////////////////////////////////////////////////////////AP//"
+                "////////////////////////////////////////////////////////////"
+                "//////////j4+I+Pj0NEQ0JFQ0FEQjo9Oi4xLywuLS8yMTo7Oz0+Pjg6Ojc5"
+                "ODc7OjM4NiQpKB0gHyYnKC4wLjAyMDI1MzI1My8yMCouKyotKyYoKRkbHBMV"
+                "FRUWFhYYGBYZGRQWFhETExYYGCQmJiwvLy4yMSswLycsK4SGhvHx8f//////"
+                "////////////////////////////////////////////////////////////"
+                "/////wD/////////////////////////////////////////////////////"
+                "///////////////////4+PiNj49CRURER0ZGSUdESEQ7PjwuMS8lJyUlJSQm"
+                "JyckJycjJSUhJSUeIyIiJSUrLCwxMTA0NTM1NzQyNTMzNTM0NTMtMC4oKyon"
+                "KSknKSkeICAWFxcUFxYTGBcWGBgcHh4kJiYpKysvMDAtMjAwNTQrMC6FiIfx"
+                "8fH/////////////////////////////////////////////////////////"
+                "//////////////8A////////////////////////////////////////////"
+                "////////////////////////////+Pj4jY6OQ0RERkdGR0lGRkdFQ0RCPkA+"
+                "Njc2Li4tJyooJScnJCYmJiknKCwqMDAwNTY1Nzg2ODk3OTo4Njg2NDY0NTY0"
+                "MzQyLS4tKSsrJykpJCUlICEhHB4eHSAfICIiIyUkJCclJignKCoqMDQzNjk4"
+                "LjMyhYmI8PHx////////////////////////////////////////////////"
+                "////////////////////////AP//////////////////////////////////"
+                "//////////////////////////////////////j4+IyNjURFREVGRUVGREdI"
+                "RkhJRkVGRD9BPzs9OzY5NzI1MzI0NDI1NDQ2NDY2NTU2NDU2NDU1NDQ0MzMz"
+                "MjIzMTEyMDEzMC0wLSgqKiMlJSAiIR4fHxwdHRocHBsdHR4gHyAkIiMlJCgp"
+                "KjEzMzg7OzM3NoeLivHx8f//////////////////////////////////////"
+                "/////////////////////////////////wD/////////////////////////"
+                "///////////////////////////////////////////////39/eJi4tCRENC"
+                "RUNCRERFR0ZFR0Q/QT9AREJFSUdJTUtJTktESEU5PDk5Ozg3OTY1ODU2OTY1"
+                "NzY1NjY1NTU0NjUzNDMwNTAxNTAvMi8qLSooKicuMTEzNzY1OTYzNjMvMjAr"
+                "MC4vMzE0NjU0NDQ3OTgxMzKGiIjw8fH/////////////////////////////"
+                "//////////////////////////////////////////8A////////////////"
+                "////////////////////////////////////////////////////////9vf3"
+                "iYuLP0E/QkRCRUdHREdGQkZEVltZbXRxeYJ+hIyIjJaPhZGKZnJqYm5mY29m"
+                "Ym5lYm9mZW9pZG5oY25qYmxoYmxmYGxlYGtjYm1kXmlgXmlfcnt1c3t2bndx"
+                "aXJtYWllXWNgXGBeYGJidHV1d3l5YGNilJaV8PHx////////////////////"
+                "////////////////////////////////////////////////////AP//////"
+                "////////////////////////////////////////////////////////////"
+                "//////T394eLikJDQkVFREVGRkVIR2ZraICIg4SQinaCfWt2b2p3b2t6cmh4"
+                "bmZ3a2V1amV1amR0aWd1a2p5cGl4cWh2b2p3cGl3bmRzZ2FvY2RxZWdzaGdy"
+                "al5oY11nYGlzbXN+eGBoZFVaWISHh6erqqGlpZKWlrO2tvT09P//////////"
+                "////////////////////////////////////////////////////////////"
+                "/wD/////////////////////////////////////////////////////////"
+                "///////////////09vaHiYlFRUVERERNTk5zdnWDi4aDkYppdW5PV1FMUk1O"
+                "VFBPV1NLUk1JUUxLUk1OVFBKUUxLUU1UWlVTWVdTWVdRVlVOVE9KUUlAR0BG"
+                "S0VLTkpGSUdDRkRAQ0FITUpncWt8i4JpdG6aoJ/M0dKzur1+hYeip6fn6en/"
+                "////////////////////////////////////////////////////////////"
+                "//////////8A////////////////////////////////////////////////"
+                "////////////////////////9PX1iIqKQEFBTk9PdXZ2gISDfYeCdIN6SlVO"
+                "Sk9KQ0dCP0NBP0NCPUFAPkFAQEJBPkJBPEE/PUA+Oj48Oz49PD8/PUA/PEE9"
+                "PUE8Oz88PD49Ozw9ODw7Ojw8PT49RklHRE1HcIB2go6IlZuZv8XFeYKDhI6R"
+                "ztTV4eLi/f39////////////////////////////////////////////////"
+                "////////////////////AP//////////////////////////////////////"
+                "//////////////////////////////////P09IGDg1tdXYWIiISKiWxzcXiE"
+                "fmp3bkJMQzk+OC80MTI2NTE2NS81NDI3NjY5OTI2NTA1NDI4NzA2NDA1MzA1"
+                "MzI3NTY7OTU6ODQ5ODg+PjM6OzE2NjM4Nzc7OkNGRkdNSmd0bYCKhW10couS"
+                "kHN7epigosLGyO7w8P//////////////////////////////////////////"
+                "/////////////////////////////wD/////////////////////////////"
+                "///////////////////////////////////////////r6+ypqqytsLChpaWY"
+                "np57hYJ7h4Flc2o9Rz81OjQxNTM0ODYzNzUyNjU0Ojk3PDszODcxNzUxOTcv"
+                "NzUwNjQxNjQzODY2Ozk2PDgyOTc4Pz43Pj4xODgwNjU7QT9SVFRKUE5renN8"
+                "hoJyd3aAhIRvdHNOU1SIi4zw8fH/////////////////////////////////"
+                "//////////////////////////////////////8A////////////////////"
+                "////////////////////////////////////////////////////9fX23d7g"
+                "1dnauMDAtb2+j5iWe4aBcYF4RVJJNz84MTcyMjY0NDg2NTo4Mzk3OT48OD47"
+                "NDs4NDs3Nj06Nz47OD47Njs3NTw3Njw3Mjk0O0I+PURBOD48Njw6O0A9SU1K"
+                "T1dTfoqElp6al5qafX9/Sk1MJigohYiH8fLy////////////////////////"
+                "////////////////////////////////////////////////AP//////////"
+                "////////////////////////////////////////////////////////////"
+                "/+rr7Nre37vDxJqmqM7a2qCop2lxbnKCemd4bkhSS0JJQ0VLRkZNR0ZOSERM"
+                "RkRKRUdOSEVNSENKRUVMSEdOS0ZNSkZMR0VNRUVMREZNRUpSSkpSSklPSkdO"
+                "SEZMR1BWUHh/eqCpo56ioHx9fUhLSy4zMi40M4uOjvLz8///////////////"
+                "/////////////////////////////////////////////////////////wD/"
+                "////////////////////////////////////////////////////////////"
+                "///////////09PTe4OChqaiLlZW9xsaboKB0eXdzfXiCjIZ9hYB1fHd0fHd3"
+                "gXp0f3hxf3RyfnRyfXVyfndzfXd0fnh0f3p1gHp0fndyfnR1gHVzfnNzfXN2"
+                "gHZ7hHx1fHZ3fniGjYeaoJuUmphucXE/QkExNjU7Pz42OTmNj5Dy8/P/////"
+                "////////////////////////////////////////////////////////////"
+                "//////8A////////////////////////////////////////////////////"
+                "////////////////////8PDwoqSjhImHfoSDeX9+aGtrc3R0homHiY6Li5KN"
+                "jpWRi5OOhI+KbnlyZXJpZ3RrZXJpZXFqY25oZHBpZnFrYm5oYm5mYm5jYWxi"
+                "YmthYWxjYGpicnl0dnx5dnx5eX58cXVzVllZODs7MzU1Oz8+PkJBODo7jpCQ"
+                "8vPz////////////////////////////////////////////////////////"
+                "////////////////AP//////////////////////////////////////////"
+                "//////////////////////////////Hy8n6AgD5BQD1BQDE2NS8zMDQ3NTw9"
+                "PEJEREdLSk1SUE1RUEhLSkFGRD9EQkFGQj9FPz5CQDs+PD1APUBCQT1BPkBD"
+                "PkBDPz9DPj9DPUFFQj9CQTg9PD1CQT9EQzo/PjQ5NzI1NDc6Ojs9Pjs+PT0/"
+                "PzY5OY+RkfL09P//////////////////////////////////////////////"
+                "/////////////////////////wD/////////////////////////////////"
+                "///////////////////////////////////////x8vKAhYNBTEJBT0FBTUE+"
+                "SD05RDk4QzgyOTQvMTIvLzAxMTI0MzQwMTIvMDExMjAvMS4vMC4wMS8vMC4v"
+                "MC8wMTAyMzE0NTQ2NzY2NzY4ODg7Ozs6PDw4Ozs4PTo/SkFBUENHVUhDT0VE"
+                "T0VIU0lHU0s4QTyQlJLy9PT/////////////////////////////////////"
+                "//////////////////////////////////8A////////////////////////"
+                "////////////////////////////////////////////////8PHxf4WBWWtZ"
+                "W3JZWW1XVmhVUmJQW21cRVFGPT89QUE/P0A+PD07ODk4Njg4NTc3NTc2Nzc1"
+                "Njc1Nzc2NTg2Njk3ODs5Ojw8Oz09Oz09PT8/P0FAQENBPEA8RExBYXRfWHFX"
+                "WHFZT2RQUmRRVmtWUmZURlNJjpSR8fPz////////////////////////////"
+                "////////////////////////////////////////////AP//////////////"
+                "//////////////////////////////////////////////////////////Dx"
+                "8YKEgkNLQ0JNQEJMQkJKQj9HQEBJQUBHP0FFPEFGNz9FMTk+LDg9Mjw+PDk6"
+                "OjQ1NDU4Njc5Nzc3NTc4Njc4NzY4ODk7Ozk7Ozo8Pjw/P0BGQT9FOD9GMkBG"
+                "Lz5JMztINz9KPj5HPz9HPzxGPTtFPTc/OpCUk/P09P//////////////////"
+                "/////////////////////////////////////////////////////wD/////"
+                "////////////////////////////////////////////////////////////"
+                "///////w8PB/f387PDo/Pz5BQUE/QEA9Pz9GSUdLT0gtMiUoLR0tNB8/Ri0+"
+                "RDI5PjY1ODYyNTQ1ODY2ODY3ODY4OTc3ODg5Ozs6PDs7Pj49Pz9OUk4/Rjon"
+                "Lh4oLxszOCNBRy88QjE5PDg8Pj46PDw7Pj47Pj00NjaQkpLy9PT/////////"
+                "////////////////////////////////////////////////////////////"
+                "//8A////////////////////////////////////////////////////////"
+                "////////////////9Pb2hYeHMTMzMzY2NDg3MzY1Nzo4SVBINTswJioeKS0p"
+                "LTEsOD0tQEYyOUAxLjIsJSopKS4sLDAuLTAvLjAwLzIxMjUyMjUzMjQ0PEA+"
+                "SU5BLDIhJiokKy8tMDQtPkMsQUYuNjszNTg3NTc3NDk4Mzg4MDQ1nZ+g9/j4"
+                "////////////////////////////////////////////////////////////"
+                "////////////AP//////////////////////////////////////////////"
+                "//////////////////////////v7+5+goTM1NC8yMTI2NTAzMzk9OUFHOisz"
+                "JzQ6NDY7OzI3NzY7NTpAMj9GNjM3MSImJCUpJyktKywuLS8xMDAyMTI0NDI1"
+                "MzI0NT1CQDpAMi40Ijc7OTQ3PDM3Nzg+Lz1EMz1EPTk9PDU3Nzc5OjE1NTxA"
+                "QI6QkLy9vf//////////////////////////////////////////////////"
+                "/////////////////////wD/////////////////////////////////////"
+                "///////////////////////////////////7/PymqKhHSklHSUlKTExJSktN"
+                "UU1HTkE2PTExNzQyNzgvNDYuMzIzOjFCST5ARD81NzY6PTs+QEBCRENGSUdE"
+                "R0ZDRUVERkZDRkZJTk1CRzo5Py4xNTM0NzowNDQuMy43PjdES0hGS0pCRERC"
+                "REU+QEFHS0qRk5O5urr/////////////////////////////////////////"
+                "//////////////////////////////8A////////////////////////////"
+                "////////////////////////////////////////////9/b2lJSUTU1NTU1N"
+                "S0xMTE1OTE9NREtEOD80QEU8O0A9NTo7OD08Mzo2SU9LQURCOjo6QkJCR0hI"
+                "P0BALS8vQEFBSEhISEpKR0hJSEtJQEU5PEIzQEQ/ODw+ODw9OD05OT47TFJR"
+                "RElIQ0VFRUVGREZHQUNEqqys+fn5////////////////////////////////"
+                "////////////////////////////////////////AP//////////////////"
+                "/////////////////////////////////////////////////////+3t7Xx8"
+                "fD4+Pj9AQD5AQD4/Pzs+PkJHRD5FPjY7MzA0MjA1NTxBQExRUExQUDQ2NTAx"
+                "MDY4Nzg6OS8xMCAjIjM1NTw+Pjs9PTo9PT1AP0VJQzxANzQ4NS4yMjQ4OUFG"
+                "RVBVVEVJSTw+Pzw+Pjw8Pj0+Pzg5O5SWlvT09P//////////////////////"
+                "/////////////////////////////////////////////////wD/////////"
+                "////////////////////////////////////////////////////////////"
+                "///r7e18f38/Pz8/Pz87PT0yNDQvMzMzODc4PjwvNjIpLyw0OjlJTk9ITE01"
+                "OjorLi0mKicxNTM2Ojg3OjgwMjA1ODY8Pz84PDsyNzUzNzY1Ojo3PTwsMS8s"
+                "MjA9QUJNUlNARUUxNTQzNjYzNjc7PT4+QEE2ODmXmZn19vb/////////////"
+                "//////////////////////////////////////////////////////////8A"
+                "////////////////////////////////////////////////////////////"
+                "////////////6+3tfH5+PT4+OTo6TU9PhoqJkZaUjpSTipGQi5ORkZmXlZ2c"
+                "j5eWh4+OiI+OiY6NfIGARUtJQEZENjs5KSooNTc2R0tLV11ckZaWlZqbk5iZ"
+                "kZeWlJqZmqCfm6Chk5iZjpOTj5WUkZeWgYWFR0xLPD4+OTo6mZub9fb2////"
+                "////////////////////////////////////////////////////////////"
+                "////////AP//////////////////////////////////////////////////"
+                "/////////////////////+zt7Xt9fTs8PDQ1NWhra9/h4fX49/T4+PH39vD1"
+                "9ez08+rx8enx8Ovz8u708/H19d/i4mpwb0JIRzA0Mzc3NistLj5DRH2Cgers"
+                "7Pf5+fb5+fz+/vz9/fb5+vb5+fb4+Pb5+ff6+v3+/uHk419kYzc7Ozg5OZqb"
+                "nPX29v//////////////////////////////////////////////////////"
+                "/////////////////wD/////////////////////////////////////////"
+                "///////////////////////////////t7u56fX05Ojo2Nzdoamre4ODy9fTy"
+                "9fTq7+7p7+7p7u3o7uzo7u3p7u3o7u3v9PPm6OhnbWxAREMoKikjJCQnKSo6"
+                "P0B7gH/s7u7y9vfv9fTx9vXx9PXx9fX3+vrw9PXv9PXz9vf7/f3n6eliZmc8"
+                "QEE7PT6cnp729vb/////////////////////////////////////////////"
+                "//////////////////////////8A////////////////////////////////"
+                "////////////////////////////////////////7O3tenx8PD09OTg4aGtr"
+                "3+Li9vf38PT07PDw8fTz9Pf29Pb29Pf29/n58PX08/f26evrYWVlOj09R0pL"
+                "NTk5TlFSOz9Bd3x77e/v8vb38fb18fb18/b39fj47/X07vP07/T18fb2+Pr6"
+                "4eLjYGRlPkJDPUBBnZ+f9vb2////////////////////////////////////"
+                "////////////////////////////////////AP//////////////////////"
+                "/////////////////////////////////////////////////+3u7nd5eTU2"
+                "Ni8yMWJnZtzf3vP19fLz8/Hz8+7y8ezx8Ovw7+3x8PH09PH08/X29uPl5Whs"
+                "bDE2NlVZWWNnaFhcXTU5Onp+fujr6vX4+PT29/X39/X3+PD09O/08/L29vP2"
+                "9vP29vf4+N3f31tfYDg7PDQ5Opqdnfb39///////////////////////////"
+                "/////////////////////////////////////////////wD/////////////"
+                "///////////////////////////////////////////////////////////6"
+                "+vqtr69fYWFYW1tvc3Kxs7PX19fFxcW3ubrLzc3S1NTS1NPNz8+7vb22uLjB"
+                "w8S+wMGys7Ta3Nze39/c3t7f4ODZ2tqmqKjBxMTg4uPKzMzHycrb3d3d39/d"
+                "3t7T1dXExsfGx8jKy8y5urtzdndgY2RobWzLz87+/v7/////////////////"
+                "//////////////////////////////////////////////////////8A////"
+                "////////////////////////////////////////////////////////////"
+                "////////////+/v79vb29vb29/f3+vr6/f39/Pz8+vr6/Pz8/Pz8/P38/Pz8"
+                "+/v7+vr6+/v7+/v7/Pz8/////v7+/v7+////////+/v7+/z8/v7+/Pz8+/v8"
+                "/f39/f39/f39/P39+/v7+/v8/Pz8+/v7+Pj49vf39/j3/f39////////////"
+                "////////////////////////////////////////////////////////////"
+                "////AP//////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "/////////////wD/////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "//////////////////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+[Device Classification]
+        Class1 = EtherNetIP;
+
+[Params]
+        Param1 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0000,                 $ Descriptor
+                0xC7,                   $ Data Type
+                2,                      $ Data Size in bytes
+                "Input Size",           $ name
+                "Bytes",                $ units
+                "This parameter sets the input size",    $ help string
+                16,500,56,              $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param2 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0000,                 $ Descriptor
+                0xC7,                   $ Data Type
+                2,                      $ Data Size in bytes
+                "Output Size",          $ name
+                "Bytes",                $ units
+                "This parameter sets the output size",    $ help string
+                16,496,16,              $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param3 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0000,                 $ Descriptor
+                0xC7,                   $ Data Type
+                2,                      $ Data Size in bytes
+                "Configuration Size",   $ name
+                "Bytes",                $ units
+                "Always Zero",          $ help string
+                0,0,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+
+[Assembly]
+        Assem100 =
+                "InputAssem",
+                ,
+                ,
+                0x0021,
+                ,;
+        Assem112 =
+                "OutputAssem",
+                ,
+                ,
+                0x0021,
+                ,;
+        Assem128 =
+                "ConfigAssem",
+                ,
+                ,
+                0x0000,
+                ,;
+
+
+
+[Connection Manager]
+        Connection1 =
+                0x04010002,             $ 0-15    = supported transport classes
+                                        $ 16      = trigger: cyclic
+                                        $ 17      = trigger: change of state
+                                        $ 18      = trigger: application
+                                        $ 19-23   = trigger: reserved
+                                        $ 24      = application type: listen-only
+                                        $ 25      = application type: input-only
+                                        $ 26      = application type: exclusive-owner
+                                        $ 27      = application type: redundant-owner
+                                        $ 28-30   = reserved
+                                        $ 31      = Direction: Client = 0 / Server = 1
+                0x4464040F,             $ 0       = O->T fixed size supported
+                                        $ 1       = O->T variable size supported
+                                        $ 2       = T->O fixed size supported
+                                        $ 3       = T->O variable size supported
+                                        $ 4-5     = O->T number of bytes per slot (obsolete)
+                                        $ 6-7     = T->O number of bytes per slot (obsolete)
+                                        $ 8-10    = O->T Real time transfer format
+                                        $ 11      = reserved
+                                        $ 12-14   = T->O Real time transfer format
+                                        $ 15      = reserved
+                                        $ 16      = O->T connection type: NULL
+                                        $ 17      = O->T connection type: MULTICAST
+                                        $ 18      = O->T connection type: POINT2POINT
+                                        $ 19      = O->T connection type: reserved
+                                        $ 20      = T->O connection type: NULL
+                                        $ 21      = T->O connection type: MULTICAST
+                                        $ 22      = T->O connection type: POINT2POINT
+                                        $ 23      = T->O connection type: reserved
+                                        $ 24      = O->T priority: LOW
+                                        $ 25      = O->T priority: HIGH
+                                        $ 26      = O->T priority: SCHEDULED
+                                        $ 27      = O->T priority: reserved
+                                        $ 28      = T->O priority: LOW
+                                        $ 29      = T->O priority: HIGH
+                                        $ 30      = T->O priority: SCHEDULED
+                                        $ 31      = T->O priority: reserved
+                ,Param2,Assem112,       $ O->T RPI, size, format
+                ,Param1,Assem100,       $ T->O RPI, size, format
+                ,,                      $ proxy config size, format
+                Param3,Assem128,        $ target config size, format
+                "I/O Connection",       $ Connection Name
+                "Input and Output data",$ help string
+                "20 04 24 80 2C 70 2C 64";    $ Path
+

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<IOMaster xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.tmgte.com/IOLM/2015/11" xsi:schemaLocation="http://www.tmgte.com/IOLM/2015/11 tmg_iolm_v13.xsd">
+	<DocumentInfo version="4.0" releaseDate="2021-02-24" copyright="Copyright 2018, Murrelektronik GmbH"/>
+	<ProfileHeader>
+		<ProfileIdentification>IO Master Profile</ProfileIdentification>
+		<ProfileRevision>1.3</ProfileRevision>
+		<ProfileSource>TMG TE GmbH</ProfileSource>
+	</ProfileHeader>
+	<ProfileBody>
+		<DeviceIdentity vendorId="0x012F" vendorName="Murrelektronik GmbH" vendorLogo="Murrelektronik-logo.png" deviceId="0x03D553" deviceNameId="TID_DeviceName" devicePicture="Murrelektronik-MVK-pic.png" deviceTextId="TID_DeviceText"/>
+		<EngineeringTool masterControl="IOLM"/>
+	</ProfileBody>
+	<CommNetworkProfile>
+		<!-- USB,IndustrialEthernet, PROFINET, PROFIBUS, EtherNetIP, EtherCAT -->
+		<FieldbusInterface type="EtherNetIP">
+			<MasterToolCommunication type="TMG_UDP" revision="V2"/>
+		</FieldbusInterface>
+		<IOCommunication>
+			<IOLINK revision="1.1"/>
+		</IOCommunication>
+		<IOModules moduleNameHeader="" portNameHeader="Port" pinNameHeader="Pin">
+			<IOModuleType moduleId="1" connector="M12" portClass="A" minMasterCycleTime="1200">
+				<IOChannels>
+					<IOChannel id="0" portName="1" pinName="4" physics="IOLINK">
+						<IOFunction mode="IOLINK_OP"/>
+						<IOFunction mode="SIO_INOUT"/>
+						<IOFunction mode="NC"/>
+					</IOChannel>
+					<IOChannel id="1" portName="2" pinName="4" physics="IOLINK">
+						<IOFunction mode="IOLINK_OP"/>
+						<IOFunction mode="SIO_INOUT"/>
+						<IOFunction mode="NC"/>
+					</IOChannel>
+					<IOChannel id="2" portName="3" pinName="4" physics="IOLINK">
+						<IOFunction mode="IOLINK_OP"/>
+						<IOFunction mode="SIO_INOUT"/>
+						<IOFunction mode="NC"/>
+					</IOChannel>
+					<IOChannel id="3" portName="4" pinName="4" physics="IOLINK">
+						<IOFunction mode="IOLINK_OP"/>
+						<IOFunction mode="SIO_INOUT"/>
+						<IOFunction mode="NC"/>
+					</IOChannel>
+					<IOChannel id="4" portName="5" pinName="4" physics="IOLINK">
+						<IOFunction mode="IOLINK_OP"/>
+						<IOFunction mode="SIO_INOUT"/>
+						<IOFunction mode="NC"/>
+					</IOChannel>
+					<IOChannel id="5" portName="6" pinName="4" physics="IOLINK">
+						<IOFunction mode="IOLINK_OP"/>
+						<IOFunction mode="SIO_INOUT"/>
+						<IOFunction mode="NC"/>
+					</IOChannel>
+					<IOChannel id="6" portName="7" pinName="4" physics="IOLINK">
+						<IOFunction mode="IOLINK_OP"/>
+						<IOFunction mode="SIO_INOUT"/>
+						<IOFunction mode="NC"/>
+					</IOChannel>
+					<IOChannel id="7" portName="8" pinName="4" physics="IOLINK">
+						<IOFunction mode="IOLINK_OP"/>
+						<IOFunction mode="SIO_INOUT"/>
+						<IOFunction mode="NC"/>
+					</IOChannel>
+				</IOChannels>
+			</IOModuleType>
+			<IOModuleDef moduleId="1" moduleNameMode="IncFrom1" countMin="1" countMax="1" shownInTopology="false"/>
+		</IOModules>
+	</CommNetworkProfile>
+	<ExternalTextCollection>
+		<PrimaryLanguage xml:lang="en">
+			<Text id="TID_DeviceText" value="Ethernet/IP IO module with 16 digital multifunctional signals, IP67 protection type M12"/>
+			<Text id="TID_DeviceName" value="54611 MVK Pro ME DIO8 IOL8 M12L 5P"/>
+		</PrimaryLanguage>
+		<Language xml:lang="de">
+			<Text id="TID_DeviceText" value="Ethernet/IP IO Modul mit 16 digitalen multifunktionalen Signalen, Schutzklasse IP67 Typ M12"/>
+			<Text id="TID_DeviceName" value="54611 MVK Pro ME DIO8 IOL8 M12L 5P"/>
+		</Language>
+	</ExternalTextCollection>
+	<Stamp crc="2745306140"><Checker version="V1.3"/></Stamp>
+</IOMaster>

@@ -1,0 +1,27 @@
+{
+  "special": {
+    "zh-CN": "简体中文"
+  },
+  "common": {
+    "Select language": "选择语言",
+    "UI Settings": "UI 设置",
+    "Interval:": "间隔:",
+    "seconds": "秒",
+    "Refresh IO Overview periodically": "周期性刷新IO总览",
+    "Refresh Parameters periodically": "周期性刷新参数",
+    "Refresh Diagnostic Messages periodically": "周期性刷新诊断信息",
+    "Status": "状态",
+    "IO Overview": "IO总览",
+    "Parameters": "参数",
+    "Diagnosis": "诊断",
+    "Maintenance": "维护",
+    "Station name / Station type": "站点名称 / 站点类型",
+    "Disabled": "禁用",
+    "Enabled": "启用",
+    "NO Input": "NO 输入",
+    "NC Input": "NC 输入",
+    "Output": "输出",
+    "Reset parameters": "重置参数",
+    "Save parameters": "保存参数"
+  }
+}

@@ -1,0 +1,1070 @@
+$ EZ-EDS Version 3.21.1.20161208 Generated Electronic Data Sheet
+
+$ ****************************************************************************
+$  
+$ Changes:
+$  
+$  EDS-Version  Date        Name   Description
+$ -------------------------------------------------------------------------
+$  1.1          2017-04-07  MD     Created
+$  
+$ ****************************************************************************
+
+[File]
+        DescText = "EDS-File for Murrelektronik IMPACT67 EtherNet/IP IO-Link";
+        CreateDate = 04-27-2017;
+        CreateTime = 10:56:58;
+        ModDate = 04-26-2018;
+        ModTime = 14:01:18;
+        Revision = 1.1;
+        HomeURL = "htts://www.murrelektronik.com";
+
+[Device]
+        VendCode = 640;
+        VendName = "Murrelektronik GmbH";
+        ProdType = 7;
+        ProdTypeStr = "General Purpose Discrete I/O";
+        ProdCode = 55142;
+        MajRev = 1;
+        MinRev = 4;
+        ProdName = "IMPACT67 E DIO16 4P";
+        Catalog = "55142";
+        Icon = "Impact67.ico";
+        IconContents =
+                "AAABAAEARigQAAEABADoBwAAFgAAACgAAABGAAAAUAAAAAEABAAAAAAAAAAA"
+                "AGAAAABgAAAAEAAAAAAAAAAAAAAAAACAAACAAAAAgIAAgAAAAIAAgACAgAAA"
+                "gICAAMDAwAAAAP8AAP8AAAD//wD/AAAA/wD/AP//AAD///8A////////////"
+                "//////////////////////////////////8A////////////////////////"
+                "//////////////////////8A////////////////////////////////////"
+                "//////////8A///////////////////wAAAP//////////////////////8A"
+                "//////////////////AAAAAAD/////////////////////8A////////////"
+                "/////wAAAAAAAP////////////////////8A/////////////////wDwAAAP"
+                "AP////////////////////8A/////////////////w9/AAD38P//////////"
+                "//////////8A/////////////////wDwAAAPAP////////////////////8A"
+                "/////////////////wAA//8AAP////////////////////8A////////////"
+                "/////wAAAAAAAP////////////////////8A/////////////////wD/AAD/"
+                "AP////////////////////8A/////////////////w938A938P//////////"
+                "//////////8A/////////////////w938A938P////////////////////8A"
+                "/////////////////wD/AAD/AP////////////////////8A////////////"
+                "/////wAAAAAAAP////////////////////8A/////////////////wAKqqqg"
+                "AP////////////////////8A/////////////////wAAAAAAAP//////////"
+                "//////////8A/////////////////wAAAAAAAP////////////////////8A"
+                "/////////////////wAAAAAAAP////////////////////8A////////////"
+                "/////wDwAAAPAP////////////////////8A/////////////////wsLAACw"
+                "sP////////////////////8A/////////////////wAAAAAAAP//////////"
+                "//////////8A/////////////////wAAAAAAAP////////////////////8A"
+                "/////////////////wDwAAAPAP////////////////////8A////////////"
+                "/////wsLAACwsP////////////////////8A/////////////////wAAAAAA"
+                "AP////////////////////8A/////////////////wAAAAAAAP//////////"
+                "//////////8A/////////////////wDwAAAPAP////////////////////8A"
+                "/////////////////wsLAACwsP////////////////////8A////////////"
+                "/////wAAAAAAAP////////////////////8A/////////////////wAAAAAA"
+                "AP////////////////////8A/////////////////wDwAAAPAP//////////"
+                "//////////8A/////////////////wsLAACwsP////////////////////8A"
+                "/////////////////wAAAAAAAP////////////////////8A////////////"
+                "//////AAAAAAD/////////////////////8A///////////////////wAAAP"
+                "//////////////////////8A////////////////////////////////////"
+                "//////////8A//////////////////////////////////////////////8A"
+                "//////////////////////////////////////////////8AAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+[Device Classification]
+        Class1 = EtherNetIP;
+
+
+[Params]
+        Param7 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0000,                 $ Descriptor
+                0xC6,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "InputOnly_CP1",        $ name
+                "",                     $ units
+                "Input Only Connection Point",    $ help string
+                193,193,193,            $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param8 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0000,                 $ Descriptor
+                0xC6,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "ListenOnly_CP",        $ name
+                "",                     $ units
+                "Listen Only Connection Point",    $ help string
+                192,192,192,            $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param9 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0000,                 $ Descriptor
+                0xC6,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "InputOnly_CP2",        $ name
+                "",                     $ units
+                "Input Only Connection Point",    $ help string
+                193,193,193,            $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param21 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Pin/Port based IO Layout",    $ name
+                "",                     $ units
+                "0 = Port based (default), 1 = Pin based",    $ help string
+                0,1,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum21 =
+                0,"Port based (default)",
+                1,"Pin based";
+        Param22 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Function port 0 pin 4 (Ch00)",    $ name
+                "",                     $ units
+                "0 = Default configuration (1 = NO, 2 = NC, 3 = Low, 4 = High, 5 = LS)",    $ help string
+                0,3,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum22 =
+                0,"Default configuration (default, not changeable)",
+                1,"NO input",
+                2,"NC input",
+                3,"Output: FS Low";
+        Param23 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Function port 0 pin 2 (Ch10)",    $ name
+                "",                     $ units
+                "0 = Default configuration (1 = NO, 2 = NC, 3 = Low, 4 = High, 5 = LS)",    $ help string
+                0,3,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum23 =
+                0,"Default configuration (default, not changeable)",
+                1,"NO input",
+                2,"NC input",
+                3,"Output: FS Low";
+        Param24 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Function port 1 pin 4 (Ch01)",    $ name
+                "",                     $ units
+                "0 = Default configuration (1 = NO, 2 = NC, 3 = Low, 4 = High, 5 = LS)",    $ help string
+                0,3,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum24 =
+                0,"Default configuration (default, not changeable)",
+                1,"NO input",
+                2,"NC input",
+                3,"Output: FS Low";
+        Param25 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Function port 1 pin 2 (Ch11)",    $ name
+                "",                     $ units
+                "0 = Default configuration (1 = NO, 2 = NC, 3 = Low, 4 = High, 5 = LS)",    $ help string
+                0,3,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum25 =
+                0,"Default configuration (default, not changeable)",
+                1,"NO input",
+                2,"NC input",
+                3,"Output: FS Low";
+        Param26 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Function port 2 pin 4 (Ch02)",    $ name
+                "",                     $ units
+                "0 = Default configuration (1 = NO, 2 = NC, 3 = Low, 4 = High, 5 = LS)",    $ help string
+                0,3,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum26 =
+                0,"Default configuration (default, not changeable)",
+                1,"NO input",
+                2,"NC input",
+                3,"Output: FS Low";
+        Param27 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Function port 2 pin 2 (Ch12)",    $ name
+                "",                     $ units
+                "0 = Default configuration (1 = NO, 2 = NC, 3 = Low, 4 = High, 5 = LS)",    $ help string
+                0,3,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum27 =
+                0,"Default configuration (default, not changeable)",
+                1,"NO input",
+                2,"NC input",
+                3,"Output: FS Low";
+        Param28 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Function port 3 pin 4 (Ch03)",    $ name
+                "",                     $ units
+                "0 = Default configuration (1 = NO, 2 = NC, 3 = Low, 4 = High, 5 = LS)",    $ help string
+                0,3,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum28 =
+                0,"Default configuration (default, not changeable)",
+                1,"NO input",
+                2,"NC input",
+                3,"Output: FS Low";
+        Param29 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Function port 3 pin 2 (Ch13)",    $ name
+                "",                     $ units
+                "0 = Default configuration (1 = NO, 2 = NC, 3 = Low, 4 = High, 5 = LS)",    $ help string
+                0,3,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum29 =
+                0,"Default configuration (default, not changeable)",
+                1,"NO input",
+                2,"NC input",
+                3,"Output: FS Low";
+        Param30 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Function port 4 pin 4 (Ch04)",    $ name
+                "",                     $ units
+                "0 = Default configuration (1 = NO, 2 = NC, 3 = Low, 4 = High, 5 = LS)",    $ help string
+                0,3,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum30 =
+                0,"Default configuration (default, not changeable)",
+                1,"NO input",
+                2,"NC input",
+                3,"Output: FS Low";
+        Param31 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Function port 4 pin 2 (Ch14)",    $ name
+                "",                     $ units
+                "0 = Default configuration (1 = NO, 2 = NC, 3 = Low, 4 = High, 5 = LS)",    $ help string
+                0,3,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum31 =
+                0,"Default configuration (default, not changeable)",
+                1,"NO input",
+                2,"NC input",
+                3,"Output: FS Low";
+        Param32 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Function port 5 pin 4 (Ch05)",    $ name
+                "",                     $ units
+                "0 = Default configuration (1 = NO, 2 = NC, 3 = Low, 4 = High, 5 = LS)",    $ help string
+                0,3,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum32 =
+                0,"Default configuration (default, not changeable)",
+                1,"NO input",
+                2,"NC input",
+                3,"Output: FS Low";
+        Param33 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Function port 5 pin 2 (Ch15)",    $ name
+                "",                     $ units
+                "0 = Default configuration (1 = NO, 2 = NC, 3 = Low, 4 = High, 5 = LS)",    $ help string
+                0,3,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum33 =
+                0,"Default configuration (default, not changeable)",
+                1,"NO input",
+                2,"NC input",
+                3,"Output: FS Low";
+        Param34 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Function port 6 pin 4 (Ch06)",    $ name
+                "",                     $ units
+                "0 = Default configuration (1 = NO, 2 = NC, 3 = Low, 4 = High, 5 = LS)",    $ help string
+                0,3,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum34 =
+                0,"Default configuration (default, not changeable)",
+                1,"NO input",
+                2,"NC input",
+                3,"Output: FS Low";
+        Param35 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Function port 6 pin 2 (Ch16)",    $ name
+                "",                     $ units
+                "0 = Default configuration (1 = NO, 2 = NC, 3 = Low, 4 = High, 5 = LS)",    $ help string
+                0,3,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum35 =
+                0,"Default configuration (default, not changeable)",
+                1,"NO input",
+                2,"NC input",
+                3,"Output: FS Low";
+        Param36 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Function port 7 pin 4 (Ch07)",    $ name
+                "",                     $ units
+                "0 = Default configuration (1 = NO, 2 = NC, 3 = Low, 4 = High, 5 = LS)",    $ help string
+                0,3,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum36 =
+                0,"Default configuration (default, not changeable)",
+                1,"NO input",
+                2,"NC input",
+                3,"Output: FS Low";
+        Param37 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Function port 7 pin 2 (Ch17)",    $ name
+                "",                     $ units
+                "0 = Default configuration (1 = NO, 2 = NC, 3 = Low, 4 = High, 5 = LS)",    $ help string
+                0,3,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum37 =
+                0,"Default configuration (default, not changeable)",
+                1,"NO input",
+                2,"NC input",
+                3,"Output: FS Low";
+        Param38 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Quick Connect",        $ name
+                "",                     $ units
+                "0 = disable (default), 1 = enable",    $ help string
+                0,1,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum38 =
+                0,"disable (default)",
+                1,"enable";
+        Param100 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Diag-Para - Diagnostic Report",    $ name
+                "",                     $ units
+                "0 = enabled (default), 1 = disabled",    $ help string
+                0,1,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum100 =
+                0,"global diagnostic enabled (default) ",
+                1,"global diagnostic disabled";
+        Param101 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Diag-Para - Under Voltage / Sensor Supply",    $ name
+                "",                     $ units
+                "0 = report (default), 1 = do not report",    $ help string
+                0,1,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum101 =
+                0,"report (default)",
+                1,"do not report";
+        Param102 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Diag-Para - Under Voltage Actuator Supply",    $ name
+                "",                     $ units
+                "0 = report (default), 1 = do not report",    $ help string
+                0,1,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum102 =
+                0,"report (defaul)",
+                1,"do not report";
+        Param103 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Diag-Para - No Actuator Supply",    $ name
+                "",                     $ units
+                "0 = report (default), 1 = do not report",    $ help string
+                0,1,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum103 =
+                0,"report (default)",
+                1,"do not report";
+        Param104 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Diag-Para - LED Indication for Suppressed Diagnoses",    $ name
+                "",                     $ units
+                "0 = no LED indication (default), 1 = LED indication",    $ help string
+                0,1,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum104 =
+                0,"no LED indication (default)",
+                1,"LED indication";
+        Param105 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Diag-Para - Diagnosis Acknowledgment",    $ name
+                "",                     $ units
+                "0 = disable (default), 1 = enable",    $ help string
+                0,1,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum105 =
+                0,"disable (default)",
+                1,"enable";
+        Param110 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0200,                 $ Descriptor
+                0xC2,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "reserved",             $ name
+                "",                     $ units
+                "not used",             $ help string
+                0,0,0,                  $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param200 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0010,                 $ Descriptor
+                0xD2,                   $ Data Type
+                2,                      $ Data Size in bytes
+                "Digital Input Data",   $ name
+                "",                     $ units
+                "",                     $ help string
+                0x0000,0xFFFF,0x0000,   $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param201 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0010,                 $ Descriptor
+                0xD2,                   $ Data Type
+                2,                      $ Data Size in bytes
+                "DI Qualifier",         $ name
+                "",                     $ units
+                "",                     $ help string
+                0x0000,0xFFFF,0x0000,   $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param202 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0110,                 $ Descriptor
+                0xD3,                   $ Data Type
+                4,                      $ Data Size in bytes
+                "System State",         $ name
+                "",                     $ units
+                "",                     $ help string
+                0,0x00000FFF,0,         $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum202 =
+                0,"Undervoltage bus/sensor supply",
+                1,"Undervoltage actuator supply",
+                2,"No actuator supply",
+                3,"External error",
+                4,"At least one channel has a sensor short circuit",
+                5,"At least one channel has an actuator short circuit",
+                6,"At least one channel has an actuator warning",
+                7,"At least one analog channel has an error",
+                8,"Internal communication error",
+                9,"At least one IO-Link channel has an error",
+                10,"Overvoltage bus/sensor supply",
+                11,"Overvoltage actuator supply";
+        Param230 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0010,                 $ Descriptor
+                0xDA,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Diagnosis Buffer - 1", $ name
+                "",                     $ units
+                "",                     $ help string
+                0,8,"",                 $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param231 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0010,                 $ Descriptor
+                0xDA,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Diagnosis Buffer - 2", $ name
+                "",                     $ units
+                "",                     $ help string
+                0,8,"",                 $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param232 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0010,                 $ Descriptor
+                0xDA,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Diagnosis Buffer - 3", $ name
+                "",                     $ units
+                "",                     $ help string
+                0,8,"",                 $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param233 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0010,                 $ Descriptor
+                0xDA,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Diagnosis Buffer - 4", $ name
+                "",                     $ units
+                "",                     $ help string
+                0,8,"",                 $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param234 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0010,                 $ Descriptor
+                0xDA,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Diagnosis Buffer - 5", $ name
+                "",                     $ units
+                "",                     $ help string
+                0,8,"",                 $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param235 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0010,                 $ Descriptor
+                0xDA,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Diagnosis Buffer - 6", $ name
+                "",                     $ units
+                "",                     $ help string
+                0,8,"",                 $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param236 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0010,                 $ Descriptor
+                0xDA,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Diagnosis Buffer - 7", $ name
+                "",                     $ units
+                "",                     $ help string
+                0,8,"",                 $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param237 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0010,                 $ Descriptor
+                0xDA,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Diagnosis Buffer - 8", $ name
+                "",                     $ units
+                "",                     $ help string
+                0,8,"",                 $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param238 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0010,                 $ Descriptor
+                0xDA,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Diagnosis Buffer - 9", $ name
+                "",                     $ units
+                "",                     $ help string
+                0,8,"",                 $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param239 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0010,                 $ Descriptor
+                0xDA,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Diagnosis Buffer - 10",$ name
+                "",                     $ units
+                "",                     $ help string
+                0,8,"",                 $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param240 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0010,                 $ Descriptor
+                0xDA,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Diagnosis Buffer - 11",$ name
+                "",                     $ units
+                "",                     $ help string
+                0,8,"",                 $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param241 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0010,                 $ Descriptor
+                0xDA,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Diagnosis Buffer - 12",$ name
+                "",                     $ units
+                "",                     $ help string
+                0,8,"",                 $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param242 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0010,                 $ Descriptor
+                0xDA,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Diagnosis Buffer - 13",$ name
+                "",                     $ units
+                "",                     $ help string
+                0,8,"",                 $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param243 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0010,                 $ Descriptor
+                0xDA,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Diagnosis Buffer - 14",$ name
+                "",                     $ units
+                "",                     $ help string
+                0,8,"",                 $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param244 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0010,                 $ Descriptor
+                0xDA,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Diagnosis Buffer - 15",$ name
+                "",                     $ units
+                "",                     $ help string
+                0,8,"",                 $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param245 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0010,                 $ Descriptor
+                0xDA,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Diagnosis Buffer - 16",$ name
+                "",                     $ units
+                "",                     $ help string
+                0,8,"",                 $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param246 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0100,                 $ Descriptor
+                0xD2,                   $ Data Type
+                2,                      $ Data Size in bytes
+                "Diag. Acknowledge",    $ name
+                "",                     $ units
+                "",                     $ help string
+                0,0xFFFF,0,             $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Enum246 =
+                0,"Acknowledge Diag 1",
+                1,"Acknowledge Diag 2",
+                2,"Acknowledge Diag 3",
+                3,"Acknowledge Diag 4",
+                4,"Acknowledge Diag 5",
+                5,"Acknowledge Diag 6",
+                6,"Acknowledge Diag 7",
+                7,"Acknowledge Diag 8",
+                8,"Acknowledge Diag 9",
+                9,"Acknowledge Diag 10",
+                10,"Acknowledge Diag 11",
+                11,"Acknowledge Diag 12",
+                12,"Acknowledge Diag 13",
+                13,"Acknowledge Diag 14",
+                14,"Acknowledge Diag 15",
+                15,"Acknowledge Diag 16";
+        Param300 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0000,                 $ Descriptor
+                0xD2,                   $ Data Type
+                2,                      $ Data Size in bytes
+                "Digital Output Data",  $ name
+                "",                     $ units
+                "",                     $ help string
+                0x0000,0xFFFF,0x0000,   $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param301 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0010,                 $ Descriptor
+                0xD2,                   $ Data Type
+                2,                      $ Data Size in bytes
+                "DO Qualifier",         $ name
+                "",                     $ units
+                "",                     $ help string
+                0x0000,0xFFFF,0x0000,   $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+        Param310 =
+                0,                      $ reserved, shall equal 0
+                ,,                      $ Link Path Size, Link Path
+                0x0000,                 $ Descriptor
+                0xC6,                   $ Data Type
+                1,                      $ Data Size in bytes
+                "Output_8C_CP",         $ name
+                "",                     $ units
+                "Output Connection Point",    $ help string
+                140,140,140,            $ min, max, default data values
+                ,,,,                    $ mult, div, base, offset scaling
+                ,,,,                    $ mult, div, base, offset links
+                ;                       $ decimal places
+
+[Groups]
+
+        Group1 =
+                "Configuration",
+                18,
+                21,38,22,23,24,25,26,27,28,29,
+                30,31,32,33,34,35,36,37;
+        Group2 =
+                "Diagnostics",
+                24,
+                100,101,102,103,104,105,202,230,231,232,
+                233,234,235,236,237,238,239,240,241,242,
+                243,244,245,246;
+
+
+[Assembly]
+        Object_Name = "Assembly Object";
+        Object_Class_Code = 0x04;
+        Assem100 =
+                "Digital Input, Qualifier DI, Qualifier DO, System State",
+                ,
+                10,
+                0x0000,
+                ,,
+                16,Param200,
+                16,Param201,
+                16,Param301,
+                32,Param202;
+
+        Assem140 =
+                "Digital Output Data",
+                ,
+                2,
+                0x0000,
+                ,,
+                16,Param300;
+        Assem170 =
+                "Configuration Assembly 170",
+                ,
+                26,
+                0x0000,
+                ,,
+                64,Assem200,
+                144,Assem201;
+        Assem175 =
+                "Configuration Assembly 175",
+                ,
+                0,
+                0x0000,
+                ,,
+                0,;
+        Assem200 =
+                "Dignostic Parameters",
+                ,
+                8,
+                0x0000,
+                ,,
+                8,Param100,
+                8,Param101,
+                8,Param102,
+                8,Param103,
+                8,Param104,
+                8,Param105,
+                8,Param110,
+                8,Param110;
+        Assem201 =
+                "General Parameters",
+                ,
+                18,
+                0x0000,
+                ,,
+                8,Param21,
+                8,Param38,
+                8,Param22,
+                8,Param23,
+                8,Param24,
+                8,Param25,
+                8,Param26,
+                8,Param27,
+                8,Param28,
+                8,Param29,
+                8,Param30,
+                8,Param31,
+                8,Param32,
+                8,Param33,
+                8,Param34,
+                8,Param35,
+                8,Param36,
+                8,Param37;
+
+[Connection Manager]
+        Object_Name = "Connection Manager Object";
+        Object_Class_Code = 0x06;
+        Connection1 =
+                0x04010002,             $ Trigger and Transport
+                0x44640405,             $ Point Multicast
+                ,,Assem140,             $ OT RPI Size format
+                ,,Assem100,             $ TO rpi size format
+                ,,                      $ config 1
+                ,Assem170,              $ config 2
+                "E01 - Digital In/Outputs",    $ connection name
+                "",                     $ help string
+                "20 04 24 AA 2C 8C 2C 64";    $ path
+        Connection2 =
+                0x02010002,             $ Trigger and Transport
+                0x44640305,             $ Point Multicast
+                ,0,,                    $ O->T RPI, size, format
+                ,,Assem100,             $ T->O RPI, size, format
+                ,,                      $ proxy config size, format
+                ,Assem170,              $ target config size, format
+                "I01 - Digital Input",  $ Connection Name
+                "",                     $ help string
+                "20 04 24 AA 2C [Param7] 2C 64";    $ Path
+        Connection3 =
+                0x04010002,             $ Trigger and Transport
+                0x44640405,             $ Point Multicast
+                ,,Assem140,             $ OT RPI Size format
+                ,,Assem100,             $ TO rpi size format
+                ,,                      $ config 1
+                ,,                      $ config 2
+                "WE01 - Digital In/Output",    $ connection name
+                "",                     $ help string
+                "20 04 24 AF 2C [Param310] 2C 64";    $ path
+        Connection4 =
+                0x02010002,             $ Trigger and Transport
+                0x44640305,             $ Point Multicast
+                ,0,,                    $ O->T RPI, size, format
+                ,,Assem100,             $ T->O RPI, size, format
+                ,,                      $ proxy config size, format
+                ,,                      $ target config size, format
+                "WI01 - Digital Input", $ Connection Name
+                "",                     $ help string
+                "20 04 24 AF 2C [Param9] 2C 64";    $ Path
+        Connection5 =
+                0x01010002,             $ Trigger and Transport
+                0x44240305,             $ Point Multicast
+                ,0,,                    $ O->T RPI, size, format
+                ,,Assem100,             $ T->O RPI, size, format
+                ,,                      $ proxy config size, format
+                ,,                      $ target config size, format
+                "L01 - Digital Input",  $ Connection Name
+                "",                     $ help string
+                "20 04 24 AA 2C [Param8] 2C 64";    $ Path
+
+[Capacity]
+
+        ConnOverhead = .004;            $ Connection Overhead
+
+        MaxIOConnections = 3;           $ Maximum number of Class 1 Connections
+        MaxMsgConnections = 6;          $ Maximum number of Class 3 Connections
+        TSpec1 = TxRx, 10, 4000;        $ packets per sec @ 10 bytes
+        TSpec2 = TxRx, 504, 3000;       $ packets per sec @ 504 bytes
+
+[DLR Class]
+        Revision = 3;
+        Object_Name = "Device Level Ring Object";
+        Object_Class_Code = 0x47;
+        MaxInst = 1;
+        Number_Of_Static_Instances = 1;
+        Max_Number_Of_Dynamic_Instances = 0;
+
+
+[TCP/IP Interface Class]
+        Revision = 4;
+        Object_Name = "TCP/IP Interface Object";
+        Object_Class_Code = 0xF5;
+        MaxInst = 1;
+        Number_Of_Static_Instances = 1;
+        Max_Number_Of_Dynamic_Instances = 0;
+        ENetQCT1 =
+                350,                    $ Ready for Connection Time
+                50;                     $ Accumulated CIP Connection Time
+
+
+[Ethernet Link Class]
+        Revision = 4;
+        Object_Name = "Ethernet Link Object";
+        Object_Class_Code = 0xF6;
+        MaxInst = 2;
+        Number_Of_Static_Instances = 2;
+        Max_Number_Of_Dynamic_Instances = 0;
+        InterfaceLabel1 = "XF1";
+        InterfaceLabel2 = "XF2";
+
+$ ****************************************************************************
+$ EOF
+$ ****************************************************************************

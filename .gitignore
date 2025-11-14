@@ -72,6 +72,7 @@ frontend/build/
 # Project-specific
 iodd_storage/
 generated/
+ticket_attachments/
 *.db
 *.db-journal
 *.db-shm

@@ -1,0 +1,724 @@
+$ EZ-EDS Version 3.9 Generated Electronic Data Sheet
+
+[File]
+        DescText = "Network Interface Module EtherNet/IP";
+        CreateDate = 03-17-2015;
+        CreateTime = 10:00:00;
+        ModDate = 09-26-2016;
+        ModTime = 10:00:00;
+        Revision = 1.4;
+        HomeURL = "http://www.schneider-electric.com";
+
+[Device]
+        VendCode = 243;
+        VendName = "Schneider Electric";
+        ProdType = 14;
+        ProdTypeStr = "Programmable Logic Controller";
+        ProdCode = 4098;
+        MajRev = 4;
+        MinRev = 7;
+        ProdName = "TM251_Generic";
+        Catalog = "TM251_Generic";
+        Icon = "TM251_Generic.ico";
+        IconContents =
+                "AAABAAEAQEAAAAEAIAAoQgAAFgAAACgAAABAAAAAgAAAAAEAIAAAAAAAAEAA"
+                "AMIOAADCDgAAAAAAAAAAAAAAAAAAjrqVAJm7oAA9g0cAi7WUIGyddy9gmG4u"
+                "XJlvLlqaby5emW8uX5ptLlufaS5an2kuV59oLlSeZy5anGsuY5lwLmCYbS5q"
+                "nXYvgauMFUqTWgAAAAAAcG9qAJ2ZlhdjXVq4RT47/0U9PP9aU1L/ZV5e/2Jb"
+                "Wv9dVlb/UEpN/1tUWv9eWVvyUEtKxFRQTMFhXFnCX1pXnEdBPnFQSkdyYltY"
+                "c3JsaW9UTUo9Ny8sLVdPTC6OhoMvkYuKGURAQQaOiosHx8PDB////wBLSEgA"
+                "QkJCAFFRUQCSkpIAk5KSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAKHHpwAAAAAAdKl+UmOkcNRWomXrUaJj6U2jY+lLo2TpTqNj6U+i"
+                "YulLoV/pSaJf6UmkYOlIpWLpTaRj6VWiZOlSomLpV6Fm6l+ibsVpqng8aZVy"
+                "AHl8dRVXVVCmQTs2/0M5Nf9EQTH/TFE2/1VaQP9XW0H/WFxC/1lZRf9cWUv/"
+                "Yl9R/19bT/9dWU7/ZV1X/2NZVf9tYl//bGJe/2ddWf9NQz/+SD057kY7N+lL"
+                "QDzpVktI6k9FRc9IPT64Wk9RuWhdXrpcUVOVRkREdVFRUXdnZmZmmJeXDpaW"
+                "lgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABvo3gAdKN8"
+                "D16iastIp1n/Q6tW/0upWf9Hqlb/Qa1T/0irV/9brWj/ZbB0/2ewdf9cqmz/"
+                "TKVf/0aoWv9Gq1j/RalX/0eoWv9Jp13/V6Vnt+f/+AZNRUV8PTYv/0A2Mf9C"
+                "PDL/Tl4n/1h7Jv9WfyP/VHsk/1BuJv9OYyn/T2Er/1FjLv9NXyv/TV4r/1Fa"
+                "Mf9SVjD/T00y/1NGRv9TRUD/TT45/04+Ov9PPjn/Tz44/008Nv9JOzj/XE5M"
+                "/3ZnZf9+cW//bGJg/2ZfXP9PSkf/UU1L9JCNizSSj40AAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVZNgAFiQYhRPo13XQa5V/0KrVv9F"
+                "q1j/SKlW/0OtUf9WrGT/pti0/6XUs/+r0rT/rty4/1ytbf9Cq1f/Rq1X/0ep"
+                "Wf9HqFr/Q6tY/06jYOZHVkGXQDM04DktJv8/NS//QD8v/1J2Hv9bmBL/V5oO"
+                "/0+LG/9LdTf/WHFM/2R3U/9ccUz/Wm9J/1ZsQv9YbD//V20y/05dKv9DOzr/"
+                "RDs2/0U5N/9DODb/Qjcz/0I3Mf9DOTL/Rj02/1xQSv9pWlT/Z1tV/2liW/9x"
+                "ZmD/V01I/1JMSPOOiYY2kIuIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAFWTXwBYkGEUUKNe1kStV/9Cqlf/Q65X/1qvZ/9VnWD/dKt/"
+                "/6vbuf9gp3H/aaN0/7Dhuf9ttHv/TKNe/1axZf9Jrlv/Q6tX/0apW/9Qll7/"
+                "NUIt/z0xMP8+Miz/PjQu/0BAL/9Sex//WJwL/1qcCf9Kghz/Unxe/2d4fP9e"
+                "YWX/bHBy/2xycv93fXv/lJ6Y/1dtRf9KYir/WF5U/4iIhv95eHz/dXV4/21w"
+                "cP9kaGb/UldT/0A/OP9COjP/Sj03/0k9N/9GPjf/SD03/0g+Of9SS0jzjIeE"
+                "No6JhgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABXkmAA"
+                "WpBiFFSiYdZGqVn/T6Jg/4vDmP+0473/n8el/6vWtf+Gypb/SKta/1WlYf+O"
+                "xZb/qtm0/53JqP+y3Lz/isqY/0+kYP9JqF3/TJRZ/zZCLf8+MjH/QTUu/0A2"
+                "MP9APy//T3kj/1WZEf9anQv/TYMe/2OHbP9dam//DhAT/wcLDP8GCgn/LzQy"
+                "/5mfpP9Xak7/RmEo/1xoWv+Ynp7/RUdN/0JFSf9KUFD/TFZU/2dzcP9ITkf/"
+                "ODUt/0k+OP9KPjj/SD84/0o+OP9JPjn/UUpH84R/fDaGgX4AAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWZFhAFuOYhRVoGHWS6lc/2uv"
+                "e/+v0rn/drWB/4zOlv9rsHj/UaJh/2Ovcf9qrXP/YZ9o/3Cref+KxZf/eq+F"
+                "/6XVsP9vr37/SaZd/0aWU/83RSz/PjIx/0E0Lv9ANjD/QD8v/1F6IP9Umw//"
+                "VZwM/02AH/87TjT/IyUr/woKEf8LDBH/EhMW/zc5O/+bnqL/YXJU/0liKf9l"
+                "cGP/k5uZ/yEfI/8IBAb/BQYF/xQcGP9kcGr/VV9W/zc3Lv9IPzn/Sj44/0k/"
+                "OP9KPjj/ST46/1FKR/ODfns2hYB9AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAFiQYQBajWIUVZ5h1k2kXf+TzqH/lMWg/0ykWf9Ip1T/"
+                "Vqxk/4/Vn/+p17X/qNiu/53Tov9grWz/RadW/0imW/+Nw5r/ndCo/0qoXv9M"
+                "m1X/OEUv/z41Lf9BNDD/QDYu/0FBLv9SeyD/VJ0L/1ScD/9Lfhv/EyMJ/wwM"
+                "EP8SEhv/GRkl/yQkMP89QEj/mZ+g/2JzVv9FYST/ZXFl/5Kamf8nJCX/CwcH"
+                "/wYHBv8JDwz/JS4p/z9HQf86NzH/SkA6/0c/OP9JPzf/Sj44/0k+Ov9QSkbz"
+                "gHt4NoJ9egAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABV"
+                "kl8AWJFhFFSiYdZOpVz/gsCP/6natf+Py5n/Za5v/2Grbv94von/V6Zq/1qk"
+                "Zv+QxZf/l9Gh/02kXf9svYH/sdy+/4vElf9IqVv/T5lV/zpEMv8+Nin/QTMw"
+                "/z41K/9BQi3/U3oi/1WcC/9VmxD/S4AZ/yI2Gv8QFRL/GBoe/xwdKP8iJC//"
+                "OkBG/5ign/9gcVf/RGIh/2VyZv+SmZn/Jygn/wsJCf8HCAf/AwUE/wYJCf8X"
+                "HRr/PTYy/0k+Of9FQDf/ST83/0o+OP9JPjr/T0lF83x3dDZ+eXYAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAUZRdAFSSXxRPpV3WRqtX"
+                "/02hXv9fqG//h8WT/6Tcrv+Kx5f/VaJl/0asV/9Cqlj/WqVs/6Tbrf9fpmz/"
+                "hMKV/5LKpP9KoWL/SKpZ/0qYV/86RDP/Pjcp/0EzMf8+NSv/QEEs/1J6Iv9V"
+                "nAv/VZsQ/06DHP9YbFH/Q0dE/xscIP8aGyb/ISMu/ztAR/+ZoaD/YXJY/0Vj"
+                "Iv9mcmb/kpqa/yYpKP8NCwv/DAcI/wgFBf8NDg7/HyQg/z02Mv9KPzr/RUA3"
+                "/0k/N/9KPjj/ST46/09JRfN6dXM2fHd0AAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAFGVXABTkl4UTqVc1katV/9QqGH/YK9z/2KqcP9r"
+                "q3f/o9yx/2Sqc/9Iqlf/QalY/1upcP+l267/X6Vr/4fClf+V0Kf/SKVj/0ip"
+                "Wv9Il1j/OkQz/z84Kv9CNDL/PzYs/0FCLf9TeiL/VZwL/1SaEP9MgRn/V2tP"
+                "/11hXv8eICT/HB0n/x0fKv81OkD/maGg/1psUf9GZCL/YW1g/5Obm/8kKCf/"
+                "EA0N/w4HCP8RERH/S1ZU/09YVP87NTH/SkA6/0VAN/9JPzf/Sj44/0k+Ov9P"
+                "SUXzeHNxNnp1cgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AABUk18AWJNiFFSkYdZMp1v/icyY/6Dcsv9mt3b/S6Fb/4XGlf+bz6z/aa15"
+                "/2atdP+ZzqP/jsmY/0+mXf9mtHX/qNe0/43NnP9Ip1//TphZ/ztEM/8/OCr/"
+                "QjQx/z41K/9AQSz/Unoi/1WcDP9UmhD/TIAZ/1ptUv97gH3/gYOH/3p6hf9y"
+                "dH7/c3h//52lpP9Za0//RmQj/1xoW/+YoJ//REdG/zQwMf8oJSX/Iisq/2mE"
+                "f/9UYl3/PDUx/0k+Of9FQDf/ST83/0o+OP9JPjr/T0lF83hzcDZ6dXIAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAV5JgAFqQYhRTn1/W"
+                "SaNY/4zNmv+TxKD/Upxh/0ynX/9TpGf/g8SW/6LWsf+o1rD/kMiW/1ukZ/9R"
+                "pmD/T6Fg/5DBmv+UzaH/RqZf/1CXWP88QzT/PzYr/z8zMv89Ni3/QUEu/1R5"
+                "Iv9Wmwz/VpoR/0l+Fv8dLhn/REpM/1BTV/88O0P/aWpy/09UWv9UXmH/Ok4y"
+                "/0xoKv9QWEf/fH13/3t6e/98fH3/eHx9/3B8fP9ziIb/X2Vf/zs1L/9IPzn/"
+                "Rj43/0k/N/9KPjj/ST86/09IRfNzbms2dXBtAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAFeSYABZj2EUU6Nf1kWqVv9dr2z/qtez/429"
+                "l/+d1ar/c7mD/1KlY/9Pq2D/VaVj/0+kXv9tuXv/ntas/4y9lf+s2rD/Y69z"
+                "/0KoVf9NmlP/PEM1/0A2LP8+NDP/PTYv/0JBL/9WeSP/WJsN/1SZEP9JhBj/"
+                "UWtU/2t1ev9zd3v/bWxx/3Z3fP9ZX2T/S1RZ/zNGKf9UbjH/XWJO/1xYT/9i"
+                "Vlf/VUpK/09ISP9MS0n/SElH/01KRP9KQzz/S0Q9/0pAOf9KPzn/Sz85/0k/"
+                "Ov9NR0PzcGxpNnJtagAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAABZlGIAXZNmFVKiXtZGq1b/TaNd/324iv+j2a7/jL6T/6rSr/+k0qv/"
+                "Uqhl/06nYv+Zzaj/rdO6/4i9l/+o1q//h7yJ/1GlXv9ErVT/TptT/z1DNf9B"
+                "Ny3/PzU0/z02L/9DQTD/WHkj/1mbDf9SmhH/QoQX/1yAZ/9od3v/QkZK/1RU"
+                "WP9WV1v/ZGpt/5mip/9Xak3/Umkt/1dZRv9sZl3/c2Vh/2laVf9xZV//bGNd"
+                "/2hiW/9kYFj/ZV9X/15WUP9sY1z/a2Ba/2BUTv9KQDv/TEZC825pZjZvamcA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAdap+AHmqgSFW"
+                "pGHgRqtW/0qnW/9Mp13/Tqpd/1GiXP9tqHP/sN63/2iuef9gsXT/q+G7/2mt"
+                "ev9Cpln/S6lf/02nXP9DqVv/Rqpd/1SWW/88QzX/QTcu/z81NP89Ni//Q0Ew"
+                "/1h6JP9Zmw7/UpkQ/0WFGP9ggGj/VGBl/wkLEP8FBAn/AgIG/ycsMf+XnqP/"
+                "XG1Q/1FmKv9JSTb/dW1k/3lybP90b2f/cm5m/21oYf92cmr/ZmJa/2ZgWf9N"
+                "Rj//TUQ9/1BFPv9VSUP/SkA7/0pDP/NmYl82aGNgAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAF+ZaABil2oWUqFe2EWqVv9JqFr/SKpY"
+                "/0GtU/9Cq1T/V6xn/5jWpv+m2LL/rdW3/6DUrP9aq2r/Salc/0WqWP9Gq1X/"
+                "Pq1V/0arW/9UlFr/PEM1/0E3Lv9ANTT/PTYv/0NBMP9WeiT/WJsO/1SYEP9I"
+                "fxX/KTwn/xAWG/8JDBH/EA8V/xkZH/83PEL/mZ+k/2V0WP9UaCz/RUQx/01E"
+                "O/9NQ0H/Rz46/0tBPf9NQj7/UURB/1JMRf9WUEn/SEA5/0g+N/9JPjf/Sz85"
+                "/0g+Of9LREHzZWBdNmZhXgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAABspHUAdKR7Cl2jabhMpVz/SaZa/0qnWv9Gqlf/RatZ/0qnXv9O"
+                "qGP/VKxp/12lb/9OpmH/R6xb/0unXP9OqF3/SKxW/0GtVP9NrV7/SH1K/zk5"
+                "L/9BOC7/QjQ0/z82L/9CQTD/U3kk/1SbDP9VmRD/SX0W/xQkDP8LEBD/FBcb"
+                "/xwcJv8lJTD/PkFI/5ieof9kc1n/U2oo/0NEMf9FPjb/SD43/0g9N/9IPDf/"
+                "SDw3/0c7Nv9GPDb/RDs0/0c+N/9IPjf/ST43/0k9N/9IPjn/SkRA82FcWTZi"
+                "XVoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAW5dkAGmm"
+                "dQB6r4U1W55ppU6cXrxPm166UJtfuk+aXrpOml26TJteukygY7tUlWToVY1f"
+                "/1aOXf9Th1j/U4ZY/0+KVf9Tilj/T3hT/zpIM/8+NTD/QTgu/0M0NP9ANi//"
+                "QkEv/1J6Iv9UnAn/U5kO/0t/Gf8yRCr/Fhsa/xYZH/8cHCn/IiIw/z0+SP+X"
+                "nqD/Y3Na/1FrJv9CRDH/RD42/0Y9NP9GPDX/Rjw1/0Y8Nf9GPDX/Rjw1/0Y8"
+                "Nf9HPTb/SD43/0g9Nv9IPTb/Rzw3/0hCPvNfWlc2YFtYAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABHklcAcKh8AG6GbgJJdFAG"
+                "UXFZBlNxWwZScFoGUXBZBk9wWAaCoYwHbGdlrWNZVv9YS0f/SkE7/0Q8Nf9F"
+                "PDX/RDsz/0E4Mf9ANi//PzYy/0E4Lv9DNDT/QDYv/0JBMP9VeyP/V50J/1OZ"
+                "DP9Mgxn/WG5Q/0hQTf8VGR//Fhgk/x8hL/86PUf/lp6g/2JyWP9RaiX/QEMv"
+                "/0E7NP9EOzL/RTo0/0U7NP9FOzT/RTs0/0U7NP9FOzT/RTs0/0U7NP9GPDX/"
+                "Rzs1/0Y7N/9HQT3zW1ZTNlxXVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAVHtbAOr/8gBel2gASolWAE+JWwBQiVwAT4hbAE+I"
+                "WwBUiGAA////AXJsaqtmW1n/VUdE/0c9N/8/NzD/Qjgx/0A2L/9BNzD/QTcw"
+                "/z82Mv9AOC7/QzQ0/0E3MP9DQjD/Vngm/1maDf9VmQ3/SIIT/1RxSP9baV3/"
+                "KTEx/yMrMf8gJy7/Nz1B/5Wfn/9ZaU//T2gj/z0/K/88Ni7/Pzcu/0E3MP9A"
+                "Ni//PjQt/z40Lf9ANi//QTcw/0E3MP9CODD/Qzky/0Y6NP9GPDf/RkA881RP"
+                "TDZVUE0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAhYB/AP///wFqZGKr"
+                "V01L/0k7OP9DODL/QDgw/0M5Mv9IPjf/QTcw/0E3MP9ANjL/QTgu/0I0NP9C"
+                "ODH/Q0Ex/1FtJP9akxT/WJkS/1CMFv9TeD3/ZHpd/3eGd/96h3//dIB5/3uI"
+                "fv+Vo5j/WGlL/05nI/83OSX/NzEp/zsyKv88Miv/PDIr/zowKf87MSr/PDIr"
+                "/zwyK/88Miz/OzIs/z0zLf9BNjH/Qjg0/0Q+O/NUT0w2VFBNAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAIJ9ewD///8BYFpXq0pAPf9GOTT/Qjkx/0M7"
+                "NP9SSEH/TEI7/0E3MP9BNzD/QTcx/0E3MP9BNjH/Qjgx/0U+NP9KTy3/UWUm"
+                "/1ZzJv9XeSX/VXYs/1JwM/9Ubjn/VnA7/1dyPP9bdz7/WXY1/1ZxLv9GWCD/"
+                "MDEc/zowLv9BNzL/QTcw/0A2L/9ANi//QDYv/0I4Mv83Lyv/MCon/zEtK/8v"
+                "LSz/MC4s/zIvLv84NzbzSUhINUlIRwBoaGgAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAACBfHkA////AVxWU6tIPjr/Rzo0/0Q7Mv9PRz//S0E6/0I4Mf9BNzD/"
+                "QTcw/0E3MP9BNzD/QTcw/0E3MP9HPTb/ST09/0Y6O/9FQDb/UFJA/291Yf9u"
+                "d1z/bnhW/2RuS/9ibUj/ZnFK/1ZhNP9OVS3/MzQb/zIsI/9ANTj/ST47/0pA"
+                "Of9KQDn/UUdA/0pAOf9HPTn/OTEu/y8qKP8uLCz/Kyws/ysrK/8tLS3/Ly8v"
+                "/EFBQWQwMDAA7u7uAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgn16AP///wFd"
+                "V1StRjw4/0c6NP9EOjL/Qjoy/0M5Mv9BNzD/QTcw/0E3MP9BNzD/Qjgx/0E3"
+                "MP9BNzD/Rjw1/0w/OP9OQTb/SUEy/09LPf9gXlX/YVtW/1xTT/9fV1D/YVpR"
+                "/2VfVP9cT0n/VEVB/zMmIv82Kyb/Rj03/0k/Of9JPzj/SkA5/1VLRP9JPzn/"
+                "SD05/zkxLv8vKij/Liws/yssLP8rLCz/LS0t/y0tLf82NjbHdXV1E3d3dwAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAIuGgwAAAAAAZV5bbko/O/hGOTP/Qzkx"
+                "/z84MP9BNzD/QTcw/0E3MP9BNzD/Qjgx/0I4Mf9ANi//QDYv/0Y8Nf9MPzn/"
+                "TT83/0lANv9DPTb/OjU1/zozNf86MjP/ODEw/zYwLP82MCv/Oy8v/z0vMP8w"
+                "JB//Ny0i/0g/Mv9KQTj/SkA5/0tBOv9WTEX/S0E6/0k/Ov85MS7/Lion/y4s"
+                "LP8rLCz/Kysr/ywsLP8tLS3/NjY27F1dXSlhYWEAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAACAe3gAXVVRAFtTTydLQD3rRjkz/0I5Mf9FPTX/Rz02/0E3MP9B"
+                "NzD/QTcw/0E3MP9ANi//PzUu/0A2L/9GPDX/Sj46/0o9O/9GPjn/T0tH/4qI"
+                "iv+CgYX/eXh8/3Z2eP9ub2//a2xr/2FhYP82MjH/KyMh/zYpJv9JOjf/Sz85"
+                "/0k/Of9KQDr/VkxF/0tAOv9JPzr/OTEu/y4qJ/8uLCz/Kyws/yorK/8rKyv/"
+                "LCws/zMzM+tQUFApU1NTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFVP"
+                "TABUTkspSD4760Y3NP9KPjj/UklB/0pAOf9HPTb/Qzky/0E3MP9ANi//QDYv"
+                "/0E3MP9CODH/Rjw1/0s/OP9NPzn/ST04/1BMR/+Ynpr/XmNi/y8xMv86PD3/"
+                "PD8//31/f/+doJ//QkA+/yoiH/81KCX/Rjs3/0k+O/9PQ0D/UEVC/1pOS/9M"
+                "QD3/Sz87/zkxLv8rKif/LS0s/y8tLf8sLCz/LCws/ywsLP8zMzPrUFBQKVNT"
+                "UwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABVT0wAU05LKUk+POtHODX/"
+                "WEtG/1tRSv9KQDn/RDoz/0M5Mv9ANi//RDoz/0I4Mf9ANi//Qzky/0Y9Nv9L"
+                "Pzn/Tz86/0o8Of9ZVFH/mqCd/0dNS/8BAwP/BAUF/wUHB/9XWVn/lpmY/0NB"
+                "P/8qIR7/NCkk/0Y8Nv9KPzv/YFRS/2dbWf9kWFX/TkI//0w/PP85MS7/Kyon"
+                "/y0tLP8vLS7/LSws/ywsLP8tLS3/MzMz605OTilQUFAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAV1JPAFZRTilKQD3rSDk3/1dKRf9ORD3/Qjgx/0A2"
+                "L/8/NS7/Qzky/05EPf9ANi//OzEq/0I4Mf9HPTb/Sz84/04+Of9KPDn/XVhU"
+                "/52joP9JT03/BggI/wUHB/8FBwf/FBYW/z1AP/82NDH/LCMg/zUpJf9FPDX/"
+                "Rjs3/1ZKR/9aT0v/WE1J/01BPv9LPjr/OjIu/ysqJ/8rKyv/LCsr/ysrK/8r"
+                "Kyv/Kysr/zU1NetfX18pYmJiAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AFdSTwBWUU4pSkA+60Y4Nf9IOzb/Qzky/0I4Mf9BNzD/PzUu/1BGP/9VS0T/"
+                "SD43/zowKf9BNzD/Rz02/0s/OP9OPjn/Sjw5/1xXVP+cop//S1FQ/woMDP8F"
+                "Bwf/AwUF/wQHB/8PEhH/JSQh/y0kIf81KST/Rjw2/0k/O/9cUE7/YlZT/1ZK"
+                "SP9eUk//X1JP/zoyLv8qKCX/Kiop/yooKP8qKSn/Kysr/ykpKf8yMjLrXl5e"
+                "KWFhYQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABRTEoAUEtJKUk/PetG"
+                "ODX/RTgz/0M5Mv9CODH/QTcw/0A2L/9cUkv/WE5H/0g+N/85Lyj/QTcw/0c9"
+                "Nv9LPzj/TT44/0k8Of9dV1X/nKOh/01SUf8NDw//CAoK/wUHB/8GCAj/FhoZ"
+                "/ygnJf8rIyD/NCkk/0U8Nf9HPDj/Wk5M/05CQP9USUb/a19c/3BjYP86Mi7/"
+                "Kyon/y4uLf8uLCz/LS0t/y4uLv8uLi7/MzMz60pKSilMTEwAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAATklGAE5JRilJPz3rSDk3/0Y5NP9DOTL/Qjgx"
+                "/0I4Mf9CODH/SkA5/09FPv9HPTb/OS8o/0M5Mv9JPzj/Sj84/0w/N/9JPDn/"
+                "VU9R/5mdof9MUFL/EBER/wkLC/8FBgf/Ojs8/3B0c/87PTv/JiMg/zEpJf9E"
+                "OjT/ST84/1ZMRv9MQjz/VUtF/2ZbVf9mWlb/OTEt/ysqJ/8tLS3/Liws/yws"
+                "LP8sLCz/LS0t/zIyMutCQkIpQ0NDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAE5JRgBOSUYpST8960g5N/9GOTT/Qzky/0Y8Nf9FOzT/Qjgx/0c9Nv9O"
+                "RD3/Rz02/zowKf9DOTL/SkA5/0o/OP9LPzj/STs5/09HSP+bnZ//Y2dq/ywv"
+                "Mv8hIyf/Ghwf/2psb/+ho6L/Q0NA/yclIP8yKyX/RTw1/0pAOf9gVk//ZlxV"
+                "/19VTv9hVk//Y1ZS/zoyL/8qKSb/Li4t/y4sLP8sLCz/LCws/ywsLP8vLy/r"
+                "PDw8KT09PQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABKREEASURBKUg+"
+                "POtJOjf/RTgz/0U7NP9LQTr/RDoz/0I4Mf9IPjf/TkQ9/0k/OP86MCn/Qjgx"
+                "/0g+N/9JPzj/Sz45/0o8Of9RR0X/eHd0/3p8fP96e3z/fH1+/3p8ff+Ki4z/"
+                "kpCO/0I+Of8qJR//My0l/0U+NP9IPzf/WE1H/1dNRv9bUUr/UkdB/1BEQP86"
+                "Mi7/Kikm/y0uLf8tLCz/LCws/ywsLP8sLCz/Li4u6zQ0NCk0NDQAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAARkA9AEVAPSlHPTvrSjs5/00/O/9ZTkf/"
+                "S0E6/0A2L/8+NC3/Qzky/01DPP9JPzj/PjQt/0E3MP9HPTb/ST85/0o+Ov9N"
+                "PTr/Sz45/0M+N/9KRkD/VlJN/1FNSP9OSkX/TEhD/0U+Of84Lyr/Lygg/zMt"
+                "Iv9DPjL/Rj01/2RaU/9fVU7/VEpD/1tRSv9WSkX/OTEu/ysqJ/8uLi3/Liws"
+                "/ywsLP8sLCz/LCws/y0tLesvLy8pLy8vAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAEZAPwBFQD4pRz0760g6N/9dUUz/Y1lS/1BGP/9DOTL/QDYv/0I4"
+                "Mf9ORD3/SkA5/0I4Mf9BNzD/Rz02/0g/Of9JPjr/TD45/0w+N/9GPjX/X1hO"
+                "/4B4bv91bGP/c2th/3RsYv9MQTr/PTIs/zAnH/8yLCH/QT0x/0g/N/9ZTkj/"
+                "UUdA/1VLRP9oXlf/aV5Z/zkyLv8tKyj/Li0t/y4sLf8sLCz/LCws/ywsLP8t"
+                "LS3rLi4uKS8vLwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABHQT8ARkE+"
+                "KUc9O+tGOzj/WVFL/19YUf9ZT0j/RDoz/0A2L/9CODH/SkA5/0pAOf8/NS7/"
+                "PzUu/0g+N/9IPjj/ST84/0g9Nv9IPTb/SkA5/0tDO/9MRDz/SEA4/0tDPP9P"
+                "Rj//Rjw1/z0yK/8wJh//NCoj/0Y9Nf9KQDn/XVNM/1RKQ/9WTEX/aF5X/2ti"
+                "Wv86NC7/Lyoo/y4sLf8rKy7/Kior/ysrK/8sLCz/Kysr6yoqKikqKioAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAR0E+AEZCPylGPTvrRjs4/1ZOSP9T"
+                "TEX/RTs0/0M5Mv9BNzD/Qjgx/0k/OP9JPzj/PjQt/z81Lv9IPjf/ST84/05E"
+                "Pf9QRj//TUM8/zkvKP8vJiD/QDky/0c/OP9GPjf/Qzs0/0I5Mv8+NC3/MScg"
+                "/zQqI/9HPTb/SkA5/1tRSv9RR0D/VEpD/2ZdVf9qYVj/OTIt/y4pJ/8uKy3/"
+                "Kysu/yoqK/8rKyv/LCws/ysrK+spKSkpKioqAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAEdBPgBGQj8pRTw660c7OP9MRD7/Qjs0/0A2L/9ANi//QDYv"
+                "/0I4Mf9MQjv/S0E6/0A2L/9ANi//Rz02/0k/OP9aUEn/Z11W/1tRSv8rIRr/"
+                "EwoF/zgwKv9HPzj/Rj43/0U9Nv9FPDX/PjQt/zAmH/80KiP/Rjw1/0k/OP9V"
+                "S0T/UUdA/1ZMRf9eVE3/YVhQ/zozLf8vKij/Lywu/ywsL/8rKyz/Kysr/yws"
+                "LP8pKSnrISEhKSEhIQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAOzgA"
+                "QDw5KUU8OetFOjb/QTk0/0A5Mv9DOTL/Qjgx/0A2L/9CODH/S0E6/0c9Nv9A"
+                "Ni//QTcw/0c9Nv9KQDn/XVNM/2NZUv9RRj//LSMc/xsSDP87Myz/SUE6/0Y+"
+                "N/9FPTb/RTs0/z81Lv8wJh//NCoj/0Y8Nf9JPzj/YlhR/2VbVP9XTUb/ZVtU"
+                "/2tiWv86NC7/Lyso/y8sLv8sLC//LCwt/ysrK/8sLCz/Jycn6xoaGikaGhoA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAACHhoIAOTQyADQvLSdDOjjrRTo2/0A5"
+                "Mv9CPDX/SD43/0U7NP9ANzD/Qjky/0c9Nv9CODH/QTcw/0I4Mf9IPjf/TkQ9"
+                "/1ZNRv9ZUEn/TkY//zYuJ/8nHxn/PTUu/0hAOf9GPjf/RT02/0U7NP8+NC3/"
+                "LyUe/zQqI/9GPDX/ST84/1hOR/9aUEn/V01G/2heV/9vZV7/OzQv/y4pJ/8v"
+                "LS7/LCwv/ywsLf8rKyv/KCcn/yYmJusZGhopGRkZAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAkI+LAAoEAABWU09cRj4690M5M/9GQDf/VE9H/1xUTf9GPjf/"
+                "Pzcw/0E5Mv9BODH/QTcw/0E3MP9CODH/SD43/2lgWf9+dm//gHly/3h0bP9z"
+                "cGn/cm1l/1VNRv9GPjf/Rz84/0Y+N/9FPDX/PjQt/y8lHv8zKSL/Rjw1/0tB"
+                "Ov9kWlP/Z11W/1lPSP9kWlT/Z11Y/z01Mf8vKyj/Ly0t/yssLP8mKSn/IyIi"
+                "/ycjI/84NzfrOjs7KTw8PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGxrZwD/"
+                "//8BTEpGqkM8N/9FOzT/U01E/15ZUP9iWlP/RT02/z42L/9AODH/QDcw/0E3"
+                "MP9BNzD/Qjgx/0c9Nv95cGn/nZWO/4eBev+Gg3v/jYuD/5SOh/9nX1j/Rz84"
+                "/0c/OP9GPjf/Rj02/z81Lv8wJh//Myki/0U7NP9JPzj/VkxF/1xSS/9YTkf/"
+                "ZlxV/29kYP85Mi7/Lyoo/y8tLf8rLCz/ICMj/xgXF/8pJCX/Pz4+601NTSlS"
+                "UlIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABLSkYAYmtpAUhFQatEPTj/RTs0"
+                "/1VPRv9bV07/U0tE/0I6M/89NS7/Pzcw/0A3MP9BNzD/QTcw/0E3MP9GPDX/"
+                "enFq/5KKg/+Vj4j/iIV9/4iGfv+Mhn//ZFxV/0c/OP9IQDn/Rj43/0c+N/9B"
+                "NzD/Migh/zQqI/9FOzT/S0E6/2BWT/9rYVr/WU9I/1lOSP9bUUz/PDQx/y4p"
+                "J/8vLCz/Kyws/yUpKf8fHh7/Ih0e/yclJeskJSUpJSUlAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAASUhEAF1mZAFGRECrRD04/0U8Nf9OSD//aGRb/3FpYv9H"
+                "Pzj/PjYv/z83MP9ANzD/QTcw/0E3MP9BNzD/Rjw1/3tya/+dlY7/nJaO/4WC"
+                "ev+amJD/lI+H/2hgWf9HPzj/Rz84/0Y+N/9GPTb/Qzky/zYsJf81KyT/QTcw"
+                "/0k/OP9MQjv/TEI7/1NJQv9MQjz/S0E9/zs0MP8uKSf/Liws/yssLP8pLCz/"
+                "LCsr/y0oKf8sKivqMjIyJzMzMwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEhF"
+                "QgBUWlkBR0M/q0U8N/9CODH/Vk9I/2xmYP9LQjv/QDcw/0A3MP9ANzD/QDcw"
+                "/0E3MP9BNzD/Qjgx/0Y8Nf91bGX/npWO/6Gak/+OioL/k5CI/4+Kg/9lXlf/"
+                "Rz84/0hAOf9HPjf/Rzw2/0Y7NP89Miz/Nywm/z0zLP9CODH/RTs0/0g9Nv9I"
+                "PTb/SD43/0U7Nv87My7/MCsn/zAtK/8tLCv/LS0r/y8sK/8yLS3/SUdHs31+"
+                "fgtvb28AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABGPj4AOTdCAUhAPqtHPDf/"
+                "RDky/01FQv9HPz3/QTcw/z81Lv9BNzD/QTcw/0I4Mf8+NC3/PDIr/0I4Mf9I"
+                "Pjf/bWNc/4h+d/+Ohn//jIZ//5SQiP+KhX7/XVZP/0Y9Nv9LQDn/Sz44/0o9"
+                "N/9JPDb/Rjo0/0A0Lv89MCr/PzMt/0E1L/9DNzH/Rjkz/0Y5M/9EOTP/QDcw"
+                "/zQtJv8zLif/MS0m/zUtKP82Liv/NjIw+VVRUVA1MTAAVldXAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAARj4+ADg1QgFIQD6rRzw2/0U6M/9COTb/PTUz/0A2"
+                "MP9BNzD/QTcw/0E3MP9CODH/PjQt/zwyK/9EOjP/SkA5/1JHQP9WSkT/V01G"
+                "/1lRSv9dV1D/XFVO/1JJQv9NQjz/TUE7/05AOv9OQDr/TT85/0w+OP9KPDb/"
+                "Rjgy/0M2MP9ENjD/RTcx/0Q2MP9CNC7/QjUv/0E2L/8+NS7/OzQt/zkzLP88"
+                "My7/PDUy/zs3NPVDPz4+NzMyAJCOjgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AEM7OwArKDUBSD89q0g9N/9GOzT/PTQx/yYeHP86MCr/Qzky/0E3MP9BNzD/"
+                "PzUu/0E3MP9EOjP/ST84/0tBOv9PQz3/UEI8/1FFP/9ORD3/S0M8/01DPf9Q"
+                "RT//UkZA/1VGQP9VRD//VEM9/1NDPf9TQz3/VEQ+/1VFP/9SQjz/UUE7/1FB"
+                "O/9PPzn/UEA6/04/Of9MPjj/Sj84/0c+N/9GPjf/Rjw4/0U9Ov9BPDr5UU1M"
+                "Q0A8OwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABCOjoAJiIwAUg/PatI"
+                "Pjf/Rzw1/zcuLP8ZEQ//OS8o/0I4Mf9BNzD/QTcw/zIoIf83LSb/QTcw/0A2"
+                "L/9BNzD/T0I8/1NDPf9KPDb/Rzs1/0U7NP9GOzX/SDs1/0s8Nv9PPjj/Uz86"
+                "/1NAO/9RPjn/Uj86/1RBPP9UQDv/VEE8/1RBPP9WQj3/VUI9/1ZDPv9UQz7/"
+                "VEQ+/1JFP/9QRT7/UEU//09FQf9MRUL5UUxJomFdXRdjX14AAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAQjs5ACkoLQFHPzyrSD04/0Y7NP84MCv/GhMP"
+                "/zguJ/9CODH/Qzky/0M5Mv86MCn/NSsk/zEnIP8/NS7/UEY//09CPP9ENjD/"
+                "Oi0n/zktJ/84LSb/OC0n/zouKP87LSf/RDUv/008N/9GNS//QjEr/0IxK/9B"
+                "MSv/RTQv/0g3Mv9FNC7/Rzcx/1FAO/9QPzr/UUA7/0o8Nv9IOzb/Rzw3/0g/"
+                "Ov9RSUXcXFVSY4N+ewldWFYATkpJAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAEM8OQAuLy4BRz87q0c8OP9FOjP/OjQr/yAaEv88Miv/QTcw/0M5Mv9G"
+                "PDX/PDIr/zsxKv9JPzj/UEY//0pAOf89Myz/OS8o/zguJ/85Lyj/OS8o/zct"
+                "Jv87MCn/RTs0/0c9Nv8+My3/OjAp/zkvKP85Lif/OC4n/0A1L/89Myz/RDoz"
+                "/0tBOv9GPDX/Rz02/01CO/8+My3/Niwo/zw0MflKQkGmaGRkKj83NQB1cG0A"
+                "eXNwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABDPDkALi8uAUc/"
+                "O6tIPTn/RTo0/zUvJv85Myr/Qjgx/0c9Nv9EOjP/OjAp/zwyK/9KQDn/UEY/"
+                "/0c9Nv86MCn/OC4n/zkvKP85Lyj/OC4n/zguJ/89Myz/ST84/0M5Mv88Miv/"
+                "OzEq/zsxKv87MSr/OzEq/zguJ/87MSr/RDoz/0tBOv9ORD3/Rz02/z40Lf86"
+                "MSv/OC8r/0E6N9xUTkxkmJCRCWNeXQALAwMAamVjAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAQzw5ACorKgFHPzyrRzw4/0Q5Mv89Ni3/"
+                "Qz01/0c9Nv9CODH/OS8o/0E3MP9PRT7/S0E6/0A2L/87MSr/OS8o/zowKf86"
+                "MCn/OS8o/zguJ/9FOzT/S0E6/z81Lv85Lyj/PDIr/zwyK/87MSr/OzEq/zgu"
+                "J/8+NC3/ST84/05EPf9KQDn/Qzky/zowKf83Lif/OTIt+UpFQqZuaGUqKSIf"
+                "AHdwbwBiW1oAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAEM8OQApKikBRz88q0c8OP9GOjT/RD41/0A6Mv86MCn/PDIr/0g+"
+                "N/9TSUL/S0E6/z40Lf86MCn/OjAp/zowKf85Lyj/Niwl/z0zLP9JPzj/Rz02"
+                "/zwyK/87MSr/OjAp/zwyK/89Myz/OC4n/zowKf9EOjP/TUM8/01DPP9IPjf/"
+                "PjQt/zsxKv85Lyj/RDs03FRPSmOamZcIYVtYANHJzQBqYmIAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEPTkAKyws"
+                "AUhAPKtHPDf/Rjs1/z03Lv8yKyT/OjAp/0tBOv9LQzz/TkdA/0U8Nf9JPjj/"
+                "PjQu/zswKv87MCr/PDIr/0Y7Nf9NQjz/Qzgx/zovKf85Lyj/PTMs/z41Lv9D"
+                "OjP/QDcw/0Y8Nf9MQjv/SkA5/05FPv9LRD3/OzMt/zkxK/89NTD5UUlDpmpg"
+                "WSoRDgsAc29rAFBNSQB5dXMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARD43AD0/OQFGPzirPzUu/zcsJv8w"
+                "KCH/LScg/zsyLP86Myz/My4n/zk3L/9FPjj/SDw5/z0xLv87Lyv/PjIu/0xA"
+                "PP9JPjj/PTEr/zouKf87MCr/SD03/0U7NP9MQjz/RTs1/01DPf9USEL/U0dB"
+                "/0Y8Nv9EPDb/PTcw/zcyL/9KRUTnYFxZZZ6fmwlfV1EA7uTdAJaMhQAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAEA6MwA+QDkBQTozqzgtJ/8yJiD/Lygh/ywnIP8+NjHwWlVQ"
+                "vk5KRbpOS0a6UEpGvVhPTOFWTUrsT0VD609GQ+tNREHrQTgz7Ug/O/5GPjr/"
+                "UEdD/0xCPv8+Mi7/QTUx/0tAPP9USET/VEZD/0w9Ov9BNTH/PDIu/z82MvlR"
+                "TEmlfnp6NQAAAACKh4QAgoB7AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBOzQA"
+                "QUM8AUI7NKs+My3/UkdB/0E5Mv8xLCb/S0VByq6ppRKlop4FeXhzBm1qZgif"
+                "mZYilI2KKXhxbildVlMpTEZCKVdSTTB+eXVeeXRwZmxnY2VfVlNlV0xJZFxR"
+                "TnR1a2inbGJfq2VYVqtWSkeqUEVDsFtTUMdqY19kpp6bCXNubQDW0tEAr6uq"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQDozADU3MAFBOjOrRjw1/8e9"
+                "t/+sp6D/NzIu/1JNS8m9ubcMkY2KAF9dWABtaGQAoZqXAJSNigB3cG0AXFVS"
+                "AE5IRABPSUQAbmhkAG1nYwBjXVkAWlJOAFhNSQAoHBkA////Af///wH///8B"
+                "8/DwAauopQS2sq8QAAAAAIqDgACDe3gAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAFBIQgB8e3YBSUE7q0A1MP+LgXz/qaKd/z04NP9XVFTK"
+                "y8nJDKuqqQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAACqoqAAt66rAKykoQCTi4gAfXJwAFFDQQCjnZoAsKuoAKyn"
+                "pACWko8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABe"
+                "VVIAxr26AU5FQqxANzP/PDMv/z41Mf85NDL/VFNTuN7e3gipqakAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZl9cABAMCQBYUU5sSEI/"
+                "xEA6N8E+ODXBQT07wVhXV1Q7OjoAsbGxAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAIAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAgAAA"
+                "AAAAAAQAAAAAAABMAAAAAAAAAAIAgAAAAAAAAACAAAAAAAAABAAAAAAAAEwA"
+                "AAAAAAAAAgCAAAAAAAAAAIAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAIAAAAAA"
+                "AAAAgAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAACAAAAAAAAAAIAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAAgCAAAAAAAAA"
+                "AIAAAAAAAAAAgAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAACAAAAA"
+                "AAAAAAAAAAAAAAIEAAAAAAAMzACAAAAAAAAAAIAAAAAAAAAAgAAAAAAAAAAA"
+                "AAAAAAACAIAAAAAAAAAAgAAAAAAAAACAAACIAAAAAAAAACIAAAI=";
+
+[Device Classification]
+        Class1 = EtherNetIP;
+
+[Params]
+        Param1 =
+                0,
+                ,,
+                0x0000,
+                0xC8,
+                4,
+                "RPI",
+                "",
+                "",
+                10000,60000000,100000,
+                ,,,,
+                ,,,,
+                ;
+        Param2 =
+                0,
+                ,,
+                0x0000,
+                0xC7,
+                2,
+                "Size 2",
+                "",
+                "",
+                2,240,40,
+                ,,,,
+                ,,,,
+                ;
+        Param3 =
+                0,
+                ,,
+                0x0000,
+                0xC7,
+                2,
+                "Size 3",
+                "",
+                "",
+                2,240,40,
+                ,,,,
+                ,,,,
+                ;
+
+
+[Assembly]
+        Revision = 2;
+        Max_Number_Of_Dynamic_Instances = 0;
+        Class_Attributes =
+                0x01,
+                0x02,
+                0x03,
+                0x04,
+                0x06,
+                0x07;                   $ "Standard" class attributes
+        Instance_Attributes =
+                0x03,
+                0x04;
+        Class_Services =
+                0x08,                   $ Create supported
+                0x0E;                   $ GetAttributeSingle supported
+        Instance_Services =
+                0x09,                   $ Delete supported
+                0x0E,                   $ GetAttributeSingle supported
+                0x10;                   $ SetAttributeSingle supported
+
+        Assem1 =
+                "Data Format O->T (LS1)",
+                "20 04 24 96 30 03",
+                40,
+                0x0000,
+                ,,
+                320,;
+
+        Assem2 =
+                "Data Format T->O (LS1)",
+                "20 04 24 64 30 03",
+                40,
+                0x0000,
+                ,,
+                320,;
+
+
+[Connection Manager]
+        Revision = 1;
+        MaxInst = 1;
+        Number_Of_Static_Instances = 1;
+        Max_Number_Of_Dynamic_Instances = 0;
+        Class_Attributes =
+                0x01,
+                0x02,
+                0x03,
+                0x04,
+                0x06,
+                0x07;                   $ "Standard" class attributes
+        Instance_Attributes =
+                0x01,
+                0x02,
+                0x03,
+                0x04,
+                0x05,
+                0x06,
+                0x07,
+                0x08;                   $ Statistics attributes
+        Class_Services =
+                0x01,                   $ GetAttributeAll supported
+                0x0E;                   $ GetAttributeSingle supported
+        Instance_Services =
+                0x01,
+                0x02,                   $ Get/SetAttributeAll supported
+                0x0E,
+                0x10,                   $ Get/SetAttributeSingle supported
+                0x54,                   $ FwdOpen supported
+                0x5B,                   $ LargeFwdOpen supported
+                0x4E,                   $ FwdClose supported
+                0x52;                   $ UnconnectedSend supported
+
+        Connection1 =
+                0x04010002,             $ trigger & transport
+                                        $ 0-15    = supported transport classes (class 1)
+                                        $ 16      = cyclic (1 = supported)
+                                        $ 19-23   = reserved (must be zero)
+                                        $ 24-27   = exclusive owner
+                                        $ 28-30   = reserved (must be zero)
+                                        $ 31      = client 0 (don't care for classes 0 and 1)
+                0x44643405,             $ connection parameters
+                                        $ 0       = O->T fixed (1 = supported)
+                                        $ 1       = O->T variable (1 = supported)
+                                        $ 2       = T->O fixed (1 = supported)
+                                        $ 3       = T->O variable (1 = supported)
+                                        $ 4-7     = reserved (must be zero)
+                                        $ 8-11    = O->T header (32-bit header)
+                                        $ 12-15   = T->O header (heartbeat)
+                                        $ 16-19   = O->T connection type (point-to-point)
+                                        $ 20-23   = T->O connection type (multicast & point-to-point)
+                                        $ 24-27   = O->T priority (scheduled)
+                                        $ 28-31   = T->O priority (scheduled)
+                Param1,Param2,Assem2,   $ O->T RPI, size, format
+                Param1,0,,              $ T->O RPI, size, format
+                ,,                      $ config #1 size, format
+                ,,                      $ config #2 size, format
+                "Write Data to 150",    $ Connection Name
+                "Output Assembly (Originator --> Target,, %IW)",    $ help string
+                "20 04 24 03 2C 96 2C C6";    $ Path
+
+        Connection2 =
+                0x04010002,             $ trigger & transport
+                                        $ 0-15    = supported transport classes (class 1)
+                                        $ 16      = cyclic (1 = supported)
+                                        $ 19-23   = reserved (must be zero)
+                                        $ 24-27   = exclusive owner
+                                        $ 28-30   = reserved (must be zero)
+                                        $ 31      = client 0 (don't care for classes 0 and 1)
+                0x44640405,             $ connection parameters
+                                        $ 0       = O->T fixed (1 = supported)
+                                        $ 1       = O->T variable (1 = supported)
+                                        $ 2       = T->O fixed (1 = supported)
+                                        $ 3       = T->O variable (1 = supported)
+                                        $ 4-7     = reserved (must be zero)
+                                        $ 8-11    = O->T header (4 byte run/idle)
+                                        $ 12-15   = T->O header (modeless)
+                                        $ 16-19   = O->T connection type (point-to-point)
+                                        $ 20-23   = T->O connection type (multicast & point-to-point)
+                                        $ 24-27   = O->T priority (scheduled)
+                                        $ 28-31   = T->O priority (scheduled)
+                Param1,Param2,Assem1,   $ O->T RPI, size, format
+                Param1,Param3,Assem2,   $ T->O RPI, size, format
+                ,,                      $ config #1 size, format
+                ,,                      $ config #2 size, format
+                "Read From 100 / Write to 150",    $ Connection Name
+                "Read Input Assembly (Target --> Originator, %QW) and Write Output Assembly (Originator --> Target,, %IW) ",    $ help string
+                "20 04 24 03 2C 96 2C 64";    $ Path
+
+        Connection3 =
+                0x02010002,             $ trigger & transport
+                                        $ 0-15    = supported transport classes (class 1)
+                                        $ 16      = cyclic (1 = supported)
+                                        $ 19-23   = reserved (must be zero)
+                                        $ 24-27   = input only
+                                        $ 28-30   = reserved (must be zero)
+                                        $ 31      = client 0 (don't care for classes 0 and 1)
+                0x44640305,             $ connection parameters
+                                        $ 0       = O->T fixed (1 = supported)
+                                        $ 1       = O->T variable (1 = supported)
+                                        $ 2       = T->O fixed (1 = supported)
+                                        $ 3       = T->O variable (1 = supported)
+                                        $ 4-7     = reserved (must be zero)
+                                        $ 8-11    = O->T header (heartbeat)
+                                        $ 12-15   = T->O header (modeless)
+                                        $ 16-19   = O->T connection type (point-to-point)
+                                        $ 20-23   = T->O connection type (multicast & point-to-point)
+                                        $ 24-27   = O->T priority (scheduled)
+                                        $ 28-31   = T->O priority (scheduled)
+                Param1,0,,              $ O->T RPI, size, format
+                Param1,Param3,Assem2,   $ T->O RPI, size, format
+                ,,                      $ config #1 size, format
+                ,,                      $ config #2 size, format
+                "Read Data from 100",   $ Connection Name
+                "Input Assembly (Target --> Originator, %QW)",    $ help string
+                "20 04 24 03 2C C6 2C 64";    $ Path
+
+
+[Capacity]
+        MaxMsgConnections = 32;
+
+        MaxIOProducers = 32;
+        MaxIOConsumers = 32;
+        TSpec1 = TxRx, 4, 3200;
+        TSpec2 = TxRx, 80, 3200;
+
+[TCP/IP Interface Class]
+        Revision = 3;
+        MaxInst = 2;
+        Number_Of_Static_Instances = 2;
+        Max_Number_Of_Dynamic_Instances = 0;
+        Class_Attributes =
+                0x01,
+                0x02,
+                0x03,
+                0x06,
+                0x07;                   $ "Standard" class attributes
+        Instance_Attributes =
+                0x01,
+                0x02,
+                0x03,
+                0x04,
+                0x05,
+                0x06,
+                0x0A,
+                0x0B;
+        Class_Services =
+                0x01,                   $ GetAttributeAll supported
+                0x0E;                   $ GetAttributeSingle supported
+        Instance_Services =
+                0x01,                   $ GetAttributeAll supported
+                0x02,                   $ SetAttributeAll supported
+                0x0E,                   $ GetAttributeSingle supported
+                0x10;                   $ SetAttributeSingle supported
+
+[Ethernet Link Class]
+        Revision = 3;
+        MaxInst = 3;
+        Number_Of_Static_Instances = 3;
+        Max_Number_Of_Dynamic_Instances = 0;
+        Class_Attributes =
+                0x01,
+                0x02,
+                0x03,
+                0x04,
+                0x06,
+                0x07;
+        Instance_Attributes =
+                0x01,
+                0x02,
+                0x03,
+                0x04,
+                0x05,
+                0x06,
+                0x0A;
+        Class_Services =
+                0x01,                   $ GetAttributeAll supported
+                0x0E;                   $ GetAttributeSingle supported
+        Instance_Services =
+                0x01,                   $ GetAttributeAll supported
+                0x0E,                   $ GetAttributeSingle supported
+                0x10,                   $ SetAttributeSingle supported
+                0x4C;                   $ Get_And_Clear supported
+        InterfaceLabel1 = "Port 1";
+        InterfaceLabel2 = "Port 2";
+        InterfaceLabel3 = "Port 3";
+
+[Identity Class]
+        Revision = 1;
+        MaxInst = 1;
+        Number_Of_Static_Instances = 1;
+        Max_Number_Of_Dynamic_Instances = 0;
+        Class_Attributes =
+                0x01,
+                0x02,
+                0x03,
+                0x06,
+                0x07;                   $ "Standard" class attributes
+        Instance_Attributes =
+                0x01,
+                0x02,
+                0x03,
+                0x04,
+                0x05,
+                0x06,
+                0x07;                   $ "Required" attributes
+        Class_Services =
+                0x01,                   $ GetAttributeAll supported
+                0x0E;                   $ GetAttributeSingle supported
+        Instance_Services =
+                0x01,                   $ GetAttributeAll supported
+                0x05,                   $ Reset supported
+                0x0E,
+                0x10;                   $ Get/SetAttributeSingle supported
+
+[Message Router Class]
+        Revision = 1;
+        MaxInst = 1;
+        Number_Of_Static_Instances = 1;
+        Max_Number_Of_Dynamic_Instances = 0;
+        Class_Attributes =
+                0x01,
+                0x02,
+                0x03,
+                0x04,
+                0x05,
+                0x06,
+                0x07;                   $ "Standard" class attributes
+        Instance_Attributes =
+                0x01,
+                0x02;                   $ "Required" attributes
+        Class_Services =
+                0x01,                   $ GetAttributeAll supported
+                0x0E;                   $ GetAttributeSingle supported
+        Instance_Services =
+                0x01,                   $ GetAttributeAll supported
+                0x0A,                   $ Multiple Service Request supported
+                0x0E;                   $ GetAttributeSingle supported
+

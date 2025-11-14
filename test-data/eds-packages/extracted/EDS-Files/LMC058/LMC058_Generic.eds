@@ -1,0 +1,244 @@
+$ EZ-EDS Version 3.9 Generated Electronic Data Sheet
+
+[File]
+        DescText = "Network Interface Module EtherNet/IP";
+        CreateDate = 04-04-2008;
+        CreateTime = 10:00:00;
+        ModDate = 06-02-2008;
+        ModTime = 10:00:00;
+        Revision = 1.0;
+        HomeURL = "http://www.schneider-electric.com";
+
+[Device]
+        VendCode = 243;
+        VendName = "Schneider Electric";
+        ProdType = 14;
+        ProdTypeStr = "Programmable Logic Controller";
+        ProdCode = 2054;
+        MajRev = 2;
+        MinRev = 33;
+        ProdName = "LMC058_Generic";
+        Catalog = "LMC058_Generic";
+        Icon = "LMC058.ico";
+        IconContents =
+                "AAABAAEAQEAAAAEACAAoFgAAFgAAACgAAABAAAAAgAAAAAEACAAAAAAAABAA"
+                "AAAAAAAAAAAAAAEAAAABAAAAAAAAHBwcACEhIQAlJSUAKCgoADIyMgA9PT0A"
+                "RkZGAEtLTABRUFAAWlpaAGFhYQBpaWkAcXFxAHh3dwB1dXkAeXl5AH19fQAz"
+                "jhIANI8TADyTHABDlyQAR5kpAE6dMQBUoDkAWKM9AFylQgBgp0YAZapMAGir"
+                "TwBtrlUAcLBZAHazYAB8tmYAfrhqAIS7cQCIt34Ai794AIy/eQCRwn8AcnqG"
+                "AG+AiQBqi5YAe5OaAHiVoQCBgYEAgYSFAIiHhwCEio0AjY2NAJCPjwCIlpkA"
+                "kZGRAJWVlQCYl5cAlpaYAJeYmgCZmZkAi7OAAI63hQCWvIQAmL+NAJ2/kACI"
+                "nqQAlZygAJagogCcpKUAl6OqAKGhoQCmqKgAoqquAKmpqQCsq6sAsK+vAKqu"
+                "sACytLQAtbW1ALO2ugC8u7sAksKBAJjGhwCfypAApc2XAKbNmACs0Z4Ap8ei"
+                "ALDTowC11qgAuditALvasAC/3LUAvtO5AMLduADI4L4Av7/AAL/CxAC+xsgA"
+                "wcHBAMjHxwDGx8gAzMvLAM7VygDR0dEA09bWANjX1wDd3d0AzOPEANDkxwDT"
+                "58wA1ujPANrh1gDe7dkA2+DgAOXl5QDn6ekA6enpAOXx4gDr9OgA8PfuAPDw"
+                "8AD29vYA8vjxAPj5+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAD///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHh4eHh4eHh4"
+                "eHh4AHgAeAB4AHgAeAAAAAAAAAAAAAAAAAAAAHJxcnJxaXJycWlycnNpcnJx"
+                "aXNxcnNxcnh4cXFxaXFxcXFxcXFxcXFxcXFxcXFycXFxcWdnZGRkcWlpZ15O"
+                "ZGRocXhpZHF4cWlpeHFpaXJ4Z2dzeGlncXhxcXJycXFxcXFxcXFxZ2RpcXJy"
+                "cnJycnJ4cWk5Ly8vLmFpNRERLjdLYUhhTk5FZEhhSGRLYkthS05eSE5OXkhk"
+                "Tk5xeHFxcXJycnJycmhOcXJyeHF4cXhxeHFnRUJBODNfaUAwLi4wSGc5S0hk"
+                "NWQNZEVkEU4xTi9JYTk5SEgRTjU1c3NxcXJycnJ4cXhOLmdzeHNzc3hzeHNx"
+                "aUM/LCorY2k4KSgpMEs1RWQRNTFpLzkRcTVFDWdFNBFLTi8xRWkNDXN4cXFy"
+                "cnhxcXJxSDVOc3h4c3hzeHF4cWlkYGBgY2dwZF9OTU5haGRoZ2RkZ2dnZmZp"
+                "aGdnZmdnYWhnZ2RpaWl4cXFxcnNzc3NzSwcHD3Jzc3hxeHN4cXNyeHJycnJz"
+                "c3J4cnhyeGQRRUhkL0s2ZDVLL2RJOS9hYTE1TmIxS0hIeHNxcXNzc3Nzc0oI"
+                "CA9zc3N4c3hxeHNyeHFyeHFxDU5yeHJ4eHg1MWQvNS5pCTURaQ0xEWQxETFL"
+                "SA01OWcKCnNzcXNyeHNzcnhIBwgNeHN4c3Nzc3F4cXF4cXNzcQtOcmlpcnhx"
+                "YU5nS05OZ05hTmdiYU5nYU5LTmdLTk5pS0t4eHFzcnNzc3JySwcID3JzeHh4"
+                "c3hzeHFyc3NzeHE1ZHJyeHJzemFLZEtOSWROTktkYWFOYU5OTkteS15OZ0tL"
+                "cXNxc3N4c3Nyc00JByh4c3Nxc3N4cnFzc3Nzc3Fzc3J4cXhzeHhkDUk1ZBFO"
+                "SGkvTjZxYUsxTmkxNktpNUs5OXhzcXNyc3NzeHNxXkVfcnhyeHNyc3Nzc3Nz"
+                "c2lpSAgucnJzc3hxNTFkCTENcQs1CmkvLwthNg0LRV8LDjFoCQlyc3FzcnNz"
+                "c3Fzc0gxaHJxcnJzeHNzcXNzc3NzaDkGDXNzeHh4c2lnZ2lpZGdnZ2dkZ2lx"
+                "Z2lxZ19naWlnaXFxcnJxcXJ4cXNzc3JxZ3Jyc3hxcnFzc2lzc3N4cWk1Bg1x"
+                "Z2dxc3NiLktFTjFLNU45SzVOS0U1Tk4yNkteNk5FRXNzcXFzcXNzc3Nzc3Nz"
+                "c3Nxc3Nzc3NocXNzcnNoNwYNcXNzcnhxXjZnNTcLaTJLNWcNOTleNTFFREs5"
+                "SDVnOTlpaWlpaWlpaWlxaWlpcWlpaWlpaWlpZ2lzc3NpZzkHD3FycnNxc0tI"
+                "ZzVOSGg5SzZoTktFY2JIOUtkNkhIaTk5aWlpaGhoaGlnaGlnaWhpaGlpaWlo"
+                "aGFoaGlpaWdnZ2dpaWloaWdiYWdeXk5nYl5eZGReX2JnTl5OZF5hZGdkZHFz"
+                "cWlxaWlxaHFpaWlpaWlzcXNzc3Npc3NzcnJyeHFycnJ4cXN4aRFLSGk1SzJp"
+                "RUgxaWE1NWlnDTZOaC5LRUVzc3FxcXNzc3NzcXFycnJyc3Nzc3Nzc2loeHN4"
+                "c3hzeHN4c3h4czYvaQsuC2kJLgZnLi8JSEgNCjVLCA0NaQYGc3NxcnJzc3Nz"
+                "c3NzcnJycnNzc3Nzc3N4c3J4c3N4c3h4c3hzeHhnZ2doaGdoaGhpZ2lpcWdp"
+                "cWdiaWdpZ2lpaXNzc3Jyc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzcnhxc3hzc3Jzc3hz"
+                "eHN4S0RkSE5FTkhOSEtETk5ISE5ONk5IXkhkSUlzc3JyeHFzc3Nzc3Jzc3Nz"
+                "c3Nzcnhxc3Jzc3hxeHN4eHNzeHN4c2k2YTFLDWcNThFOEUtOSEthZzVINU4R"
+                "Z0tLeHFycnFzcnJycnJ4cXJ4cXN4cXNxc3NzaXNpcWlzaWlzaXNxcXM2NWkR"
+                "OS9pNTkuaUQ4MU5hMg5FZBE2OXEODnFzcmlpZ2hoaWlnZ2hzcXNzcXNzc3Nz"
+                "c3N4cXNzc3hzc3hxcnhzYUtLS2RLSEtiS0lIYWJLTmJhS05OZ15OYWFzc3Jp"
+                "aXNxaXFpc2lxc3Nzc3Nzc3Nzc3NzcXNzc3hxc3NzeHFzczVLYkgyMUUvLw1I"
+                "ORENSEgRDUU5ES45S0tLc3N4cXJzc3JycnNzc3Nzc3Nzc3Nzc3NyeHNzc3NL"
+                "S2hpcXF4eHgxBgYGRAkKC0gNCw1FEQoNMTULCw1FCgsKCnNzcXhpc3J4c3N4"
+                "cXNzc3Nzc3Nzc3J4cXFzeGlnSDFnZnN4c3N4EQEBATUCAgIuBQQEDQkEAgoN"
+                "AgQGLgQEAgJzc3FxPWVpaWlpc3Nzc3Nzc3Nzc3hxcXNzc3NpYUgvaHF3c3h4"
+                "cS4BAQkxAQECXgUCAUgIAgIxCwQBDS8CAQoKZ2c6Uzo+PDwkVXNzc3NzaWRn"
+                "Z2Zxc3Nzc3NxaWdIOXNxeHhxeHgRBAICOQEBAkgFAgJFCQIBMQ0CAQoxAQEI"
+                "B2RnW3Nuc3NxaXNzc3hxc2lnZGdicXNzc3hzaWdnSC9pc3N4eHF4LgUECzEB"
+                "AQRkBQIBTgkEATYNAgExMQIBDQ1zcXNzc3Nzc3Fzc3NzcXNzcXNxc3Nzc3Nx"
+                "c3NxcWlocXNzcXhxcUlFOTk2EQ0NYhELC041DQpIRQ0LNk4RDTExZ2hpaWhi"
+                "aXFnZGlpaGdncWlnaHNpZ2lpcWdocWloaXFxaGhxc2lecWlnOUhORGdIX0Vh"
+                "S0hLTk5IYUtkSGlxcWlpc2lxaXFpcWRpcXFnaXNpaWlxcWlpc2lpaWdnZ2dE"
+                "SzFLaWdpSEtiXkhkZ2lOZGdpYWRoaUhfZ3NkYWdxaWkAAAAAAAAAAAAAeGtY"
+                "Wm8AAAAAAAAAAAAAAAAAAAB3BgcHZwAAAHhnaXoAeHMAAHhyAAB6cngHCAtL"
+                "AABxAAAAAAAAAAAAAAB6ax4YFxcZH1N4AAAAAAAAAAAAAAAAAHNpaXgAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAYV5eaQAAAAAAAAAAAAAAAAAAWhISEhISEhISFyd1"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAdSYSEhISEhISEhIWT28AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGsaElRrbWtcHxUSEhQdAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABr"
+                "FxJWeHh6enptFxISElAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAaxgSHidRa3p6eh8UFiImAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHhRIhwUEiJ6"
+                "enpUGBhRVlR0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAenpcFxIfb3p6ax8SFBQSVwAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFoUFBISF1Z6enonFBxc"
+                "a3QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAABzWFoeFhQmenp6VBIWHyBPbQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSHhYSGnZ6emsfIhcSGFwAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "HhISEhRUdHp6enoeEhdaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAGscFBISFB9YXFxcHxIaXQAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAdSYSEhIS"
+                "FBQUFBQSTwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAB4UhgUEhISEhISF2sAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB4UiEaFxYaI2sA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAB6a1xaawAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAP//////////////////////////////////////////////////"
+                "////////////////////////////////////////////////////////////"
+                "///////ABVX//AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/"
+                "wf/8HCZgN/8AP/4f//w//wAP///////+AAf///////4AB////////gAD////"
+                "///+AAP///////4AAP///////wAA////////AAD///////8AAH///////8AA"
+                "f///////wAB////////AAH///////+AA////////8AD////////8Af//////"
+                "//8H////////////////////////////";
+
+[Device Classification]
+        Class1 = EtherNetIP;
+        Class2 = 1_RSNetWorx_Connectable_Module;
+
+[Params]
+        Param1 =
+                0,
+                ,,
+                0x0000,
+                0xC8,
+                4,
+                "RPI",
+                "",
+                "",
+                10000,60000000,100000,
+                ,,,,
+                ,,,,
+                ;
+        Param2 =
+                0,
+                ,,
+                0x0000,
+                0xC7,
+                2,
+                "Size 2",
+                "",
+                "",
+                4,240,40,
+                ,,,,
+                ,,,,
+                ;
+        Param3 =
+                0,
+                ,,
+                0x0000,
+                0xC7,
+                2,
+                "Size 3",
+                "",
+                "",
+                4,240,40,
+                ,,,,
+                ,,,,
+                ;
+
+[Connection Manager]
+        Connection1 =
+                0x04030002,             $ trigger & transport
+                0x44643405,             $ connection parameters
+                Param1,Param2,,         $ O=>T RPI,Size,Format
+                Param1,0,,              $ T=>O RPI,Size,Format
+                ,,                      $ config part 1 (not used)
+                ,,                      $ config part 2 (not used)
+                "Write Data to 150",    $ connection name
+                "Output Assembly (Originator --> Target,, %IW)",    $ Help string
+                "20 04 24 03 2C 96 2C C6";    $ outputs only path
+
+        Connection2 =
+                0x04030002,             $ trigger & transport
+                0x44640405,             $ connection parameters
+                Param1,Param2,,         $ O=>T RPI,Size,Format
+                Param1,Param3,,         $ T=>O RPI,Size,Format
+                ,,                      $ config part 1 (not used)
+                ,,                      $ config part 2 (not used)
+                "Read From 100 / Write to 150",    $ connection name
+                "Read Input Assembly (Target --> Originator, %QW) and Write Output Assembly (Originator --> Target,, %IW) ",    $ Help string
+                "20 04 24 03 2C 96 2C 64";    $ input/output path
+
+        Connection3 =
+                0x02030002,             $ trigger & transport
+                0x44640305,             $ connection parameters
+                Param1,0,,              $ O=>T RPI,Size,Format
+                Param1,Param3,,         $ T=>O RPI,Size,Format
+                ,,                      $ config part 1 (not used)
+                ,,                      $ config part 2 (not used)
+                "Read Data from 100",   $ connection name
+                "Input Assembly (Target --> Originator, %QW)",    $ Help string
+                "20 04 24 03 2C C6 2C 64";    $ inputs only path
+
+[Port]
+        Port2 =
+                TCP,
+                "Ethernet Port",
+                "20 F5 24 01",
+                2;
+
+[Capacity]
+        MaxMsgConnections = 32;
+        MaxIOProducers = 32;
+        MaxIOConsumers = 32;
+        TSpec1 = TxRx, 4, 100;
+        TSpec2 = TxRx, 496, 100;
+

@@ -3,7 +3,7 @@ import axios from 'axios';
 import {
   Bug, Filter, Download, ArrowLeft, Clock, AlertCircle, CheckCircle2,
   XCircle, AlertTriangle, MessageSquare, Calendar, User, Tag, Package,
-  ChevronRight, Search, X, Send, Trash2
+  ChevronRight, Search, X, Send, Trash2, FileArchive
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui';
 import { Button } from '@/components/ui';
@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui';
 import { Input } from '@/components/ui';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
 import { format } from 'date-fns';
+import TicketAttachments from './TicketAttachments';
 
 /**
  * Comprehensive Ticket Management Page
@@ -143,9 +144,10 @@ const TicketsPage = ({ API_BASE, toast }) => {
   const handleExportCSV = async () => {
     try {
       const params = new URLSearchParams();
-      if (filters.status) params.append('status', filters.status);
-      if (filters.priority) params.append('priority', filters.priority);
-      if (filters.device_type) params.append('device_type', filters.device_type);
+      if (filters.status && filters.status !== 'all') params.append('status', filters.status);
+      if (filters.priority && filters.priority !== 'all') params.append('priority', filters.priority);
+      if (filters.device_type && filters.device_type !== 'all') params.append('device_type', filters.device_type);
+      if (filters.category && filters.category !== 'all') params.append('category', filters.category);
 
       const response = await axios.get(`${API_BASE}/api/tickets/export/csv?${params.toString()}`, {
         responseType: 'blob'
@@ -168,6 +170,40 @@ const TicketsPage = ({ API_BASE, toast }) => {
       toast({
         title: 'Error',
         description: 'Failed to export tickets',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleExportWithAttachments = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (filters.status && filters.status !== 'all') params.append('status', filters.status);
+      if (filters.priority && filters.priority !== 'all') params.append('priority', filters.priority);
+      if (filters.device_type && filters.device_type !== 'all') params.append('device_type', filters.device_type);
+      if (filters.category && filters.category !== 'all') params.append('category', filters.category);
+
+      const response = await axios.get(`${API_BASE}/api/tickets/export-with-attachments?${params.toString()}`, {
+        responseType: 'blob'
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `tickets-with-attachments-${new Date().toISOString().split('T')[0]}.zip`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      toast({
+        title: 'Success',
+        description: 'Tickets with attachments exported successfully',
+      });
+    } catch (error) {
+      console.error('Failed to export tickets with attachments:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to export tickets with attachments',
         variant: 'destructive',
       });
     }
@@ -256,13 +292,22 @@ const TicketsPage = ({ API_BASE, toast }) => {
             Track and manage device issues and feature requests
           </p>
         </div>
-        <Button
-          onClick={handleExportCSV}
-          className="bg-green-600 hover:bg-green-700 text-white"
-        >
-          <Download className="w-4 h-4 mr-2" />
-          Export CSV
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={handleExportCSV}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Export CSV
+          </Button>
+          <Button
+            onClick={handleExportWithAttachments}
+            className="bg-purple-600 hover:bg-purple-700 text-white"
+          >
+            <FileArchive className="w-4 h-4 mr-2" />
+            Export with Attachments (ZIP)
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -638,6 +683,14 @@ const TicketDetailView = ({
               </form>
             </CardContent>
           </Card>
+
+          {/* Attachments */}
+          <TicketAttachments
+            ticket={ticket}
+            API_BASE={API_BASE}
+            toast={toast}
+            onAttachmentsChange={() => fetchTicketDetails(ticket.id)}
+          />
         </div>
 
         {/* Sidebar */}

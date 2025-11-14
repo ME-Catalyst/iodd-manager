@@ -42,7 +42,13 @@
       "WebFetch(domain:github.com)",
       "Bash(pip search:*)",
       "Bash(pip index:*)",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "WebFetch(domain:www.odva.org)",
+      "Bash(timeout 3 bash:*)",
+      "Bash(powershell -Command \"Stop-Process -Id 403500,420080 -Force\")",
+      "Bash(move \"alembic\\versions\\008_expand_parameter_schema.py\" \"alembic\\versions\\010_expand_parameter_schema.py\")",
+      "Bash(move \"alembic\\versions\\009_create_ticket_system.py\" \"alembic\\versions\\011_create_ticket_system.py\")",
+      "Bash(npx eslint:*)"
     ],
     "deny": [],
     "ask": []

@@ -3741,47 +3741,152 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
                                 </div>
                               </div>
                               {pd.record_items && pd.record_items.length > 0 && (
-                                <div className="mt-3 pt-3 border-t border-slate-700">
-                                  <p className="text-xs text-slate-400 mb-2 font-semibold">Record Structure:</p>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                    {pd.record_items.map((item) => (
-                                      <div
-                                        key={item.subindex}
-                                        className="p-2 rounded bg-slate-800/50 border border-slate-700"
-                                      >
-                                        <div className="flex items-center justify-between mb-1">
-                                          <span className="text-slate-300 text-sm font-medium">{item.name}</span>
-                                          <span className="text-xs text-slate-500 font-mono">idx:{item.subindex}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-xs text-slate-400">
-                                          <span className="font-mono">{item.data_type}</span>
-                                          <span>•</span>
-                                          <span>{item.bit_length} bits</span>
-                                          <span>•</span>
-                                          <span>offset: {item.bit_offset}</span>
-                                        </div>
-                                        {item.single_values && item.single_values.length > 0 && (
-                                          <div className="mt-2 pt-2 border-t border-slate-700">
-                                            <p className="text-xs text-slate-500 mb-1">Values:</p>
-                                            <div className="flex flex-wrap gap-1">
-                                              {item.single_values.map((sv, svIdx) => (
-                                                <div
-                                                  key={svIdx}
-                                                  className="text-xs px-2 py-1 rounded bg-slate-700/50 text-slate-300"
-                                                  title={sv.description || sv.name}
-                                                >
-                                                  <span className="font-mono text-[#3DB60F]">{sv.value}</span>
-                                                  <span className="text-slate-500 mx-1">=</span>
-                                                  <span>{sv.name}</span>
-                                                </div>
-                                              ))}
+                                <>
+                                  {/* Bit Field Visualizer */}
+                                  <div className="mt-3 pt-3 border-t border-slate-700">
+                                    <p className="text-xs text-slate-400 mb-2 font-semibold flex items-center gap-2">
+                                      <span>Bit Field Layout</span>
+                                      <Badge className="bg-slate-700 text-slate-300 text-xs">
+                                        {Math.ceil(pd.bit_length / 8)} bytes
+                                      </Badge>
+                                    </p>
+                                    <div className="space-y-2">
+                                      {(() => {
+                                        const totalBytes = Math.ceil(pd.bit_length / 8);
+                                        const bytes = [];
+
+                                        for (let byteIdx = 0; byteIdx < totalBytes; byteIdx++) {
+                                          const bitStart = byteIdx * 8;
+                                          const bitEnd = Math.min(bitStart + 8, pd.bit_length);
+                                          const bits = [];
+
+                                          for (let bitPos = bitStart; bitPos < bitEnd; bitPos++) {
+                                            // Find which field this bit belongs to
+                                            const field = pd.record_items.find(item =>
+                                              bitPos >= item.bit_offset &&
+                                              bitPos < item.bit_offset + item.bit_length
+                                            );
+
+                                            bits.push({
+                                              position: bitPos,
+                                              field: field,
+                                              isStart: field && bitPos === field.bit_offset,
+                                              isEnd: field && bitPos === field.bit_offset + field.bit_length - 1
+                                            });
+                                          }
+
+                                          bytes.push({ byteIdx, bits });
+                                        }
+
+                                        return bytes.map(({ byteIdx, bits }) => (
+                                          <div key={byteIdx} className="bg-slate-800/30 rounded p-2">
+                                            <div className="flex items-center gap-2 mb-1">
+                                              <span className="text-xs text-slate-500 font-mono w-16">Byte {byteIdx}:</span>
+                                              <div className="flex gap-px flex-1">
+                                                {bits.map((bit, idx) => {
+                                                  const color = bit.field
+                                                    ? `hsl(${(bit.field.subindex * 137.5) % 360}, 70%, 50%)`
+                                                    : '#475569';
+
+                                                  return (
+                                                    <div
+                                                      key={idx}
+                                                      className="relative group"
+                                                      style={{ flex: 1 }}
+                                                    >
+                                                      <div
+                                                        className="h-8 border border-slate-700 flex items-center justify-center text-xs font-mono transition-all hover:z-10 hover:scale-110"
+                                                        style={{
+                                                          backgroundColor: bit.field ? `${color}20` : '#1e293b',
+                                                          borderColor: bit.field ? `${color}80` : '#334155',
+                                                          borderLeftWidth: bit.isStart ? '2px' : '1px',
+                                                          borderRightWidth: bit.isEnd ? '2px' : '1px'
+                                                        }}
+                                                        title={bit.field ? `${bit.field.name} (bit ${bit.position})` : `Unused (bit ${bit.position})`}
+                                                      >
+                                                        <span className="text-slate-400" style={{ fontSize: '9px' }}>
+                                                          {7 - (bit.position % 8)}
+                                                        </span>
+                                                      </div>
+                                                      {bit.field && (
+                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:block z-20">
+                                                          <div className="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs whitespace-nowrap shadow-lg">
+                                                            <div className="font-semibold text-white">{bit.field.name}</div>
+                                                            <div className="text-slate-400">Bit {bit.position} ({bit.field.data_type})</div>
+                                                          </div>
+                                                        </div>
+                                                      )}
+                                                    </div>
+                                                  );
+                                                })}
+                                              </div>
                                             </div>
                                           </div>
-                                        )}
-                                      </div>
-                                    ))}
+                                        ));
+                                      })()}
+                                    </div>
+                                    <div className="mt-2 flex flex-wrap gap-2">
+                                      {pd.record_items.map((item) => {
+                                        const color = `hsl(${(item.subindex * 137.5) % 360}, 70%, 50%)`;
+                                        return (
+                                          <div key={item.subindex} className="flex items-center gap-1 text-xs">
+                                            <div
+                                              className="w-3 h-3 rounded border"
+                                              style={{
+                                                backgroundColor: `${color}30`,
+                                                borderColor: `${color}80`
+                                              }}
+                                            />
+                                            <span className="text-slate-300">{item.name}</span>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
                                   </div>
-                                </div>
+
+                                  {/* Record Structure Details */}
+                                  <div className="mt-3 pt-3 border-t border-slate-700">
+                                    <p className="text-xs text-slate-400 mb-2 font-semibold">Field Details:</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                      {pd.record_items.map((item) => (
+                                        <div
+                                          key={item.subindex}
+                                          className="p-2 rounded bg-slate-800/50 border border-slate-700"
+                                        >
+                                          <div className="flex items-center justify-between mb-1">
+                                            <span className="text-slate-300 text-sm font-medium">{item.name}</span>
+                                            <span className="text-xs text-slate-500 font-mono">idx:{item.subindex}</span>
+                                          </div>
+                                          <div className="flex items-center gap-2 text-xs text-slate-400">
+                                            <span className="font-mono">{item.data_type}</span>
+                                            <span>•</span>
+                                            <span>{item.bit_length} bits</span>
+                                            <span>•</span>
+                                            <span>offset: {item.bit_offset}</span>
+                                          </div>
+                                          {item.single_values && item.single_values.length > 0 && (
+                                            <div className="mt-2 pt-2 border-t border-slate-700">
+                                              <p className="text-xs text-slate-500 mb-1">Values:</p>
+                                              <div className="flex flex-wrap gap-1">
+                                                {item.single_values.map((sv, svIdx) => (
+                                                  <div
+                                                    key={svIdx}
+                                                    className="text-xs px-2 py-1 rounded bg-slate-700/50 text-slate-300"
+                                                    title={sv.description || sv.name}
+                                                  >
+                                                    <span className="font-mono text-[#3DB60F]">{sv.value}</span>
+                                                    <span className="text-slate-500 mx-1">=</span>
+                                                    <span>{sv.name}</span>
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </>
                               )}
                             </div>
                           ))}
@@ -3817,47 +3922,152 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
                                 </div>
                               </div>
                               {pd.record_items && pd.record_items.length > 0 && (
-                                <div className="mt-3 pt-3 border-t border-slate-700">
-                                  <p className="text-xs text-slate-400 mb-2 font-semibold">Record Structure:</p>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                    {pd.record_items.map((item) => (
-                                      <div
-                                        key={item.subindex}
-                                        className="p-2 rounded bg-slate-800/50 border border-slate-700"
-                                      >
-                                        <div className="flex items-center justify-between mb-1">
-                                          <span className="text-slate-300 text-sm font-medium">{item.name}</span>
-                                          <span className="text-xs text-slate-500 font-mono">idx:{item.subindex}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-xs text-slate-400">
-                                          <span className="font-mono">{item.data_type}</span>
-                                          <span>•</span>
-                                          <span>{item.bit_length} bits</span>
-                                          <span>•</span>
-                                          <span>offset: {item.bit_offset}</span>
-                                        </div>
-                                        {item.single_values && item.single_values.length > 0 && (
-                                          <div className="mt-2 pt-2 border-t border-slate-700">
-                                            <p className="text-xs text-slate-500 mb-1">Values:</p>
-                                            <div className="flex flex-wrap gap-1">
-                                              {item.single_values.map((sv, svIdx) => (
-                                                <div
-                                                  key={svIdx}
-                                                  className="text-xs px-2 py-1 rounded bg-slate-700/50 text-slate-300"
-                                                  title={sv.description || sv.name}
-                                                >
-                                                  <span className="font-mono text-[#3DB60F]">{sv.value}</span>
-                                                  <span className="text-slate-500 mx-1">=</span>
-                                                  <span>{sv.name}</span>
-                                                </div>
-                                              ))}
+                                <>
+                                  {/* Bit Field Visualizer */}
+                                  <div className="mt-3 pt-3 border-t border-slate-700">
+                                    <p className="text-xs text-slate-400 mb-2 font-semibold flex items-center gap-2">
+                                      <span>Bit Field Layout</span>
+                                      <Badge className="bg-slate-700 text-slate-300 text-xs">
+                                        {Math.ceil(pd.bit_length / 8)} bytes
+                                      </Badge>
+                                    </p>
+                                    <div className="space-y-2">
+                                      {(() => {
+                                        const totalBytes = Math.ceil(pd.bit_length / 8);
+                                        const bytes = [];
+
+                                        for (let byteIdx = 0; byteIdx < totalBytes; byteIdx++) {
+                                          const bitStart = byteIdx * 8;
+                                          const bitEnd = Math.min(bitStart + 8, pd.bit_length);
+                                          const bits = [];
+
+                                          for (let bitPos = bitStart; bitPos < bitEnd; bitPos++) {
+                                            // Find which field this bit belongs to
+                                            const field = pd.record_items.find(item =>
+                                              bitPos >= item.bit_offset &&
+                                              bitPos < item.bit_offset + item.bit_length
+                                            );
+
+                                            bits.push({
+                                              position: bitPos,
+                                              field: field,
+                                              isStart: field && bitPos === field.bit_offset,
+                                              isEnd: field && bitPos === field.bit_offset + field.bit_length - 1
+                                            });
+                                          }
+
+                                          bytes.push({ byteIdx, bits });
+                                        }
+
+                                        return bytes.map(({ byteIdx, bits }) => (
+                                          <div key={byteIdx} className="bg-slate-800/30 rounded p-2">
+                                            <div className="flex items-center gap-2 mb-1">
+                                              <span className="text-xs text-slate-500 font-mono w-16">Byte {byteIdx}:</span>
+                                              <div className="flex gap-px flex-1">
+                                                {bits.map((bit, idx) => {
+                                                  const color = bit.field
+                                                    ? `hsl(${(bit.field.subindex * 137.5) % 360}, 70%, 50%)`
+                                                    : '#475569';
+
+                                                  return (
+                                                    <div
+                                                      key={idx}
+                                                      className="relative group"
+                                                      style={{ flex: 1 }}
+                                                    >
+                                                      <div
+                                                        className="h-8 border border-slate-700 flex items-center justify-center text-xs font-mono transition-all hover:z-10 hover:scale-110"
+                                                        style={{
+                                                          backgroundColor: bit.field ? `${color}20` : '#1e293b',
+                                                          borderColor: bit.field ? `${color}80` : '#334155',
+                                                          borderLeftWidth: bit.isStart ? '2px' : '1px',
+                                                          borderRightWidth: bit.isEnd ? '2px' : '1px'
+                                                        }}
+                                                        title={bit.field ? `${bit.field.name} (bit ${bit.position})` : `Unused (bit ${bit.position})`}
+                                                      >
+                                                        <span className="text-slate-400" style={{ fontSize: '9px' }}>
+                                                          {7 - (bit.position % 8)}
+                                                        </span>
+                                                      </div>
+                                                      {bit.field && (
+                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:block z-20">
+                                                          <div className="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs whitespace-nowrap shadow-lg">
+                                                            <div className="font-semibold text-white">{bit.field.name}</div>
+                                                            <div className="text-slate-400">Bit {bit.position} ({bit.field.data_type})</div>
+                                                          </div>
+                                                        </div>
+                                                      )}
+                                                    </div>
+                                                  );
+                                                })}
+                                              </div>
                                             </div>
                                           </div>
-                                        )}
-                                      </div>
-                                    ))}
+                                        ));
+                                      })()}
+                                    </div>
+                                    <div className="mt-2 flex flex-wrap gap-2">
+                                      {pd.record_items.map((item) => {
+                                        const color = `hsl(${(item.subindex * 137.5) % 360}, 70%, 50%)`;
+                                        return (
+                                          <div key={item.subindex} className="flex items-center gap-1 text-xs">
+                                            <div
+                                              className="w-3 h-3 rounded border"
+                                              style={{
+                                                backgroundColor: `${color}30`,
+                                                borderColor: `${color}80`
+                                              }}
+                                            />
+                                            <span className="text-slate-300">{item.name}</span>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
                                   </div>
-                                </div>
+
+                                  {/* Record Structure Details */}
+                                  <div className="mt-3 pt-3 border-t border-slate-700">
+                                    <p className="text-xs text-slate-400 mb-2 font-semibold">Field Details:</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                      {pd.record_items.map((item) => (
+                                        <div
+                                          key={item.subindex}
+                                          className="p-2 rounded bg-slate-800/50 border border-slate-700"
+                                        >
+                                          <div className="flex items-center justify-between mb-1">
+                                            <span className="text-slate-300 text-sm font-medium">{item.name}</span>
+                                            <span className="text-xs text-slate-500 font-mono">idx:{item.subindex}</span>
+                                          </div>
+                                          <div className="flex items-center gap-2 text-xs text-slate-400">
+                                            <span className="font-mono">{item.data_type}</span>
+                                            <span>•</span>
+                                            <span>{item.bit_length} bits</span>
+                                            <span>•</span>
+                                            <span>offset: {item.bit_offset}</span>
+                                          </div>
+                                          {item.single_values && item.single_values.length > 0 && (
+                                            <div className="mt-2 pt-2 border-t border-slate-700">
+                                              <p className="text-xs text-slate-500 mb-1">Values:</p>
+                                              <div className="flex flex-wrap gap-1">
+                                                {item.single_values.map((sv, svIdx) => (
+                                                  <div
+                                                    key={svIdx}
+                                                    className="text-xs px-2 py-1 rounded bg-slate-700/50 text-slate-300"
+                                                    title={sv.description || sv.name}
+                                                  >
+                                                    <span className="font-mono text-[#3DB60F]">{sv.value}</span>
+                                                    <span className="text-slate-500 mx-1">=</span>
+                                                    <span>{sv.name}</span>
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </>
                               )}
                             </div>
                           ))}

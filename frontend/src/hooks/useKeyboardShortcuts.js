@@ -96,6 +96,12 @@ export const KEYBOARD_SHORTCUTS = {
     description: 'Go to Compare',
     category: 'Navigation',
   },
+  GOTO_ANALYTICS: {
+    key: 'a',
+    ctrl: false,
+    description: 'Go to Analytics',
+    category: 'Navigation',
+  },
 
   // Actions
   UPLOAD_FILE: {

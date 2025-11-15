@@ -37,6 +37,7 @@ import NodeRedManager from './components/NodeRedManager';
 import GrafanaManager from './components/GrafanaManager';
 import ThemeToggle from './components/ThemeToggle';
 import KeyboardShortcutsHelp from './components/KeyboardShortcutsHelp';
+import AnalyticsDashboard from './components/AnalyticsDashboard';
 import { useKeyboardShortcuts, KEYBOARD_SHORTCUTS } from './hooks/useKeyboardShortcuts';
 import { useTheme } from './contexts/ThemeContext';
 import { getUnitInfo, formatValueWithUnit } from './utils/iolinkUnits';
@@ -186,6 +187,13 @@ const Sidebar = ({ activeView, setActiveView, devices, edsFiles, onDeviceSelect,
             label="Compare"
             active={activeView === 'compare'}
             onClick={() => setActiveView('compare')}
+            collapsed={collapsed}
+          />
+          <NavItem
+            icon={<BarChart3 className="w-5 h-5" />}
+            label="Analytics"
+            active={activeView === 'analytics'}
+            onClick={() => setActiveView('analytics')}
             collapsed={collapsed}
           />
         </nav>
@@ -4743,6 +4751,10 @@ const IODDManager = () => {
       callback: () => setActiveView('compare'),
     },
     {
+      ...KEYBOARD_SHORTCUTS.GOTO_ANALYTICS,
+      callback: () => setActiveView('analytics'),
+    },
+    {
       ...KEYBOARD_SHORTCUTS.UPLOAD_FILE,
       callback: () => fileInputRef.current?.click(),
     },
@@ -5469,6 +5481,22 @@ const IODDManager = () => {
                 <ComparisonView
                   API_BASE={API_BASE}
                   onBack={() => setActiveView('overview')}
+                />
+              </motion.div>
+            )}
+
+            {activeView === 'analytics' && (
+              <motion.div
+                key="analytics"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.2 }}
+              >
+                <AnalyticsDashboard
+                  devices={devices}
+                  edsFiles={edsFiles}
+                  stats={stats}
                 />
               </motion.div>
             )}

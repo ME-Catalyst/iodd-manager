@@ -687,4 +687,4 @@ python iodd_manager.py --database /tmp/iodd_test.db import sensor.xml
 - **[Web Interface](web-interface.md)** - Use the web UI
 - **[API Guide](api.md)** - Use the REST API
 - **[Adapter Guide](adapters.md)** - Learn about adapter generation
-- **[Developer Guide](../developer-guide/setup.md)** - Extend CLI functionality
+- **[Developer Guide](../../developer/developer-guide/setup.md)** - Extend CLI functionality

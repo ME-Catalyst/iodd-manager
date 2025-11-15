@@ -535,4 +535,4 @@ CORS_ORIGINS=http://localhost:3000,http://localhost:5173
 - **[CLI Usage](cli.md)** - Use command-line interface
 - **[API Guide](api.md)** - Access via REST API
 - **[Adapter Guide](adapters.md)** - Learn about adapter generation
-- **[API Reference](../api/overview.md)** - Complete API documentation
+- **[API Reference](../../developer/api/overview.md)** - Complete API documentation

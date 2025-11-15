@@ -607,7 +607,7 @@ kubectl apply -f k8s-deployment.yml
 
 ## Next Steps
 
-- **[Production Deployment](../deployment/production.md)** - Deploy to production servers
-- **[Monitoring](../deployment/monitoring.md)** - Set up monitoring and alerts
-- **[Environment Configuration](../deployment/environment.md)** - Advanced environment setup
-- **[API Documentation](../api/overview.md)** - Explore API capabilities
+- **[Production Deployment](../../deployment/production.md)** - Deploy to production servers
+- **[Monitoring](../../deployment/monitoring.md)** - Set up monitoring and alerts
+- **[Environment Configuration](../../deployment/environment.md)** - Advanced environment setup
+- **[API Documentation](../../developer/api/overview.md)** - Explore API capabilities

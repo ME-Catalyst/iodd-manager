@@ -745,7 +745,7 @@ session.mount('http://', adapter)
 
 ## Next Steps
 
-- **[API Reference](../api/overview.md)** - Complete API documentation
+- **[API Reference](../../developer/api/overview.md)** - Complete API documentation
 - **[Adapter Guide](adapters.md)** - Learn about adapter generation
 - **[Web Interface](web-interface.md)** - Use the web UI
-- **[Developer Guide](../developer-guide/setup.md)** - Extend the API
+- **[Developer Guide](../../developer/developer-guide/setup.md)** - Extend the API

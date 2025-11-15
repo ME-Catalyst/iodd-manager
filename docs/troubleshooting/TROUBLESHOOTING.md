@@ -383,11 +383,11 @@ VITE_DEBUG=true npm run dev
 
 ### Planned Fixes
 
-See [ROADMAP.md](ROADMAP.md) for planned improvements.
+See our GitHub issues and milestones for planned improvements.
 
 ---
 
 **Still having issues?** Check:
 - [GitHub Issues](https://github.com/ME-Catalyst/iodd-manager/issues)
-- [API Documentation](docs/API_SPECIFICATION.md)
-- [Developer Reference](DEVELOPER_REFERENCE.md)
+- [API Documentation](../developer/API_SPECIFICATION.md)
+- [Developer Reference](../developer/DEVELOPER_REFERENCE.md)

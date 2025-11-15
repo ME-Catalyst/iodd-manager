@@ -324,7 +324,7 @@ npm test
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) for contribution guidelines.
 
 **Quick checklist:**
 - [ ] Code follows style conventions

@@ -2,7 +2,7 @@
 
 This page provides production-specific Docker deployment information.
 
-For basic Docker usage and quick start, see **[Getting Started - Docker](../getting-started/docker.md)**.
+For basic Docker usage and quick start, see **[Getting Started - Docker](../user/getting-started/docker.md)**.
 
 ## Production Docker Setup
 
@@ -517,4 +517,4 @@ docker exec iodd-manager ping nginx
 - **[Production Deployment](production.md)** - Manual production deployment
 - **[Environment Configuration](environment.md)** - Configuration management
 - **[Monitoring](monitoring.md)** - Production monitoring
-- **[Getting Started - Docker](../getting-started/docker.md)** - Docker basics
+- **[Getting Started - Docker](../user/getting-started/docker.md)** - Docker basics

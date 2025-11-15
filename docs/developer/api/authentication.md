@@ -283,4 +283,4 @@ Interested in implementing authentication? See:
 - **[API Overview](overview.md)** - API introduction
 - **[Endpoints Reference](endpoints.md)** - Available endpoints
 - **[Error Handling](errors.md)** - Error codes
-- **[Deployment Guide](../deployment/production.md)** - Secure deployment
+- **[Deployment Guide](../../deployment/production.md)** - Secure deployment

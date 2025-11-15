@@ -238,6 +238,6 @@ For detailed configuration options, see `CONFIGURATION.md`.
 
 ---
 
-For troubleshooting and common issues, see [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
+For troubleshooting and common issues, see [TROUBLESHOOTING.md](../troubleshooting/TROUBLESHOOTING.md).
 
-For developer information, see [DEVELOPER_REFERENCE.md](DEVELOPER_REFERENCE.md).
+For developer information, see [DEVELOPER_REFERENCE.md](../developer/DEVELOPER_REFERENCE.md).

@@ -194,9 +194,9 @@ Now that you have IODD Manager running:
 
 ### Development Setup
 
-- **[Developer Setup](../developer-guide/setup.md)** - Set up development environment
-- **[Architecture Overview](../developer-guide/architecture.md)** - Understand the codebase
-- **[Contributing Guide](../developer-guide/contributing.md)** - Contribute to the project
+- **[Developer Setup](../../developer/developer-guide/setup.md)** - Set up development environment
+- **[Architecture Overview](../../developer/developer-guide/architecture.md)** - Understand the codebase
+- **[Contributing Guide](../../developer/developer-guide/contributing.md)** - Contribute to the project
 
 ## Common Tasks
 
@@ -283,9 +283,9 @@ Check that your IODD file:
 ## Getting Help
 
 - **[Full Documentation](../user-guide/web-interface.md)** - Comprehensive guides
-- **[API Reference](../api/endpoints.md)** - Complete API documentation
+- **[API Reference](../../developer/api/endpoints.md)** - Complete API documentation
 - **[GitHub Issues](https://github.com/ME-Catalyst/iodd-manager/issues)** - Report bugs
-- **[Contributing](../about/contributing.md)** - Get involved
+- **[Contributing](/CONTRIBUTING.md)** - Get involved
 
 ## What's Next?
 
@@ -295,6 +295,6 @@ You're now ready to use IODD Manager! Here are some recommended next steps:
 2. **Explore the API** - Visit http://localhost:8000/docs for interactive API docs
 3. **Generate adapters** - Create Node-RED or custom platform adapters
 4. **Customize configuration** - Adjust settings in `.env` for your needs
-5. **Set up for production** - See [Deployment Guide](../deployment/production.md)
+5. **Set up for production** - See [Deployment Guide](../../deployment/production.md)
 
 Happy IODD managing! 🚀

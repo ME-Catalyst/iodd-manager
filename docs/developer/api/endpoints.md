@@ -2,7 +2,7 @@
 
 Complete reference for all IODD Manager API endpoints.
 
-For usage examples and client code, see the **[API Usage Guide](../user-guide/api.md)**.
+For usage examples and client code, see the **[API Usage Guide](../../user/user-guide/api.md)**.
 
 ## Health & Status
 
@@ -420,6 +420,6 @@ See [Error Handling](errors.md) for complete error code reference.
 ## Next Steps
 
 - **[API Overview](overview.md)** - API introduction and concepts
-- **[API Usage Guide](../user-guide/api.md)** - Usage examples and client code
+- **[API Usage Guide](../../user/user-guide/api.md)** - Usage examples and client code
 - **[Error Handling](errors.md)** - Error codes and handling
 - **[Authentication](authentication.md)** - Authentication methods (future)

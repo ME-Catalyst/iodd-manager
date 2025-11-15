@@ -380,5 +380,5 @@ If you encounter persistent errors:
 
 - **[API Overview](overview.md)** - API introduction
 - **[Endpoints Reference](endpoints.md)** - Available endpoints
-- **[API Usage Guide](../user-guide/api.md)** - Usage examples
+- **[API Usage Guide](../../user/user-guide/api.md)** - Usage examples
 - **[Troubleshooting](../getting-started/installation.md#troubleshooting)** - General troubleshooting

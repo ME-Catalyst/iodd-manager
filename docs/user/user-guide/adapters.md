@@ -738,4 +738,4 @@ python iodd_manager.py show 12345 67890 --parameters
 - **[Web Interface](web-interface.md)** - Generate via web UI
 - **[CLI Usage](cli.md)** - Generate via command line
 - **[API Guide](api.md)** - Generate via API
-- **[Developer Guide](../developer-guide/architecture.md)** - Extend generation
+- **[Developer Guide](../../developer/developer-guide/architecture.md)** - Extend generation

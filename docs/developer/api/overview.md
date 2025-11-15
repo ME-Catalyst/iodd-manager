@@ -260,7 +260,7 @@ client = IODDManagerClient()
 devices = client.get_devices()
 ```
 
-See [API Usage Guide](../user-guide/api.md) for complete client implementation.
+See [API Usage Guide](../../user/user-guide/api.md) for complete client implementation.
 
 ### JavaScript/Node.js
 
@@ -391,4 +391,4 @@ When features are deprecated:
 - **[Endpoints Reference](endpoints.md)** - Detailed endpoint documentation
 - **[Authentication](authentication.md)** - Authentication methods (future)
 - **[Error Handling](errors.md)** - Error codes and handling
-- **[API Usage Guide](../user-guide/api.md)** - Usage examples and client code
+- **[API Usage Guide](../../user/user-guide/api.md)** - Usage examples and client code

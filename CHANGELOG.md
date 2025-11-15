@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Latest Features
+
+#### User Experience Enhancements
+- **Dark/Light Theme Toggle** - System preference detection with manual override, localStorage persistence
+- **Keyboard Shortcuts System** - Comprehensive shortcuts for navigation (h/d/s/c/a), actions (Ctrl+U, Ctrl+Shift+T, Ctrl+R), and help (Shift+?)
+- **Keyboard Shortcuts Help Modal** - Interactive modal showing all available shortcuts, categorized by function
+- **Analytics Dashboard** - Rich data visualizations with Chart.js
+  - Summary metrics cards with trend indicators
+  - Multi-tab interface (Overview, Devices, Parameters, EDS)
+  - Manufacturer and vendor distribution charts (Bar, Doughnut, Pie)
+  - I/O type categorization and parameter distribution analysis
+  - Time range selector for future analytics expansion
+
+#### Frontend Improvements
+- Modern theme context with React hooks
+- Animated theme toggle with Sun/Moon icons
+- Keyboard event handling with modifier key support
+- Input field awareness to prevent shortcut conflicts
+- Responsive chart layouts with dark theme optimization
+- Framer Motion page transitions
+
 ### Added - EDS Support (Under Development)
 
 ⚠️ **Note**: EDS (Electronic Data Sheet) support is currently under active development and not yet production-ready. Use with caution.

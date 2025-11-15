@@ -46,6 +46,12 @@ GreenStack is an intelligent device management platform built on a rock-solid In
 - 🔒 **Security** - CORS configuration, input validation, SQL injection protection
 - 🧪 **Comprehensive Testing** - 65+ tests with pytest
 
+### User Experience
+- 🎨 **Dark/Light Theme** - System preference detection with manual toggle, localStorage persistence
+- ⌨️ **Keyboard Shortcuts** - Navigation (h/d/s/c/a), actions (Ctrl+U, Ctrl+Shift+T, Ctrl+R), help (Shift+?)
+- 📊 **Analytics Dashboard** - Rich visualizations with Chart.js (manufacturer distribution, I/O analysis, parameter insights)
+- 🎯 **Responsive Design** - Optimized for desktop and mobile devices
+
 ## Quick Start
 
 ### 📦 PyPI Package (Recommended)

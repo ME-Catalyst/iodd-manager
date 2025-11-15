@@ -116,14 +116,6 @@ nul
 # Test files
 test_*.html
 test_*.zip
-test_*.py
-!test_eds_package.py
-!test_db_eds.py
 
-# Utility scripts (keep in repo for debugging)
-# audit_*.py
-# debug_*.py
-# check_*.py
-# fix_*.py
-# reimport_*.py
-# clear_and_*.py
+# Archive folder
+archive/

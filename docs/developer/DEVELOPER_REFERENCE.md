@@ -14,7 +14,7 @@
 
 ## Architecture Overview
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed system architecture.
+See [System Architecture](../architecture/ARCHITECTURE.md) for detailed system architecture.
 
 **Technology Stack:**
 - **Backend:** Python 3.8+, FastAPI, SQLite/PostgreSQL

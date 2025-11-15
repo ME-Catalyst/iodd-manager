@@ -3,6 +3,8 @@ import { Plus, X, GitCompare, ArrowLeft, ChevronRight, Check, AlertCircle, Info 
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from './ui';
 import { Button } from './ui';
+import { getUnitInfo, formatValueWithUnit } from '../utils/iolinkUnits';
+import { getAccessRightInfo, getDataTypeDisplay } from '../utils/iolinkConstants';
 
 /**
  * Device Comparison View - Compare multiple devices side by side
@@ -202,19 +204,28 @@ const ComparisonView = ({ API_BASE, onBack, initialDevices = [] }) => {
                       {param ? (
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium">{param.default_value ?? 'N/A'}</span>
-                            {param.unit && (
-                              <span className="text-xs text-slate-500">{param.unit}</span>
+                            <span className="font-medium">
+                              {param.default_value !== null && param.default_value !== undefined
+                                ? (param.units ? formatValueWithUnit(param.default_value, parseInt(param.units), 2) : param.default_value)
+                                : 'N/A'}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs">
+                            {param.data_type && (
+                              <span className="text-slate-500">
+                                {getDataTypeDisplay(param.data_type)}
+                              </span>
+                            )}
+                            {param.access_rights && (
+                              <span className="px-1.5 py-0.5 rounded bg-slate-700/50 text-slate-400">
+                                {getAccessRightInfo(param.access_rights)?.label || param.access_rights}
+                              </span>
                             )}
                           </div>
-                          {param.data_type && (
-                            <div className="text-xs text-slate-500">
-                              Type: {param.data_type}
-                            </div>
-                          )}
                           {(param.min_value != null || param.max_value != null) && (
                             <div className="text-xs text-slate-500">
                               Range: {param.min_value ?? '?'} - {param.max_value ?? '?'}
+                              {param.units && ` ${getUnitInfo(parseInt(param.units))?.symbol || ''}`}
                             </div>
                           )}
                         </div>

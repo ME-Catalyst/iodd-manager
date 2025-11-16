@@ -302,6 +302,7 @@ const AdminConsole = ({ API_BASE, toast, onNavigate }) => {
           handleDownloadBackup={handleDownloadBackup}
           handleDeleteIODD={handleDeleteIODD}
           handleDeleteEDS={handleDeleteEDS}
+          handleDeleteTickets={handleDeleteTickets}
           handleDeleteAll={handleDeleteAll}
           toast={toast}
         />
@@ -798,7 +799,7 @@ const HubTab = ({ overview, onNavigate }) => {
 /**
  * Database Tab
  */
-const DatabaseTab = ({ overview, dbHealth, handleVacuum, handleBackup, handleDownloadBackup, handleDeleteIODD, handleDeleteEDS, handleDeleteAll, toast }) => {
+const DatabaseTab = ({ overview, dbHealth, handleVacuum, handleBackup, handleDownloadBackup, handleDeleteIODD, handleDeleteEDS, handleDeleteTickets, handleDeleteAll, toast }) => {
   return (
     <div className="space-y-6">
       {/* Health Status */}

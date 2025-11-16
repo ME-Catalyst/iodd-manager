@@ -157,17 +157,25 @@ def check_port_available(port: int) -> tuple[bool, Optional[Dict]]:
         # If we can't check, assume it's available
         return True, None
 
-def find_process_by_name(name: str) -> Optional[psutil.Process]:
-    """Find a process by name"""
-    for proc in psutil.process_iter(['name', 'exe', 'cmdline']):
+def find_process_by_name(name: str, process_cache: Optional[list] = None) -> Optional[psutil.Process]:
+    """Find a process by name
+
+    Args:
+        name: Process name to search for
+        process_cache: Optional list of processes to search through (for performance)
+    """
+    processes = process_cache if process_cache is not None else psutil.process_iter(['name', 'exe', 'cmdline'])
+
+    for proc in processes:
         try:
-            if name.lower() in proc.info['name'].lower():
+            proc_info = proc.info if process_cache else proc.as_dict(['name', 'exe', 'cmdline'])
+            if name.lower() in proc_info.get('name', '').lower():
                 return proc
-            if proc.info['cmdline']:
-                cmdline = " ".join(proc.info['cmdline']).lower()
+            if proc_info.get('cmdline'):
+                cmdline = " ".join(proc_info['cmdline']).lower()
                 if name.lower() in cmdline:
                     return proc
-        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, AttributeError):
             pass
     return None
 
@@ -184,9 +192,15 @@ async def get_services_status():
     config = load_service_config()
     status = {}
 
+    # Collect process list once for performance
+    try:
+        process_cache = list(psutil.process_iter(['name', 'exe', 'cmdline']))
+    except Exception:
+        process_cache = None
+
     for service_id, service_config in config.items():
         # Check if process is running
-        proc = find_process_by_name(service_config['process_name'])
+        proc = find_process_by_name(service_config['process_name'], process_cache)
         running = proc is not None
         pid = proc.pid if proc else None
 
@@ -234,13 +248,19 @@ async def get_port_conflicts():
     config = load_service_config()
     conflicts = []
 
+    # Collect process list once for performance
+    try:
+        process_cache = list(psutil.process_iter(['name', 'exe', 'cmdline']))
+    except Exception:
+        process_cache = None
+
     for service_id, service_config in config.items():
         port = service_config['port']
         available, conflict = check_port_available(port)
 
         if not available and conflict:
             # Check if this is one of our services
-            proc = find_process_by_name(service_config['process_name'])
+            proc = find_process_by_name(service_config['process_name'], process_cache)
             if not proc or (proc and proc.pid != conflict.get('pid')):
                 conflicts.append(PortConflict(
                     port=port,

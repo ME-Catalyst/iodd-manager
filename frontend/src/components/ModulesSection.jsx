@@ -37,7 +37,7 @@ const ModulesSection = ({ edsId }) => {
     return (
       <div className="flex items-center justify-center p-8">
         <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
-        <span className="ml-2 text-slate-400">Loading modules...</span>
+        <span className="ml-2 text-muted-foreground">Loading modules...</span>
       </div>
     );
   }
@@ -53,7 +53,7 @@ const ModulesSection = ({ edsId }) => {
 
   if (modulesData.total_count === 0) {
     return (
-      <div className="text-center p-8 text-slate-400">
+      <div className="text-center p-8 text-muted-foreground">
         <Layers className="w-12 h-12 mx-auto mb-3 opacity-50" />
         <p>No module definitions found in this EDS file.</p>
         <p className="text-sm mt-2">
@@ -87,7 +87,7 @@ const ModulesSection = ({ edsId }) => {
         <div className="text-purple-400">
           <Cpu className="w-6 h-6" />
         </div>
-        <h3 className="text-lg font-semibold text-white">
+        <h3 className="text-lg font-semibold text-foreground">
           Hardware Modules
         </h3>
         <Badge className="bg-purple-900/50 text-purple-300 border-purple-700">
@@ -100,27 +100,27 @@ const ModulesSection = ({ edsId }) => {
         {modulesData.modules.map((module) => (
           <Card
             key={module.id}
-            className="bg-slate-900 border-slate-800 hover:border-purple-700/50 transition-colors"
+            className="bg-card border-border hover:border-purple-700/50 transition-colors"
           >
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <CardTitle className="text-white text-base flex items-center gap-2">
+                  <CardTitle className="text-foreground text-base flex items-center gap-2">
                     <span className="font-mono text-purple-300">
                       Module {module.module_number}
                     </span>
-                    <span className="text-slate-400">→</span>
+                    <span className="text-muted-foreground">→</span>
                     <span>{module.module_name}</span>
                   </CardTitle>
                   {module.module_description && (
-                    <p className="text-sm text-slate-400 mt-1">
+                    <p className="text-sm text-muted-foreground mt-1">
                       {module.module_description}
                     </p>
                   )}
                 </div>
                 <Badge
                   variant="outline"
-                  className="text-xs text-slate-400 border-slate-700"
+                  className="text-xs text-muted-foreground border-border"
                 >
                   #{module.module_number}
                 </Badge>
@@ -131,7 +131,7 @@ const ModulesSection = ({ edsId }) => {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 {module.catalog_number && (
                   <div>
-                    <div className="text-xs text-slate-500 mb-1">Catalog Number</div>
+                    <div className="text-xs text-muted-foreground mb-1">Catalog Number</div>
                     <div className="font-mono text-cyan-300">
                       {module.catalog_number}
                     </div>
@@ -139,15 +139,15 @@ const ModulesSection = ({ edsId }) => {
                 )}
                 {module.device_type && (
                   <div>
-                    <div className="text-xs text-slate-500 mb-1">Device Type</div>
-                    <div className="text-white">
+                    <div className="text-xs text-muted-foreground mb-1">Device Type</div>
+                    <div className="text-foreground">
                       {module.device_type}
                     </div>
                   </div>
                 )}
                 {(module.major_revision !== null || module.minor_revision !== null) && (
                   <div>
-                    <div className="text-xs text-slate-500 mb-1">Revision</div>
+                    <div className="text-xs text-muted-foreground mb-1">Revision</div>
                     <div className="font-mono text-green-300">
                       {formatRevision(module.major_revision, module.minor_revision)}
                     </div>
@@ -155,8 +155,8 @@ const ModulesSection = ({ edsId }) => {
                 )}
                 {module.module_class && (
                   <div>
-                    <div className="text-xs text-slate-500 mb-1">Module Class</div>
-                    <div className="text-white">
+                    <div className="text-xs text-muted-foreground mb-1">Module Class</div>
+                    <div className="text-foreground">
                       {module.module_class}
                     </div>
                   </div>
@@ -165,8 +165,8 @@ const ModulesSection = ({ edsId }) => {
 
               {/* I/O Information */}
               {(module.input_size !== null || module.output_size !== null) && (
-                <div className="bg-slate-800/50 rounded p-3">
-                  <div className="text-xs text-slate-500 mb-1">I/O Sizes</div>
+                <div className="bg-secondary/50 rounded p-3">
+                  <div className="text-xs text-muted-foreground mb-1">I/O Sizes</div>
                   <div className="font-mono text-sm text-blue-300">
                     {formatIOSize(module.input_size, module.output_size)}
                   </div>
@@ -177,15 +177,15 @@ const ModulesSection = ({ edsId }) => {
               {module.config_size !== null && (
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <div className="text-xs text-slate-500 mb-1">Config Size</div>
+                    <div className="text-xs text-muted-foreground mb-1">Config Size</div>
                     <div className="font-mono text-yellow-300">
                       {module.config_size} bytes
                     </div>
                   </div>
                   {module.slot_number !== null && (
                     <div>
-                      <div className="text-xs text-slate-500 mb-1">Slot Number</div>
-                      <div className="font-mono text-white">
+                      <div className="text-xs text-muted-foreground mb-1">Slot Number</div>
+                      <div className="font-mono text-foreground">
                         {module.slot_number}
                       </div>
                     </div>
@@ -198,7 +198,7 @@ const ModulesSection = ({ edsId }) => {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   {module.vendor_code !== null && (
                     <div>
-                      <div className="text-xs text-slate-500 mb-1">Vendor Code</div>
+                      <div className="text-xs text-muted-foreground mb-1">Vendor Code</div>
                       <div className="font-mono text-orange-300">
                         0x{module.vendor_code.toString(16).toUpperCase().padStart(4, '0')}
                       </div>
@@ -206,7 +206,7 @@ const ModulesSection = ({ edsId }) => {
                   )}
                   {module.product_code !== null && (
                     <div>
-                      <div className="text-xs text-slate-500 mb-1">Product Code</div>
+                      <div className="text-xs text-muted-foreground mb-1">Product Code</div>
                       <div className="font-mono text-orange-300">
                         0x{module.product_code.toString(16).toUpperCase().padStart(4, '0')}
                       </div>
@@ -217,8 +217,8 @@ const ModulesSection = ({ edsId }) => {
 
               {/* Config Data (if present) */}
               {module.config_data && (
-                <div className="bg-slate-800/50 rounded p-2">
-                  <div className="text-xs text-slate-500 mb-1">Configuration Data</div>
+                <div className="bg-secondary/50 rounded p-2">
+                  <div className="text-xs text-muted-foreground mb-1">Configuration Data</div>
                   <div className="font-mono text-xs text-cyan-300 break-all">
                     {module.config_data}
                   </div>
@@ -231,7 +231,7 @@ const ModulesSection = ({ edsId }) => {
 
       {/* Info Footer */}
       <div className="bg-purple-900/20 border border-purple-700/30 rounded-lg p-4">
-        <div className="text-sm text-slate-300">
+        <div className="text-sm text-foreground">
           <strong className="text-purple-300">Modules</strong> represent physical I/O modules
           in modular devices like bus couplers and distributed I/O systems. Each module
           can have its own configuration, input/output sizes, and hardware characteristics.

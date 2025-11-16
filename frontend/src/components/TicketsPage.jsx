@@ -234,7 +234,7 @@ const TicketsPage = ({ API_BASE, toast }) => {
       open: 'bg-blue-900/30 text-blue-300 border-blue-700/50',
       in_progress: 'bg-purple-900/30 text-purple-300 border-purple-700/50',
       resolved: 'bg-green-900/30 text-green-300 border-green-700/50',
-      closed: 'bg-slate-900/30 text-slate-300 border-slate-700/50',
+      closed: 'bg-card/30 text-foreground border-border/50',
       wont_fix: 'bg-red-900/30 text-red-300 border-red-700/50'
     };
     return colors[status] || colors.open;
@@ -284,25 +284,25 @@ const TicketsPage = ({ API_BASE, toast }) => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
             <Bug className="w-8 h-8 text-orange-500" />
             Ticket Management
           </h1>
-          <p className="text-slate-400 mt-1">
+          <p className="text-muted-foreground mt-1">
             Track and manage device issues and feature requests
           </p>
         </div>
         <div className="flex gap-2">
           <Button
             onClick={handleExportCSV}
-            className="bg-green-600 hover:bg-green-700 text-white"
+            className="bg-green-600 hover:bg-green-700 text-foreground"
           >
             <Download className="w-4 h-4 mr-2" />
             Export CSV
           </Button>
           <Button
             onClick={handleExportWithAttachments}
-            className="bg-purple-600 hover:bg-purple-700 text-white"
+            className="bg-purple-600 hover:bg-purple-700 text-foreground"
           >
             <FileArchive className="w-4 h-4 mr-2" />
             Export with Attachments (ZIP)
@@ -312,22 +312,22 @@ const TicketsPage = ({ API_BASE, toast }) => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">Total Tickets</p>
-                <p className="text-2xl font-bold text-white">{tickets.length}</p>
+                <p className="text-sm text-muted-foreground">Total Tickets</p>
+                <p className="text-2xl font-bold text-foreground">{tickets.length}</p>
               </div>
-              <Bug className="w-8 h-8 text-slate-500" />
+              <Bug className="w-8 h-8 text-muted-foreground" />
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">Open</p>
+                <p className="text-sm text-muted-foreground">Open</p>
                 <p className="text-2xl font-bold text-blue-400">
                   {tickets.filter(t => t.status === 'open').length}
                 </p>
@@ -336,11 +336,11 @@ const TicketsPage = ({ API_BASE, toast }) => {
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">In Progress</p>
+                <p className="text-sm text-muted-foreground">In Progress</p>
                 <p className="text-2xl font-bold text-purple-400">
                   {tickets.filter(t => t.status === 'in_progress').length}
                 </p>
@@ -349,11 +349,11 @@ const TicketsPage = ({ API_BASE, toast }) => {
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">Resolved</p>
+                <p className="text-sm text-muted-foreground">Resolved</p>
                 <p className="text-2xl font-bold text-green-400">
                   {tickets.filter(t => t.status === 'resolved').length}
                 </p>
@@ -365,10 +365,10 @@ const TicketsPage = ({ API_BASE, toast }) => {
       </div>
 
       {/* Filters */}
-      <Card className="bg-slate-900 border-slate-800">
+      <Card className="bg-card border-border">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-white flex items-center gap-2">
+            <CardTitle className="text-foreground flex items-center gap-2">
               <Filter className="w-5 h-5" />
               Filters
             </CardTitle>
@@ -377,7 +377,7 @@ const TicketsPage = ({ API_BASE, toast }) => {
                 variant="ghost"
                 size="sm"
                 onClick={clearFilters}
-                className="text-slate-400 hover:text-white"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <X className="w-4 h-4 mr-1" />
                 Clear All
@@ -389,68 +389,68 @@ const TicketsPage = ({ API_BASE, toast }) => {
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             {/* Search */}
             <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search tickets..."
                 value={filters.search}
                 onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                className="pl-10 bg-slate-800 border-slate-700 text-white"
+                className="pl-10 bg-secondary border-border text-foreground"
               />
             </div>
 
             {/* Status Filter */}
             <Select value={filters.status} onValueChange={(value) => setFilters({ ...filters, status: value })}>
-              <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+              <SelectTrigger className="bg-secondary border-border text-foreground">
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700">
-                <SelectItem value="all" className="text-slate-300">All Statuses</SelectItem>
-                <SelectItem value="open" className="text-slate-300">Open</SelectItem>
-                <SelectItem value="in_progress" className="text-slate-300">In Progress</SelectItem>
-                <SelectItem value="resolved" className="text-slate-300">Resolved</SelectItem>
-                <SelectItem value="closed" className="text-slate-300">Closed</SelectItem>
-                <SelectItem value="wont_fix" className="text-slate-300">Won't Fix</SelectItem>
+              <SelectContent className="bg-secondary border-border">
+                <SelectItem value="all" className="text-foreground">All Statuses</SelectItem>
+                <SelectItem value="open" className="text-foreground">Open</SelectItem>
+                <SelectItem value="in_progress" className="text-foreground">In Progress</SelectItem>
+                <SelectItem value="resolved" className="text-foreground">Resolved</SelectItem>
+                <SelectItem value="closed" className="text-foreground">Closed</SelectItem>
+                <SelectItem value="wont_fix" className="text-foreground">Won't Fix</SelectItem>
               </SelectContent>
             </Select>
 
             {/* Priority Filter */}
             <Select value={filters.priority} onValueChange={(value) => setFilters({ ...filters, priority: value })}>
-              <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+              <SelectTrigger className="bg-secondary border-border text-foreground">
                 <SelectValue placeholder="All Priorities" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700">
-                <SelectItem value="all" className="text-slate-300">All Priorities</SelectItem>
-                <SelectItem value="low" className="text-slate-300">Low</SelectItem>
-                <SelectItem value="medium" className="text-slate-300">Medium</SelectItem>
-                <SelectItem value="high" className="text-slate-300">High</SelectItem>
-                <SelectItem value="critical" className="text-slate-300">Critical</SelectItem>
+              <SelectContent className="bg-secondary border-border">
+                <SelectItem value="all" className="text-foreground">All Priorities</SelectItem>
+                <SelectItem value="low" className="text-foreground">Low</SelectItem>
+                <SelectItem value="medium" className="text-foreground">Medium</SelectItem>
+                <SelectItem value="high" className="text-foreground">High</SelectItem>
+                <SelectItem value="critical" className="text-foreground">Critical</SelectItem>
               </SelectContent>
             </Select>
 
             {/* Device Type Filter */}
             <Select value={filters.device_type} onValueChange={(value) => setFilters({ ...filters, device_type: value })}>
-              <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+              <SelectTrigger className="bg-secondary border-border text-foreground">
                 <SelectValue placeholder="All Device Types" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700">
-                <SelectItem value="all" className="text-slate-300">All Device Types</SelectItem>
-                <SelectItem value="EDS" className="text-slate-300">EDS</SelectItem>
-                <SelectItem value="IODD" className="text-slate-300">IODD</SelectItem>
+              <SelectContent className="bg-secondary border-border">
+                <SelectItem value="all" className="text-foreground">All Device Types</SelectItem>
+                <SelectItem value="EDS" className="text-foreground">EDS</SelectItem>
+                <SelectItem value="IODD" className="text-foreground">IODD</SelectItem>
               </SelectContent>
             </Select>
 
             {/* Category Filter */}
             <Select value={filters.category} onValueChange={(value) => setFilters({ ...filters, category: value })}>
-              <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+              <SelectTrigger className="bg-secondary border-border text-foreground">
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700">
-                <SelectItem value="all" className="text-slate-300">All Categories</SelectItem>
-                <SelectItem value="data_issue" className="text-slate-300">Data Issue</SelectItem>
-                <SelectItem value="parser_bug" className="text-slate-300">Parser Bug</SelectItem>
-                <SelectItem value="missing_feature" className="text-slate-300">Missing Feature</SelectItem>
-                <SelectItem value="documentation" className="text-slate-300">Documentation</SelectItem>
-                <SelectItem value="other" className="text-slate-300">Other</SelectItem>
+              <SelectContent className="bg-secondary border-border">
+                <SelectItem value="all" className="text-foreground">All Categories</SelectItem>
+                <SelectItem value="data_issue" className="text-foreground">Data Issue</SelectItem>
+                <SelectItem value="parser_bug" className="text-foreground">Parser Bug</SelectItem>
+                <SelectItem value="missing_feature" className="text-foreground">Missing Feature</SelectItem>
+                <SelectItem value="documentation" className="text-foreground">Documentation</SelectItem>
+                <SelectItem value="other" className="text-foreground">Other</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -458,22 +458,22 @@ const TicketsPage = ({ API_BASE, toast }) => {
       </Card>
 
       {/* Tickets List */}
-      <Card className="bg-slate-900 border-slate-800">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white">
+          <CardTitle className="text-foreground">
             Tickets ({filteredTickets.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="text-center py-12">
-              <div className="text-slate-400">Loading tickets...</div>
+              <div className="text-muted-foreground">Loading tickets...</div>
             </div>
           ) : filteredTickets.length === 0 ? (
             <div className="text-center py-12">
               <Bug className="w-16 h-16 text-slate-700 mx-auto mb-4" />
-              <p className="text-slate-400">No tickets found</p>
-              <p className="text-sm text-slate-500 mt-2">
+              <p className="text-muted-foreground">No tickets found</p>
+              <p className="text-sm text-muted-foreground mt-2">
                 {filters.search || (filters.status !== 'all') || (filters.priority !== 'all') || (filters.device_type !== 'all') || (filters.category !== 'all')
                   ? 'Try adjusting your filters'
                   : 'Create your first ticket from a device detail page'}
@@ -487,12 +487,12 @@ const TicketsPage = ({ API_BASE, toast }) => {
                   <div
                     key={ticket.id}
                     onClick={() => fetchTicketDetails(ticket.id)}
-                    className="p-4 bg-slate-800/50 border border-slate-700 rounded-lg hover:bg-slate-800 hover:border-slate-600 transition-all cursor-pointer group"
+                    className="p-4 bg-secondary/50 border border-border rounded-lg hover:bg-secondary hover:border-border transition-all cursor-pointer group"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 mb-2">
-                          <span className="text-sm font-mono text-slate-500">{ticket.ticket_number}</span>
+                          <span className="text-sm font-mono text-muted-foreground">{ticket.ticket_number}</span>
                           <Badge className={getPriorityColor(ticket.priority)}>
                             {ticket.priority}
                           </Badge>
@@ -506,15 +506,15 @@ const TicketsPage = ({ API_BASE, toast }) => {
                             </Badge>
                           )}
                         </div>
-                        <h3 className="text-white font-semibold mb-1 group-hover:text-orange-400 transition-colors">
+                        <h3 className="text-foreground font-semibold mb-1 group-hover:text-orange-400 transition-colors">
                           {ticket.title}
                         </h3>
                         {ticket.description && (
-                          <p className="text-sm text-slate-400 line-clamp-2 mb-2">
+                          <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                             {ticket.description}
                           </p>
                         )}
-                        <div className="flex items-center gap-4 text-xs text-slate-500">
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           {ticket.device_name && (
                             <span className="flex items-center gap-1">
                               <Package className="w-3 h-3" />
@@ -533,7 +533,7 @@ const TicketsPage = ({ API_BASE, toast }) => {
                           </span>
                         </div>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-slate-600 group-hover:text-slate-400 flex-shrink-0" />
+                      <ChevronRight className="w-5 h-5 text-slate-600 group-hover:text-muted-foreground flex-shrink-0" />
                     </div>
                   </div>
                 );
@@ -569,7 +569,7 @@ const TicketDetailView = ({
         <Button
           variant="ghost"
           onClick={onBack}
-          className="text-slate-400 hover:text-white"
+          className="text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Tickets
@@ -585,12 +585,12 @@ const TicketDetailView = ({
       </div>
 
       {/* Ticket Header */}
-      <Card className="bg-slate-900 border-slate-800">
+      <Card className="bg-card border-border">
         <CardHeader>
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <span className="text-lg font-mono text-slate-500">{ticket.ticket_number}</span>
+                <span className="text-lg font-mono text-muted-foreground">{ticket.ticket_number}</span>
                 <Badge className={getPriorityColor(ticket.priority)}>
                   {ticket.priority}
                 </Badge>
@@ -599,8 +599,8 @@ const TicketDetailView = ({
                   {ticket.status.replace('_', ' ')}
                 </Badge>
               </div>
-              <h1 className="text-2xl font-bold text-white mb-2">{ticket.title}</h1>
-              <div className="flex items-center gap-4 text-sm text-slate-400">
+              <h1 className="text-2xl font-bold text-foreground mb-2">{ticket.title}</h1>
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
                   Created {format(new Date(ticket.created_at), 'MMM d, yyyy h:mm a')}
@@ -619,21 +619,21 @@ const TicketDetailView = ({
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Description */}
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white">Description</CardTitle>
+              <CardTitle className="text-foreground">Description</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-slate-300 whitespace-pre-wrap">
+              <p className="text-foreground whitespace-pre-wrap">
                 {ticket.description || 'No description provided'}
               </p>
             </CardContent>
           </Card>
 
           {/* Comments */}
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
+              <CardTitle className="text-foreground flex items-center gap-2">
                 <MessageSquare className="w-5 h-5" />
                 Comments ({ticket.comments?.length || 0})
               </CardTitle>
@@ -643,22 +643,22 @@ const TicketDetailView = ({
               {ticket.comments && ticket.comments.length > 0 ? (
                 <div className="space-y-4">
                   {ticket.comments.map((comment) => (
-                    <div key={comment.id} className="p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+                    <div key={comment.id} className="p-4 bg-secondary/50 rounded-lg border border-border">
                       <div className="flex items-center gap-2 mb-2">
-                        <User className="w-4 h-4 text-slate-500" />
-                        <span className="text-sm font-medium text-slate-300">
+                        <User className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm font-medium text-foreground">
                           {comment.created_by || 'Anonymous'}
                         </span>
-                        <span className="text-xs text-slate-500">
+                        <span className="text-xs text-muted-foreground">
                           {format(new Date(comment.created_at), 'MMM d, yyyy h:mm a')}
                         </span>
                       </div>
-                      <p className="text-slate-300 whitespace-pre-wrap">{comment.comment_text}</p>
+                      <p className="text-foreground whitespace-pre-wrap">{comment.comment_text}</p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-slate-500 text-center py-4">No comments yet</p>
+                <p className="text-muted-foreground text-center py-4">No comments yet</p>
               )}
 
               {/* Add Comment Form */}
@@ -668,13 +668,13 @@ const TicketDetailView = ({
                   onChange={(e) => setCommentText(e.target.value)}
                   placeholder="Add a comment..."
                   rows={3}
-                  className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-2 bg-secondary border border-border rounded-lg text-foreground placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
                 />
                 <div className="flex justify-end">
                   <Button
                     type="submit"
                     disabled={submittingComment || !commentText.trim()}
-                    className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white"
+                    className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-foreground"
                   >
                     <Send className="w-4 h-4 mr-2" />
                     {submittingComment ? 'Adding...' : 'Add Comment'}
@@ -696,105 +696,105 @@ const TicketDetailView = ({
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Status Management */}
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white text-sm">Status</CardTitle>
+              <CardTitle className="text-foreground text-sm">Status</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <Select
                 value={ticket.status}
                 onValueChange={(value) => onUpdate(ticket.id, { status: value })}
               >
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                <SelectTrigger className="bg-secondary border-border text-foreground">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="open" className="text-slate-300">Open</SelectItem>
-                  <SelectItem value="in_progress" className="text-slate-300">In Progress</SelectItem>
-                  <SelectItem value="resolved" className="text-slate-300">Resolved</SelectItem>
-                  <SelectItem value="closed" className="text-slate-300">Closed</SelectItem>
-                  <SelectItem value="wont_fix" className="text-slate-300">Won't Fix</SelectItem>
+                <SelectContent className="bg-secondary border-border">
+                  <SelectItem value="open" className="text-foreground">Open</SelectItem>
+                  <SelectItem value="in_progress" className="text-foreground">In Progress</SelectItem>
+                  <SelectItem value="resolved" className="text-foreground">Resolved</SelectItem>
+                  <SelectItem value="closed" className="text-foreground">Closed</SelectItem>
+                  <SelectItem value="wont_fix" className="text-foreground">Won't Fix</SelectItem>
                 </SelectContent>
               </Select>
             </CardContent>
           </Card>
 
           {/* Priority Management */}
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white text-sm">Priority</CardTitle>
+              <CardTitle className="text-foreground text-sm">Priority</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <Select
                 value={ticket.priority}
                 onValueChange={(value) => onUpdate(ticket.id, { priority: value })}
               >
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                <SelectTrigger className="bg-secondary border-border text-foreground">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="low" className="text-slate-300">Low</SelectItem>
-                  <SelectItem value="medium" className="text-slate-300">Medium</SelectItem>
-                  <SelectItem value="high" className="text-slate-300">High</SelectItem>
-                  <SelectItem value="critical" className="text-slate-300">Critical</SelectItem>
+                <SelectContent className="bg-secondary border-border">
+                  <SelectItem value="low" className="text-foreground">Low</SelectItem>
+                  <SelectItem value="medium" className="text-foreground">Medium</SelectItem>
+                  <SelectItem value="high" className="text-foreground">High</SelectItem>
+                  <SelectItem value="critical" className="text-foreground">Critical</SelectItem>
                 </SelectContent>
               </Select>
             </CardContent>
           </Card>
 
           {/* Device Information */}
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white text-sm">Device Information</CardTitle>
+              <CardTitle className="text-foreground text-sm">Device Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <div>
-                <span className="text-slate-500">Type:</span>
-                <span className="ml-2 text-white font-medium">{ticket.device_type}</span>
+                <span className="text-muted-foreground">Type:</span>
+                <span className="ml-2 text-foreground font-medium">{ticket.device_type}</span>
               </div>
               {ticket.device_name && (
                 <div>
-                  <span className="text-slate-500">Device:</span>
-                  <span className="ml-2 text-white">{ticket.device_name}</span>
+                  <span className="text-muted-foreground">Device:</span>
+                  <span className="ml-2 text-foreground">{ticket.device_name}</span>
                 </div>
               )}
               {ticket.vendor_name && (
                 <div>
-                  <span className="text-slate-500">Vendor:</span>
-                  <span className="ml-2 text-white">{ticket.vendor_name}</span>
+                  <span className="text-muted-foreground">Vendor:</span>
+                  <span className="ml-2 text-foreground">{ticket.vendor_name}</span>
                 </div>
               )}
               {ticket.product_code && (
                 <div>
-                  <span className="text-slate-500">Product Code:</span>
-                  <span className="ml-2 text-white font-mono">{ticket.product_code}</span>
+                  <span className="text-muted-foreground">Product Code:</span>
+                  <span className="ml-2 text-foreground font-mono">{ticket.product_code}</span>
                 </div>
               )}
               {ticket.eds_reference && (
                 <div>
-                  <span className="text-slate-500">EDS Reference:</span>
-                  <span className="ml-2 text-white font-mono">{ticket.eds_reference}</span>
+                  <span className="text-muted-foreground">EDS Reference:</span>
+                  <span className="ml-2 text-foreground font-mono">{ticket.eds_reference}</span>
                 </div>
               )}
             </CardContent>
           </Card>
 
           {/* Metadata */}
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white text-sm">Details</CardTitle>
+              <CardTitle className="text-foreground text-sm">Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               {ticket.category && (
                 <div>
-                  <span className="text-slate-500">Category:</span>
-                  <span className="ml-2 text-white capitalize">{ticket.category.replace('_', ' ')}</span>
+                  <span className="text-muted-foreground">Category:</span>
+                  <span className="ml-2 text-foreground capitalize">{ticket.category.replace('_', ' ')}</span>
                 </div>
               )}
               {ticket.resolved_at && (
                 <div>
-                  <span className="text-slate-500">Resolved:</span>
-                  <span className="ml-2 text-white">
+                  <span className="text-muted-foreground">Resolved:</span>
+                  <span className="ml-2 text-foreground">
                     {format(new Date(ticket.resolved_at), 'MMM d, yyyy h:mm a')}
                   </span>
                 </div>

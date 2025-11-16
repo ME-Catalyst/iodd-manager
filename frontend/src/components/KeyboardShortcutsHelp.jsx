@@ -18,12 +18,12 @@ const KeyboardShortcutsHelp = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden">
+      <div className="bg-white dark:bg-secondary rounded-lg shadow-2xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-border">
           <div className="flex items-center gap-2">
             <Keyboard className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-foreground">
               Keyboard Shortcuts
             </h2>
           </div>
@@ -31,7 +31,7 @@ const KeyboardShortcutsHelp = ({ isOpen, onClose }) => {
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+            className="text-muted-foreground hover:text-slate-900 dark:text-muted-foreground dark:hover:text-foreground"
           >
             <X className="w-5 h-5" />
           </Button>
@@ -41,19 +41,19 @@ const KeyboardShortcutsHelp = ({ isOpen, onClose }) => {
         <div className="overflow-y-auto max-h-[calc(80vh-80px)] px-6 py-4">
           {Object.entries(categories).map(([category, shortcuts]) => (
             <div key={category} className="mb-6 last:mb-0">
-              <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
+              <h3 className="text-sm font-semibold text-muted-foreground dark:text-muted-foreground uppercase tracking-wider mb-3">
                 {category}
               </h3>
               <div className="space-y-2">
                 {shortcuts.map((shortcut, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                    className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-slate-50 dark:hover:bg-muted/50 transition-colors"
                   >
-                    <span className="text-slate-700 dark:text-slate-300">
+                    <span className="text-slate-700 dark:text-foreground">
                       {shortcut.description}
                     </span>
-                    <kbd className="px-3 py-1.5 text-sm font-mono bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded shadow-sm text-slate-800 dark:text-slate-200">
+                    <kbd className="px-3 py-1.5 text-sm font-mono bg-slate-100 dark:bg-muted border border-slate-300 dark:border-border rounded shadow-sm text-slate-800 dark:text-foreground">
                       {formatShortcut(shortcut)}
                     </kbd>
                   </div>
@@ -64,9 +64,9 @@ const KeyboardShortcutsHelp = ({ isOpen, onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
-          <p className="text-sm text-slate-600 dark:text-slate-400 text-center">
-            Press <kbd className="px-2 py-1 text-xs font-mono bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded">?</kbd> to show this help
+        <div className="px-6 py-4 border-t border-slate-200 dark:border-border bg-slate-50 dark:bg-card/50">
+          <p className="text-sm text-slate-600 dark:text-muted-foreground text-center">
+            Press <kbd className="px-2 py-1 text-xs font-mono bg-white dark:bg-secondary border border-slate-300 dark:border-border rounded">?</kbd> to show this help
           </p>
         </div>
       </div>

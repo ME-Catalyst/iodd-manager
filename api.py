@@ -288,6 +288,10 @@ app.include_router(mqtt_routes.router, prefix="/api/mqtt", tags=["MQTT"])
 # Include WebSocket for MQTT
 app.add_websocket_route("/ws/mqtt", mqtt_routes.websocket_endpoint)
 
+# Include Service Management routes
+import service_routes
+app.include_router(service_routes.router, tags=["Services"])
+
 # ============================================================================
 # API Endpoints
 # ============================================================================

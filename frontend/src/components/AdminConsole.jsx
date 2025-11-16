@@ -227,7 +227,7 @@ const AdminConsole = ({ API_BASE, toast, onNavigate }) => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <RefreshCw className="w-12 h-12 text-cyan-500 animate-spin mx-auto mb-4" />
-          <p className="text-slate-400">Loading admin console...</p>
+          <p className="text-muted-foreground">Loading admin console...</p>
         </div>
       </div>
     );
@@ -238,17 +238,17 @@ const AdminConsole = ({ API_BASE, toast, onNavigate }) => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
             <Settings className="w-8 h-8 text-cyan-500" />
             Admin Console
           </h1>
-          <p className="text-slate-400 mt-1">
+          <p className="text-muted-foreground mt-1">
             System management, monitoring, and resources
           </p>
         </div>
         <Button
           onClick={loadData}
-          className="bg-slate-800 hover:bg-slate-700 text-white"
+          className="bg-secondary hover:bg-muted text-foreground"
         >
           <RefreshCw className="w-4 h-4 mr-2" />
           Refresh
@@ -256,7 +256,7 @@ const AdminConsole = ({ API_BASE, toast, onNavigate }) => {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-slate-800">
+      <div className="border-b border-border">
         <div className="flex gap-1 overflow-x-auto">
           {[
             { id: 'hub', label: 'Hub', icon: Home },
@@ -273,7 +273,7 @@ const AdminConsole = ({ API_BASE, toast, onNavigate }) => {
                 className={`px-4 py-3 font-medium transition-all flex items-center gap-2 ${
                   activeTab === tab.id
                     ? 'text-cyan-400 border-b-2 border-cyan-400'
-                    : 'text-slate-400 hover:text-slate-300'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -426,23 +426,23 @@ const HubTab = ({ overview, onNavigate }) => {
               <Rocket className="w-12 h-12 text-cyan-400" />
             </div>
             <div className="flex-1">
-              <h2 className="text-2xl font-bold text-white mb-2">
+              <h2 className="text-2xl font-bold text-foreground mb-2">
                 Welcome to IODD Manager
               </h2>
-              <p className="text-slate-300 mb-4">
+              <p className="text-foreground mb-4">
                 A comprehensive tool for managing IO-Link Device Descriptions and EtherNet/IP Electronic Data Sheets.
                 Explore devices, search parameters, compare specifications, and manage your industrial automation data.
               </p>
               <div className="flex flex-wrap gap-4 text-sm">
-                <div className="flex items-center gap-2 text-slate-400">
+                <div className="flex items-center gap-2 text-muted-foreground">
                   <Package className="w-4 h-4 text-blue-400" />
                   <span className="text-blue-400 font-semibold">{overview?.devices?.total || 0}</span> Total Devices
                 </div>
-                <div className="flex items-center gap-2 text-slate-400">
+                <div className="flex items-center gap-2 text-muted-foreground">
                   <Settings className="w-4 h-4 text-purple-400" />
                   <span className="text-purple-400 font-semibold">{overview?.parameters?.total?.toLocaleString() || 0}</span> Parameters
                 </div>
-                <div className="flex items-center gap-2 text-slate-400">
+                <div className="flex items-center gap-2 text-muted-foreground">
                   <HardDrive className="w-4 h-4 text-green-400" />
                   <span className="text-green-400 font-semibold">{overview?.storage?.total_size_mb || 0} MB</span> Storage
                 </div>
@@ -454,7 +454,7 @@ const HubTab = ({ overview, onNavigate }) => {
 
       {/* Quick Actions */}
       <div>
-        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
           <Zap className="w-5 h-5 text-yellow-500" />
           Quick Actions
         </h3>
@@ -465,20 +465,20 @@ const HubTab = ({ overview, onNavigate }) => {
               <button
                 key={idx}
                 onClick={action.action}
-                className="group text-left p-6 bg-slate-900 border border-slate-800 rounded-lg hover:border-slate-700 hover:shadow-lg hover:shadow-cyan-500/10 transition-all"
+                className="group text-left p-6 bg-card border border-border rounded-lg hover:border-border hover:shadow-lg hover:shadow-cyan-500/10 transition-all"
               >
                 <div className={`inline-flex p-3 rounded-lg bg-gradient-to-br ${action.color} mb-4`}>
-                  <Icon className="w-6 h-6 text-white" />
+                  <Icon className="w-6 h-6 text-foreground" />
                 </div>
-                <h4 className="font-semibold text-white mb-1 group-hover:text-cyan-400 transition-colors">
+                <h4 className="font-semibold text-foreground mb-1 group-hover:text-cyan-400 transition-colors">
                   {action.title}
                 </h4>
-                <p className="text-sm text-slate-400">
+                <p className="text-sm text-muted-foreground">
                   {action.description}
                 </p>
                 {action.count !== undefined && (
                   <div className="mt-3">
-                    <Badge className="bg-slate-800 text-slate-300 border-slate-700">
+                    <Badge className="bg-secondary text-foreground border-border">
                       {action.count} items
                     </Badge>
                   </div>
@@ -491,7 +491,7 @@ const HubTab = ({ overview, onNavigate }) => {
 
       {/* Resources */}
       <div>
-        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
           <BookOpen className="w-5 h-5 text-orange-500" />
           Resources & Documentation
         </h3>
@@ -499,9 +499,9 @@ const HubTab = ({ overview, onNavigate }) => {
           {resources.map((section, idx) => {
             const Icon = section.icon;
             return (
-              <Card key={idx} className="bg-slate-900 border-slate-800">
+              <Card key={idx} className="bg-card border-border">
                 <CardHeader>
-                  <CardTitle className="text-white text-base flex items-center gap-2">
+                  <CardTitle className="text-foreground text-base flex items-center gap-2">
                     <Icon className="w-5 h-5 text-cyan-400" />
                     {section.title}
                   </CardTitle>
@@ -514,7 +514,7 @@ const HubTab = ({ overview, onNavigate }) => {
                         href={item.href}
                         target={item.external ? '_self' : '_blank'}
                         rel={item.external ? undefined : 'noopener noreferrer'}
-                        className="flex items-center gap-2 text-sm text-slate-400 hover:text-cyan-400 transition-colors group"
+                        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-cyan-400 transition-colors group"
                       >
                         <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                         <span>{item.label}</span>
@@ -530,15 +530,15 @@ const HubTab = ({ overview, onNavigate }) => {
 
       {/* IoT Platform Services */}
       <div>
-        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
           <Server className="w-5 h-5 text-cyan-500" />
           IoT Platform Services
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* MQTT Broker */}
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white text-sm flex items-center justify-between">
+              <CardTitle className="text-foreground text-sm flex items-center justify-between">
                 <span className="flex items-center gap-2">
                   {mqttStatus?.connected ? (
                     <Wifi className="w-4 h-4 text-green-400" />
@@ -554,13 +554,13 @@ const HubTab = ({ overview, onNavigate }) => {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="space-y-1 text-sm">
-                <div className="flex justify-between text-slate-400">
+                <div className="flex justify-between text-muted-foreground">
                   <span>Port:</span>
-                  <span className="text-slate-300">{mqttStatus?.mqtt_port || 1883}</span>
+                  <span className="text-foreground">{mqttStatus?.mqtt_port || 1883}</span>
                 </div>
-                <div className="flex justify-between text-slate-400">
+                <div className="flex justify-between text-muted-foreground">
                   <span>Host:</span>
-                  <span className="text-slate-300">{mqttStatus?.broker || 'localhost'}</span>
+                  <span className="text-foreground">{mqttStatus?.broker || 'localhost'}</span>
                 </div>
               </div>
               <div className="flex gap-2">
@@ -611,25 +611,25 @@ const HubTab = ({ overview, onNavigate }) => {
           </Card>
 
           {/* Grafana */}
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white text-sm flex items-center gap-2">
+              <CardTitle className="text-foreground text-sm flex items-center gap-2">
                 <BarChart3 className="w-4 h-4 text-orange-400" />
                 Grafana
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-muted-foreground">
                 Visualization & dashboarding platform for device telemetry
               </p>
               <div className="space-y-1 text-sm">
-                <div className="flex justify-between text-slate-400">
+                <div className="flex justify-between text-muted-foreground">
                   <span>Port:</span>
-                  <span className="text-slate-300">3001</span>
+                  <span className="text-foreground">3001</span>
                 </div>
-                <div className="flex justify-between text-slate-400">
+                <div className="flex justify-between text-muted-foreground">
                   <span>Default:</span>
-                  <span className="text-slate-300">admin/admin123</span>
+                  <span className="text-foreground">admin/admin123</span>
                 </div>
               </div>
               <a
@@ -647,25 +647,25 @@ const HubTab = ({ overview, onNavigate }) => {
           </Card>
 
           {/* Node-RED */}
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white text-sm flex items-center gap-2">
+              <CardTitle className="text-foreground text-sm flex items-center gap-2">
                 <Zap className="w-4 h-4 text-red-400" />
                 Node-RED
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-muted-foreground">
                 Flow-based automation & data processing
               </p>
               <div className="space-y-1 text-sm">
-                <div className="flex justify-between text-slate-400">
+                <div className="flex justify-between text-muted-foreground">
                   <span>Port:</span>
-                  <span className="text-slate-300">1880</span>
+                  <span className="text-foreground">1880</span>
                 </div>
-                <div className="flex justify-between text-slate-400">
+                <div className="flex justify-between text-muted-foreground">
                   <span>Flows:</span>
-                  <span className="text-slate-300">Pre-loaded</span>
+                  <span className="text-foreground">Pre-loaded</span>
                 </div>
               </div>
               <a
@@ -683,25 +683,25 @@ const HubTab = ({ overview, onNavigate }) => {
           </Card>
 
           {/* InfluxDB */}
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white text-sm flex items-center gap-2">
+              <CardTitle className="text-foreground text-sm flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-blue-400" />
                 InfluxDB
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-muted-foreground">
                 Time-series database for device telemetry
               </p>
               <div className="space-y-1 text-sm">
-                <div className="flex justify-between text-slate-400">
+                <div className="flex justify-between text-muted-foreground">
                   <span>Port:</span>
-                  <span className="text-slate-300">8086</span>
+                  <span className="text-foreground">8086</span>
                 </div>
-                <div className="flex justify-between text-slate-400">
+                <div className="flex justify-between text-muted-foreground">
                   <span>Bucket:</span>
-                  <span className="text-slate-300">device-telemetry</span>
+                  <span className="text-foreground">device-telemetry</span>
                 </div>
               </div>
               <a
@@ -722,19 +722,19 @@ const HubTab = ({ overview, onNavigate }) => {
 
       {/* System Status Summary */}
       <div>
-        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
           <Activity className="w-5 h-5 text-green-500" />
           System Status
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-card border-border">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-400 mb-1">Database Health</p>
+                  <p className="text-sm text-muted-foreground mb-1">Database Health</p>
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-5 h-5 text-green-500" />
-                    <span className="text-lg font-semibold text-white">Healthy</span>
+                    <span className="text-lg font-semibold text-foreground">Healthy</span>
                   </div>
                 </div>
                 <Database className="w-8 h-8 text-green-500/30" />
@@ -742,13 +742,13 @@ const HubTab = ({ overview, onNavigate }) => {
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-card border-border">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-400 mb-1">Open Tickets</p>
+                  <p className="text-sm text-muted-foreground mb-1">Open Tickets</p>
                   <div className="flex items-center gap-2">
-                    <span className="text-lg font-semibold text-white">
+                    <span className="text-lg font-semibold text-foreground">
                       {overview?.tickets?.open || 0}
                     </span>
                   </div>
@@ -758,13 +758,13 @@ const HubTab = ({ overview, onNavigate }) => {
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-card border-border">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-400 mb-1">Recent Imports (7d)</p>
+                  <p className="text-sm text-muted-foreground mb-1">Recent Imports (7d)</p>
                   <div className="flex items-center gap-2">
-                    <span className="text-lg font-semibold text-white">
+                    <span className="text-lg font-semibold text-foreground">
                       {(overview?.recent_activity?.iodd_imports || 0) + (overview?.recent_activity?.eds_imports || 0)}
                     </span>
                   </div>
@@ -774,13 +774,13 @@ const HubTab = ({ overview, onNavigate }) => {
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-card border-border">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-400 mb-1">Diagnostic Issues</p>
+                  <p className="text-sm text-muted-foreground mb-1">Diagnostic Issues</p>
                   <div className="flex items-center gap-2">
-                    <span className="text-lg font-semibold text-white">
+                    <span className="text-lg font-semibold text-foreground">
                       {overview?.diagnostics?.total_issues || 0}
                     </span>
                   </div>
@@ -802,16 +802,16 @@ const DatabaseTab = ({ overview, dbHealth, handleVacuum, handleBackup, handleDow
   return (
     <div className="space-y-6">
       {/* Health Status */}
-      <Card className="bg-slate-900 border-slate-800">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
+          <CardTitle className="text-foreground flex items-center gap-2">
             <Shield className="w-5 h-5 text-green-500" />
             Database Health
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-slate-800/50 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
               <div className="flex items-center gap-3">
                 {dbHealth?.healthy ? (
                   <CheckCircle className="w-6 h-6 text-green-500" />
@@ -819,35 +819,35 @@ const DatabaseTab = ({ overview, dbHealth, handleVacuum, handleBackup, handleDow
                   <AlertTriangle className="w-6 h-6 text-red-500" />
                 )}
                 <div>
-                  <p className="text-white font-medium">
+                  <p className="text-foreground font-medium">
                     {dbHealth?.healthy ? 'Healthy' : 'Issues Detected'}
                   </p>
-                  <p className="text-sm text-slate-400">
+                  <p className="text-sm text-muted-foreground">
                     Integrity: {dbHealth?.integrity} • FK Violations: {dbHealth?.foreign_key_violations}
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm text-slate-400">Tables</p>
-                <p className="text-lg font-semibold text-white">{dbHealth?.tables?.length || 0}</p>
+                <p className="text-sm text-muted-foreground">Tables</p>
+                <p className="text-lg font-semibold text-foreground">{dbHealth?.tables?.length || 0}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 bg-slate-800/30 rounded-lg border border-slate-700">
+              <div className="p-4 bg-secondary/30 rounded-lg border border-border">
                 <div className="flex items-center gap-2 mb-2">
                   <HardDrive className="w-4 h-4 text-cyan-400" />
-                  <span className="text-sm text-slate-400">Database Size</span>
+                  <span className="text-sm text-muted-foreground">Database Size</span>
                 </div>
-                <p className="text-2xl font-bold text-white">{overview?.storage?.database_size_mb} MB</p>
+                <p className="text-2xl font-bold text-foreground">{overview?.storage?.database_size_mb} MB</p>
               </div>
 
-              <div className="p-4 bg-slate-800/30 rounded-lg border border-slate-700">
+              <div className="p-4 bg-secondary/30 rounded-lg border border-border">
                 <div className="flex items-center gap-2 mb-2">
                   <Package className="w-4 h-4 text-purple-400" />
-                  <span className="text-sm text-slate-400">Indexes</span>
+                  <span className="text-sm text-muted-foreground">Indexes</span>
                 </div>
-                <p className="text-2xl font-bold text-white">{dbHealth?.index_count || 0}</p>
+                <p className="text-2xl font-bold text-foreground">{dbHealth?.index_count || 0}</p>
               </div>
             </div>
           </div>
@@ -855,9 +855,9 @@ const DatabaseTab = ({ overview, dbHealth, handleVacuum, handleBackup, handleDow
       </Card>
 
       {/* Table Statistics */}
-      <Card className="bg-slate-900 border-slate-800">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
+          <CardTitle className="text-foreground flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-cyan-500" />
             Table Statistics
           </CardTitle>
@@ -865,16 +865,16 @@ const DatabaseTab = ({ overview, dbHealth, handleVacuum, handleBackup, handleDow
         <CardContent>
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {dbHealth?.tables?.map((table, idx) => (
-              <div key={idx} className="flex items-center justify-between p-3 bg-slate-800/30 rounded border border-slate-700/50">
+              <div key={idx} className="flex items-center justify-between p-3 bg-secondary/30 rounded border border-border/50">
                 <div className="flex items-center gap-3">
-                  <Database className="w-4 h-4 text-slate-500" />
-                  <span className="text-white font-mono text-sm">{table.name}</span>
+                  <Database className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-foreground font-mono text-sm">{table.name}</span>
                 </div>
                 <div className="flex items-center gap-4 text-sm">
-                  <span className="text-slate-400">
+                  <span className="text-muted-foreground">
                     {table.row_count?.toLocaleString()} rows
                   </span>
-                  <span className="text-slate-500">
+                  <span className="text-muted-foreground">
                     {table.index_count} indexes
                   </span>
                 </div>
@@ -885,9 +885,9 @@ const DatabaseTab = ({ overview, dbHealth, handleVacuum, handleBackup, handleDow
       </Card>
 
       {/* Actions */}
-      <Card className="bg-slate-900 border-slate-800">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
+          <CardTitle className="text-foreground flex items-center gap-2">
             <Zap className="w-5 h-5 text-yellow-500" />
             Database Actions
           </CardTitle>
@@ -896,7 +896,7 @@ const DatabaseTab = ({ overview, dbHealth, handleVacuum, handleBackup, handleDow
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button
               onClick={handleVacuum}
-              className="bg-blue-600 hover:bg-blue-700 text-white h-auto py-4 flex-col items-start"
+              className="bg-blue-600 hover:bg-blue-700 text-foreground h-auto py-4 flex-col items-start"
             >
               <div className="flex items-center gap-2 mb-1">
                 <Zap className="w-4 h-4" />
@@ -909,7 +909,7 @@ const DatabaseTab = ({ overview, dbHealth, handleVacuum, handleBackup, handleDow
 
             <Button
               onClick={handleBackup}
-              className="bg-green-600 hover:bg-green-700 text-white h-auto py-4 flex-col items-start"
+              className="bg-green-600 hover:bg-green-700 text-foreground h-auto py-4 flex-col items-start"
             >
               <div className="flex items-center gap-2 mb-1">
                 <Database className="w-4 h-4" />
@@ -922,7 +922,7 @@ const DatabaseTab = ({ overview, dbHealth, handleVacuum, handleBackup, handleDow
 
             <Button
               onClick={handleDownloadBackup}
-              className="bg-purple-600 hover:bg-purple-700 text-white h-auto py-4 flex-col items-start"
+              className="bg-purple-600 hover:bg-purple-700 text-foreground h-auto py-4 flex-col items-start"
             >
               <div className="flex items-center gap-2 mb-1">
                 <Download className="w-4 h-4" />
@@ -945,7 +945,7 @@ const DatabaseTab = ({ overview, dbHealth, handleVacuum, handleBackup, handleDow
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-slate-400 text-sm mb-4">
+          <p className="text-muted-foreground text-sm mb-4">
             ⚠️ Dangerous operations that can result in permanent data loss. Use with extreme caution.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1018,9 +1018,9 @@ const DiagnosticsTab = ({ edsDiagnostics, vendorStats }) => {
   return (
     <div className="space-y-6">
       {/* EDS Diagnostics Summary */}
-      <Card className="bg-slate-900 border-slate-800">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
+          <CardTitle className="text-foreground flex items-center gap-2">
             <Activity className="w-5 h-5 text-orange-500" />
             EDS Parsing Diagnostics
           </CardTitle>
@@ -1035,8 +1035,8 @@ const DiagnosticsTab = ({ edsDiagnostics, vendorStats }) => {
                 FATAL: 'text-red-400'
               };
               return (
-                <div key={idx} className="p-4 bg-slate-800/50 rounded-lg border border-slate-700">
-                  <p className="text-sm text-slate-400 mb-1">{item.severity}</p>
+                <div key={idx} className="p-4 bg-secondary/50 rounded-lg border border-border">
+                  <p className="text-sm text-muted-foreground mb-1">{item.severity}</p>
                   <p className={`text-2xl font-bold ${colors[item.severity]}`}>
                     {item.count}
                   </p>
@@ -1047,16 +1047,16 @@ const DiagnosticsTab = ({ edsDiagnostics, vendorStats }) => {
 
           {edsDiagnostics?.files_with_issues?.length > 0 && (
             <div className="space-y-2">
-              <h4 className="text-sm font-semibold text-white mb-3">
+              <h4 className="text-sm font-semibold text-foreground mb-3">
                 Files with Issues ({edsDiagnostics.files_with_issues.length})
               </h4>
               <div className="max-h-96 overflow-y-auto space-y-2">
                 {edsDiagnostics.files_with_issues.slice(0, 20).map((file, idx) => (
-                  <div key={idx} className="p-3 bg-slate-800/30 rounded border border-slate-700/50">
+                  <div key={idx} className="p-3 bg-secondary/30 rounded border border-border/50">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <p className="text-white font-medium">{file.product_name}</p>
-                        <p className="text-sm text-slate-400">{file.vendor_name}</p>
+                        <p className="text-foreground font-medium">{file.product_name}</p>
+                        <p className="text-sm text-muted-foreground">{file.vendor_name}</p>
                       </div>
                       <div className="flex gap-2 text-xs">
                         {file.fatal > 0 && (
@@ -1086,9 +1086,9 @@ const DiagnosticsTab = ({ edsDiagnostics, vendorStats }) => {
 
       {/* Common Diagnostic Codes */}
       {edsDiagnostics?.common_codes?.length > 0 && (
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
+            <CardTitle className="text-foreground flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-yellow-500" />
               Most Common Issues
             </CardTitle>
@@ -1096,7 +1096,7 @@ const DiagnosticsTab = ({ edsDiagnostics, vendorStats }) => {
           <CardContent>
             <div className="space-y-2">
               {edsDiagnostics.common_codes.map((code, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 bg-slate-800/30 rounded border border-slate-700/50">
+                <div key={idx} className="flex items-center justify-between p-3 bg-secondary/30 rounded border border-border/50">
                   <div className="flex items-center gap-3">
                     <Badge className={
                       code.severity === 'FATAL' ? 'bg-red-900/30 text-red-300 border-red-700/50' :
@@ -1106,9 +1106,9 @@ const DiagnosticsTab = ({ edsDiagnostics, vendorStats }) => {
                     }>
                       {code.severity}
                     </Badge>
-                    <span className="text-white font-mono text-sm">{code.code}</span>
+                    <span className="text-foreground font-mono text-sm">{code.code}</span>
                   </div>
-                  <span className="text-slate-400">{code.count} occurrences</span>
+                  <span className="text-muted-foreground">{code.count} occurrences</span>
                 </div>
               ))}
             </div>
@@ -1126,9 +1126,9 @@ const SystemTab = ({ systemInfo, overview }) => {
   return (
     <div className="space-y-6">
       {/* Application Info */}
-      <Card className="bg-slate-900 border-slate-800">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
+          <CardTitle className="text-foreground flex items-center gap-2">
             <Cpu className="w-5 h-5 text-cyan-500" />
             Application Information
           </CardTitle>
@@ -1136,19 +1136,19 @@ const SystemTab = ({ systemInfo, overview }) => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <p className="text-sm text-slate-400 mb-1">Name</p>
-              <p className="text-white font-medium">{systemInfo?.application?.name}</p>
+              <p className="text-sm text-muted-foreground mb-1">Name</p>
+              <p className="text-foreground font-medium">{systemInfo?.application?.name}</p>
             </div>
             <div>
-              <p className="text-sm text-slate-400 mb-1">Version</p>
-              <p className="text-white font-medium">{systemInfo?.application?.version}</p>
+              <p className="text-sm text-muted-foreground mb-1">Version</p>
+              <p className="text-foreground font-medium">{systemInfo?.application?.version}</p>
             </div>
             <div>
-              <p className="text-sm text-slate-400 mb-1">Database Path</p>
-              <p className="text-white font-mono text-sm">{systemInfo?.application?.database_path}</p>
+              <p className="text-sm text-muted-foreground mb-1">Database Path</p>
+              <p className="text-foreground font-mono text-sm">{systemInfo?.application?.database_path}</p>
             </div>
             <div>
-              <p className="text-sm text-slate-400 mb-1">Database Status</p>
+              <p className="text-sm text-muted-foreground mb-1">Database Status</p>
               <div className="flex items-center gap-2">
                 {systemInfo?.application?.database_exists ? (
                   <>
@@ -1168,9 +1168,9 @@ const SystemTab = ({ systemInfo, overview }) => {
       </Card>
 
       {/* Platform Info */}
-      <Card className="bg-slate-900 border-slate-800">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
+          <CardTitle className="text-foreground flex items-center gap-2">
             <Server className="w-5 h-5 text-purple-500" />
             Platform Information
           </CardTitle>
@@ -1178,25 +1178,25 @@ const SystemTab = ({ systemInfo, overview }) => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <p className="text-sm text-slate-400 mb-1">Operating System</p>
-              <p className="text-white font-medium">{systemInfo?.platform?.system} {systemInfo?.platform?.release}</p>
+              <p className="text-sm text-muted-foreground mb-1">Operating System</p>
+              <p className="text-foreground font-medium">{systemInfo?.platform?.system} {systemInfo?.platform?.release}</p>
             </div>
             <div>
-              <p className="text-sm text-slate-400 mb-1">Architecture</p>
-              <p className="text-white font-medium">{systemInfo?.platform?.machine}</p>
+              <p className="text-sm text-muted-foreground mb-1">Architecture</p>
+              <p className="text-foreground font-medium">{systemInfo?.platform?.machine}</p>
             </div>
             <div className="md:col-span-2">
-              <p className="text-sm text-slate-400 mb-1">Processor</p>
-              <p className="text-white font-medium text-sm">{systemInfo?.platform?.processor}</p>
+              <p className="text-sm text-muted-foreground mb-1">Processor</p>
+              <p className="text-foreground font-medium text-sm">{systemInfo?.platform?.processor}</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Python Environment */}
-      <Card className="bg-slate-900 border-slate-800">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
+          <CardTitle className="text-foreground flex items-center gap-2">
             <Terminal className="w-5 h-5 text-green-500" />
             Python Environment
           </CardTitle>
@@ -1204,42 +1204,42 @@ const SystemTab = ({ systemInfo, overview }) => {
         <CardContent>
           <div className="space-y-3">
             <div>
-              <p className="text-sm text-slate-400 mb-1">Version</p>
-              <p className="text-white font-mono text-sm">{systemInfo?.python?.version?.split('\n')[0]}</p>
+              <p className="text-sm text-muted-foreground mb-1">Version</p>
+              <p className="text-foreground font-mono text-sm">{systemInfo?.python?.version?.split('\n')[0]}</p>
             </div>
             <div>
-              <p className="text-sm text-slate-400 mb-1">Implementation</p>
-              <p className="text-white font-medium">{systemInfo?.python?.implementation}</p>
+              <p className="text-sm text-muted-foreground mb-1">Implementation</p>
+              <p className="text-foreground font-medium">{systemInfo?.python?.implementation}</p>
             </div>
             <div>
-              <p className="text-sm text-slate-400 mb-1">Compiler</p>
-              <p className="text-white font-mono text-sm">{systemInfo?.python?.compiler}</p>
+              <p className="text-sm text-muted-foreground mb-1">Compiler</p>
+              <p className="text-foreground font-mono text-sm">{systemInfo?.python?.compiler}</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Storage Info */}
-      <Card className="bg-slate-900 border-slate-800">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
+          <CardTitle className="text-foreground flex items-center gap-2">
             <HardDrive className="w-5 h-5 text-orange-500" />
             Storage Information
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 bg-slate-800/30 rounded-lg border border-slate-700">
-              <p className="text-sm text-slate-400 mb-1">Database</p>
-              <p className="text-2xl font-bold text-white">{overview?.storage?.database_size_mb} MB</p>
+            <div className="p-4 bg-secondary/30 rounded-lg border border-border">
+              <p className="text-sm text-muted-foreground mb-1">Database</p>
+              <p className="text-2xl font-bold text-foreground">{overview?.storage?.database_size_mb} MB</p>
             </div>
-            <div className="p-4 bg-slate-800/30 rounded-lg border border-slate-700">
-              <p className="text-sm text-slate-400 mb-1">Attachments</p>
-              <p className="text-2xl font-bold text-white">{overview?.storage?.attachments_size_mb} MB</p>
-              <p className="text-xs text-slate-500 mt-1">{overview?.storage?.attachment_count} files</p>
+            <div className="p-4 bg-secondary/30 rounded-lg border border-border">
+              <p className="text-sm text-muted-foreground mb-1">Attachments</p>
+              <p className="text-2xl font-bold text-foreground">{overview?.storage?.attachments_size_mb} MB</p>
+              <p className="text-xs text-muted-foreground mt-1">{overview?.storage?.attachment_count} files</p>
             </div>
-            <div className="p-4 bg-slate-800/30 rounded-lg border border-slate-700">
-              <p className="text-sm text-slate-400 mb-1">Total</p>
+            <div className="p-4 bg-secondary/30 rounded-lg border border-border">
+              <p className="text-sm text-muted-foreground mb-1">Total</p>
               <p className="text-2xl font-bold text-cyan-400">{overview?.storage?.total_size_mb} MB</p>
             </div>
           </div>

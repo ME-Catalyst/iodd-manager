@@ -285,12 +285,12 @@ const MqttManager = ({ API_BASE, toast }) => {
     <div className="space-y-6">
       {/* Status Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-slate-900/50 border-slate-800">
+        <Card className="bg-card/50 border-border">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">Broker Status</p>
-                <p className="text-2xl font-bold text-white mt-1">
+                <p className="text-sm text-muted-foreground">Broker Status</p>
+                <p className="text-2xl font-bold text-foreground mt-1">
                   {brokerStatus?.status === 'running' ? (
                     <span className="flex items-center gap-2">
                       <Wifi className="w-6 h-6 text-green-500" />
@@ -305,55 +305,55 @@ const MqttManager = ({ API_BASE, toast }) => {
                 </p>
               </div>
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-                <Activity className="w-6 h-6 text-white" />
+                <Activity className="w-6 h-6 text-foreground" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900/50 border-slate-800">
+        <Card className="bg-card/50 border-border">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">Connected Clients</p>
-                <p className="text-2xl font-bold text-white mt-1">
+                <p className="text-sm text-muted-foreground">Connected Clients</p>
+                <p className="text-2xl font-bold text-foreground mt-1">
                   {brokerStatus?.clients || 0}
                 </p>
               </div>
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
-                <Users className="w-6 h-6 text-white" />
+                <Users className="w-6 h-6 text-foreground" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900/50 border-slate-800">
+        <Card className="bg-card/50 border-border">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">Active Topics</p>
-                <p className="text-2xl font-bold text-white mt-1">
+                <p className="text-sm text-muted-foreground">Active Topics</p>
+                <p className="text-2xl font-bold text-foreground mt-1">
                   {brokerStatus?.topics || 0}
                 </p>
               </div>
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
-                <MessageSquare className="w-6 h-6 text-white" />
+                <MessageSquare className="w-6 h-6 text-foreground" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900/50 border-slate-800">
+        <Card className="bg-card/50 border-border">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">Messages/sec</p>
-                <p className="text-2xl font-bold text-white mt-1">
+                <p className="text-sm text-muted-foreground">Messages/sec</p>
+                <p className="text-2xl font-bold text-foreground mt-1">
                   {brokerStatus?.messages_per_sec || 0}
                 </p>
               </div>
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-white" />
+                <TrendingUp className="w-6 h-6 text-foreground" />
               </div>
             </div>
           </CardContent>
@@ -361,9 +361,9 @@ const MqttManager = ({ API_BASE, toast }) => {
       </div>
 
       {/* Broker Configuration */}
-      <Card className="bg-slate-900/50 border-slate-800">
+      <Card className="bg-card/50 border-border">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
+          <CardTitle className="text-foreground flex items-center gap-2">
             <Settings className="w-5 h-5" />
             Broker Configuration
           </CardTitle>
@@ -371,20 +371,20 @@ const MqttManager = ({ API_BASE, toast }) => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <p className="text-sm text-slate-400">MQTT Port</p>
-              <p className="text-white font-mono mt-1">{brokerStatus?.mqtt_port || '1883'}</p>
+              <p className="text-sm text-muted-foreground">MQTT Port</p>
+              <p className="text-foreground font-mono mt-1">{brokerStatus?.mqtt_port || '1883'}</p>
             </div>
             <div>
-              <p className="text-sm text-slate-400">WebSocket Port</p>
-              <p className="text-white font-mono mt-1">{brokerStatus?.ws_port || '9001'}</p>
+              <p className="text-sm text-muted-foreground">WebSocket Port</p>
+              <p className="text-foreground font-mono mt-1">{brokerStatus?.ws_port || '9001'}</p>
             </div>
             <div>
-              <p className="text-sm text-slate-400">TLS Port</p>
-              <p className="text-white font-mono mt-1">{brokerStatus?.tls_port || '8883'}</p>
+              <p className="text-sm text-muted-foreground">TLS Port</p>
+              <p className="text-foreground font-mono mt-1">{brokerStatus?.tls_port || '8883'}</p>
             </div>
             <div>
-              <p className="text-sm text-slate-400">Authentication</p>
-              <p className="text-white flex items-center gap-2 mt-1">
+              <p className="text-sm text-muted-foreground">Authentication</p>
+              <p className="text-foreground flex items-center gap-2 mt-1">
                 {brokerStatus?.auth_enabled ? (
                   <>
                     <Lock className="w-4 h-4 text-green-500" />
@@ -399,12 +399,12 @@ const MqttManager = ({ API_BASE, toast }) => {
               </p>
             </div>
             <div>
-              <p className="text-sm text-slate-400">Max Connections</p>
-              <p className="text-white font-mono mt-1">{brokerStatus?.max_connections || 'Unlimited'}</p>
+              <p className="text-sm text-muted-foreground">Max Connections</p>
+              <p className="text-foreground font-mono mt-1">{brokerStatus?.max_connections || 'Unlimited'}</p>
             </div>
             <div>
-              <p className="text-sm text-slate-400">Persistence</p>
-              <p className="text-white flex items-center gap-2 mt-1">
+              <p className="text-sm text-muted-foreground">Persistence</p>
+              <p className="text-foreground flex items-center gap-2 mt-1">
                 {brokerStatus?.persistence ? (
                   <>
                     <Database className="w-4 h-4 text-green-500" />
@@ -412,7 +412,7 @@ const MqttManager = ({ API_BASE, toast }) => {
                   </>
                 ) : (
                   <>
-                    <XCircle className="w-4 h-4 text-slate-500" />
+                    <XCircle className="w-4 h-4 text-muted-foreground" />
                     <span>Disabled</span>
                   </>
                 )}
@@ -432,8 +432,8 @@ const MqttManager = ({ API_BASE, toast }) => {
                 <Send className="w-5 h-5 text-blue-400" />
               </div>
               <div>
-                <p className="font-semibold text-white">Publish Message</p>
-                <p className="text-sm text-slate-400">Send MQTT messages</p>
+                <p className="font-semibold text-foreground">Publish Message</p>
+                <p className="text-sm text-muted-foreground">Send MQTT messages</p>
               </div>
             </div>
           </CardContent>
@@ -447,8 +447,8 @@ const MqttManager = ({ API_BASE, toast }) => {
                 <Radio className="w-5 h-5 text-purple-400" />
               </div>
               <div>
-                <p className="font-semibold text-white">Subscribe to Topics</p>
-                <p className="text-sm text-slate-400">Monitor messages</p>
+                <p className="font-semibold text-foreground">Subscribe to Topics</p>
+                <p className="text-sm text-muted-foreground">Monitor messages</p>
               </div>
             </div>
           </CardContent>
@@ -462,8 +462,8 @@ const MqttManager = ({ API_BASE, toast }) => {
                 <Users className="w-5 h-5 text-green-400" />
               </div>
               <div>
-                <p className="font-semibold text-white">View Clients</p>
-                <p className="text-sm text-slate-400">Connected devices</p>
+                <p className="font-semibold text-foreground">View Clients</p>
+                <p className="text-sm text-muted-foreground">Connected devices</p>
               </div>
             </div>
           </CardContent>
@@ -475,9 +475,9 @@ const MqttManager = ({ API_BASE, toast }) => {
   // Publish Tab Component
   const PublishTab = () => (
     <div className="space-y-6">
-      <Card className="bg-slate-900/50 border-slate-800">
+      <Card className="bg-card/50 border-border">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
+          <CardTitle className="text-foreground flex items-center gap-2">
             <Send className="w-5 h-5" />
             Publish MQTT Message
           </CardTitle>
@@ -485,35 +485,35 @@ const MqttManager = ({ API_BASE, toast }) => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">Topic</label>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">Topic</label>
             <input
               type="text"
               value={publishTopic}
               onChange={(e) => setPublishTopic(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              className="w-full px-3 py-2 bg-secondary border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500"
               placeholder="devices/test-001/telemetry"
             />
-            <p className="text-xs text-slate-500 mt-1">Use + for single-level wildcard, # for multi-level wildcard</p>
+            <p className="text-xs text-muted-foreground mt-1">Use + for single-level wildcard, # for multi-level wildcard</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">Message (JSON)</label>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">Message (JSON)</label>
             <textarea
               value={publishMessage}
               onChange={(e) => setPublishMessage(e.target.value)}
               rows={10}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              className="w-full px-3 py-2 bg-secondary border border-border rounded-md text-foreground font-mono text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
               placeholder='{"parameter": "Temperature", "value": 25.4}'
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-2">Quality of Service (QoS)</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-2">Quality of Service (QoS)</label>
               <select
                 value={publishQos}
                 onChange={(e) => setPublishQos(parseInt(e.target.value))}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                className="w-full px-3 py-2 bg-secondary border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500"
               >
                 <option value={0}>QoS 0 - At most once</option>
                 <option value={1}>QoS 1 - At least once</option>
@@ -527,9 +527,9 @@ const MqttManager = ({ API_BASE, toast }) => {
                 id="retain"
                 checked={publishRetain}
                 onChange={(e) => setPublishRetain(e.target.checked)}
-                className="w-4 h-4 bg-slate-800 border-slate-700 rounded"
+                className="w-4 h-4 bg-secondary border-border rounded"
               />
-              <label htmlFor="retain" className="text-sm text-slate-400">
+              <label htmlFor="retain" className="text-sm text-muted-foreground">
                 Retain Message
               </label>
             </div>
@@ -555,7 +555,7 @@ const MqttManager = ({ API_BASE, toast }) => {
                 }, null, 2));
               }}
               variant="outline"
-              className="border-slate-700 text-slate-300"
+              className="border-border text-foreground"
             >
               <RefreshCw className="w-4 h-4" />
             </Button>
@@ -563,7 +563,7 @@ const MqttManager = ({ API_BASE, toast }) => {
 
           {/* Message Templates */}
           <div>
-            <p className="text-sm font-medium text-slate-400 mb-2">Quick Templates</p>
+            <p className="text-sm font-medium text-muted-foreground mb-2">Quick Templates</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               <Button
                 variant="outline"
@@ -577,7 +577,7 @@ const MqttManager = ({ API_BASE, toast }) => {
                     timestamp: new Date().toISOString()
                   }, null, 2));
                 }}
-                className="border-slate-700 text-slate-300 justify-start"
+                className="border-border text-foreground justify-start"
               >
                 Telemetry
               </Button>
@@ -591,7 +591,7 @@ const MqttManager = ({ API_BASE, toast }) => {
                     timestamp: new Date().toISOString()
                   }, null, 2));
                 }}
-                className="border-slate-700 text-slate-300 justify-start"
+                className="border-border text-foreground justify-start"
               >
                 Status
               </Button>
@@ -607,7 +607,7 @@ const MqttManager = ({ API_BASE, toast }) => {
                     timestamp: new Date().toISOString()
                   }, null, 2));
                 }}
-                className="border-slate-700 text-slate-300 justify-start"
+                className="border-border text-foreground justify-start"
               >
                 Registration
               </Button>
@@ -621,9 +621,9 @@ const MqttManager = ({ API_BASE, toast }) => {
   // Subscribe Tab Component
   const SubscribeTab = () => (
     <div className="space-y-6">
-      <Card className="bg-slate-900/50 border-slate-800">
+      <Card className="bg-card/50 border-border">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
+          <CardTitle className="text-foreground flex items-center gap-2">
             <Radio className="w-5 h-5" />
             Subscribe to Topics
           </CardTitle>
@@ -632,23 +632,23 @@ const MqttManager = ({ API_BASE, toast }) => {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-slate-400 mb-2">Topic Pattern</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-2">Topic Pattern</label>
               <input
                 type="text"
                 value={subscribeTopic}
                 onChange={(e) => setSubscribeTopic(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                className="w-full px-3 py-2 bg-secondary border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 placeholder="devices/#"
                 disabled={isSubscribed}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-2">QoS</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-2">QoS</label>
               <select
                 value={subscribeQos}
                 onChange={(e) => setSubscribeQos(parseInt(e.target.value))}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                className="w-full px-3 py-2 bg-secondary border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 disabled={isSubscribed}
               >
                 <option value={0}>QoS 0</option>
@@ -681,13 +681,13 @@ const MqttManager = ({ API_BASE, toast }) => {
 
           {/* Common Topic Patterns */}
           <div>
-            <p className="text-sm font-medium text-slate-400 mb-2">Common Patterns</p>
+            <p className="text-sm font-medium text-muted-foreground mb-2">Common Patterns</p>
             <div className="flex flex-wrap gap-2">
               {['devices/#', 'devices/+/telemetry', 'devices/+/status', '$SYS/#'].map((pattern) => (
                 <Badge
                   key={pattern}
                   variant="outline"
-                  className="cursor-pointer border-slate-700 text-slate-300 hover:border-cyan-500"
+                  className="cursor-pointer border-border text-foreground hover:border-cyan-500"
                   onClick={() => !isSubscribed && setSubscribeTopic(pattern)}
                 >
                   {pattern}
@@ -699,10 +699,10 @@ const MqttManager = ({ API_BASE, toast }) => {
       </Card>
 
       {/* Message Monitor */}
-      <Card className="bg-slate-900/50 border-slate-800">
+      <Card className="bg-card/50 border-border">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-white flex items-center gap-2">
+            <CardTitle className="text-foreground flex items-center gap-2">
               <Terminal className="w-5 h-5" />
               Message Monitor
               <Badge variant={isSubscribed ? "default" : "secondary"} className="ml-2">
@@ -714,7 +714,7 @@ const MqttManager = ({ API_BASE, toast }) => {
                 variant="ghost"
                 size="sm"
                 onClick={() => setAutoScroll(!autoScroll)}
-                className="text-slate-400"
+                className="text-muted-foreground"
               >
                 {autoScroll ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
               </Button>
@@ -722,7 +722,7 @@ const MqttManager = ({ API_BASE, toast }) => {
                 variant="ghost"
                 size="sm"
                 onClick={downloadMessages}
-                className="text-slate-400"
+                className="text-muted-foreground"
                 disabled={messages.length === 0}
               >
                 <Download className="w-4 h-4" />
@@ -731,7 +731,7 @@ const MqttManager = ({ API_BASE, toast }) => {
                 variant="ghost"
                 size="sm"
                 onClick={clearMessages}
-                className="text-slate-400"
+                className="text-muted-foreground"
                 disabled={messages.length === 0}
               >
                 <Trash2 className="w-4 h-4" />
@@ -748,14 +748,14 @@ const MqttManager = ({ API_BASE, toast }) => {
                 value={messageFilter}
                 onChange={(e) => setMessageFilter(e.target.value)}
                 placeholder="Filter by topic..."
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                className="w-full px-3 py-2 bg-secondary border border-border rounded-md text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
               />
             </div>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowSystemTopics(!showSystemTopics)}
-              className={showSystemTopics ? 'border-cyan-500 text-cyan-400' : 'border-slate-700 text-slate-400'}
+              className={showSystemTopics ? 'border-cyan-500 text-cyan-400' : 'border-border text-muted-foreground'}
             >
               <Filter className="w-4 h-4 mr-2" />
               $SYS
@@ -763,9 +763,9 @@ const MqttManager = ({ API_BASE, toast }) => {
           </div>
 
           {/* Messages List */}
-          <div className="bg-slate-950 rounded-lg p-4 h-[500px] overflow-y-auto font-mono text-sm">
+          <div className="bg-background rounded-lg p-4 h-[500px] overflow-y-auto font-mono text-sm">
             {filteredMessages.length === 0 ? (
-              <div className="flex items-center justify-center h-full text-slate-500">
+              <div className="flex items-center justify-center h-full text-muted-foreground">
                 <div className="text-center">
                   <MessageSquare className="w-12 h-12 mx-auto mb-2 opacity-50" />
                   <p>No messages yet</p>
@@ -795,7 +795,7 @@ const MqttManager = ({ API_BASE, toast }) => {
                             {msg.direction === 'incoming' ? 'IN' : 'OUT'}
                           </Badge>
                           <span className="text-cyan-400 text-xs">{msg.topic}</span>
-                          <Badge variant="outline" className="text-xs border-slate-700">
+                          <Badge variant="outline" className="text-xs border-border">
                             QoS {msg.qos}
                           </Badge>
                           {msg.retain && (
@@ -805,7 +805,7 @@ const MqttManager = ({ API_BASE, toast }) => {
                           )}
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-slate-500 flex items-center gap-1">
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             {new Date(msg.timestamp).toLocaleTimeString()}
                           </span>
@@ -819,7 +819,7 @@ const MqttManager = ({ API_BASE, toast }) => {
                           </Button>
                         </div>
                       </div>
-                      <pre className="text-slate-300 text-xs overflow-x-auto whitespace-pre-wrap break-all">
+                      <pre className="text-foreground text-xs overflow-x-auto whitespace-pre-wrap break-all">
                         {typeof msg.payload === 'string'
                           ? msg.payload
                           : JSON.stringify(JSON.parse(msg.payload), null, 2)}
@@ -839,10 +839,10 @@ const MqttManager = ({ API_BASE, toast }) => {
   // Clients Tab Component
   const ClientsTab = () => (
     <div className="space-y-6">
-      <Card className="bg-slate-900/50 border-slate-800">
+      <Card className="bg-card/50 border-border">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-white flex items-center gap-2">
+            <CardTitle className="text-foreground flex items-center gap-2">
               <Users className="w-5 h-5" />
               Connected Clients
             </CardTitle>
@@ -850,7 +850,7 @@ const MqttManager = ({ API_BASE, toast }) => {
               variant="ghost"
               size="sm"
               onClick={fetchClients}
-              className="text-slate-400"
+              className="text-muted-foreground"
             >
               <RefreshCw className="w-4 h-4" />
             </Button>
@@ -858,7 +858,7 @@ const MqttManager = ({ API_BASE, toast }) => {
         </CardHeader>
         <CardContent>
           {clients.length === 0 ? (
-            <div className="text-center py-12 text-slate-500">
+            <div className="text-center py-12 text-muted-foreground">
               <Users className="w-12 h-12 mx-auto mb-2 opacity-50" />
               <p>No clients connected</p>
             </div>
@@ -869,12 +869,12 @@ const MqttManager = ({ API_BASE, toast }) => {
                   key={index}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="p-4 bg-slate-800/50 rounded-lg border border-slate-700"
+                  className="p-4 bg-secondary/50 rounded-lg border border-border"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-white font-semibold">{client.client_id}</p>
-                      <p className="text-sm text-slate-400 mt-1">
+                      <p className="text-foreground font-semibold">{client.client_id}</p>
+                      <p className="text-sm text-muted-foreground mt-1">
                         {client.ip_address} • Connected since {new Date(client.connected_at).toLocaleString()}
                       </p>
                     </div>
@@ -883,18 +883,18 @@ const MqttManager = ({ API_BASE, toast }) => {
                       Connected
                     </Badge>
                   </div>
-                  <div className="grid grid-cols-3 gap-4 mt-3 pt-3 border-t border-slate-700">
+                  <div className="grid grid-cols-3 gap-4 mt-3 pt-3 border-t border-border">
                     <div>
-                      <p className="text-xs text-slate-500">Messages Sent</p>
-                      <p className="text-sm text-white font-mono">{client.messages_sent || 0}</p>
+                      <p className="text-xs text-muted-foreground">Messages Sent</p>
+                      <p className="text-sm text-foreground font-mono">{client.messages_sent || 0}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500">Messages Received</p>
-                      <p className="text-sm text-white font-mono">{client.messages_received || 0}</p>
+                      <p className="text-xs text-muted-foreground">Messages Received</p>
+                      <p className="text-sm text-foreground font-mono">{client.messages_received || 0}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500">Subscriptions</p>
-                      <p className="text-sm text-white font-mono">{client.subscriptions || 0}</p>
+                      <p className="text-xs text-muted-foreground">Subscriptions</p>
+                      <p className="text-sm text-foreground font-mono">{client.subscriptions || 0}</p>
                     </div>
                   </div>
                 </motion.div>
@@ -909,10 +909,10 @@ const MqttManager = ({ API_BASE, toast }) => {
   // Topics Tab Component
   const TopicsTab = () => (
     <div className="space-y-6">
-      <Card className="bg-slate-900/50 border-slate-800">
+      <Card className="bg-card/50 border-border">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-white flex items-center gap-2">
+            <CardTitle className="text-foreground flex items-center gap-2">
               <MessageSquare className="w-5 h-5" />
               Active Topics
             </CardTitle>
@@ -920,7 +920,7 @@ const MqttManager = ({ API_BASE, toast }) => {
               variant="ghost"
               size="sm"
               onClick={fetchTopics}
-              className="text-slate-400"
+              className="text-muted-foreground"
             >
               <RefreshCw className="w-4 h-4" />
             </Button>
@@ -928,7 +928,7 @@ const MqttManager = ({ API_BASE, toast }) => {
         </CardHeader>
         <CardContent>
           {topics.length === 0 ? (
-            <div className="text-center py-12 text-slate-500">
+            <div className="text-center py-12 text-muted-foreground">
               <MessageSquare className="w-12 h-12 mx-auto mb-2 opacity-50" />
               <p>No active topics</p>
             </div>
@@ -939,21 +939,21 @@ const MqttManager = ({ API_BASE, toast }) => {
                   key={index}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="p-3 bg-slate-800/50 rounded-lg border border-slate-700 hover:border-cyan-500/50 transition-all"
+                  className="p-3 bg-secondary/50 rounded-lg border border-border hover:border-cyan-500/50 transition-all"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <Zap className="w-4 h-4 text-cyan-400" />
-                      <span className="text-white font-mono text-sm">{topic.name}</span>
+                      <span className="text-foreground font-mono text-sm">{topic.name}</span>
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <p className="text-xs text-slate-500">Subscribers</p>
-                        <p className="text-sm text-white font-mono">{topic.subscribers || 0}</p>
+                        <p className="text-xs text-muted-foreground">Subscribers</p>
+                        <p className="text-sm text-foreground font-mono">{topic.subscribers || 0}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs text-slate-500">Messages</p>
-                        <p className="text-sm text-white font-mono">{topic.messages || 0}</p>
+                        <p className="text-xs text-muted-foreground">Messages</p>
+                        <p className="text-sm text-foreground font-mono">{topic.messages || 0}</p>
                       </div>
                       <Button
                         variant="ghost"
@@ -982,8 +982,8 @@ const MqttManager = ({ API_BASE, toast }) => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">MQTT Broker Manager</h1>
-          <p className="text-slate-400 mt-1">Manage and monitor Eclipse Mosquitto MQTT broker</p>
+          <h1 className="text-3xl font-bold text-foreground">MQTT Broker Manager</h1>
+          <p className="text-muted-foreground mt-1">Manage and monitor Eclipse Mosquitto MQTT broker</p>
         </div>
         <div className="flex items-center gap-2">
           <Badge
@@ -1010,7 +1010,7 @@ const MqttManager = ({ API_BASE, toast }) => {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-slate-800">
+      <div className="border-b border-border">
         <div className="flex space-x-1">
           {[
             { id: 'overview', label: 'Overview', icon: Activity },
@@ -1027,7 +1027,7 @@ const MqttManager = ({ API_BASE, toast }) => {
                 className={`px-4 py-3 font-medium transition-all flex items-center gap-2 ${
                   activeTab === tab.id
                     ? 'text-cyan-400 border-b-2 border-cyan-400'
-                    : 'text-slate-400 hover:text-white'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 <Icon className="w-4 h-4" />

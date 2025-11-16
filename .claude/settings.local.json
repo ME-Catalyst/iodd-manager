@@ -50,7 +50,12 @@
       "Bash(move \"alembic\\versions\\009_create_ticket_system.py\" \"alembic\\versions\\011_create_ticket_system.py\")",
       "Bash(npx eslint:*)",
       "Bash(powershell -Command \"Get-Process python -ErrorAction SilentlyContinue | Select-Object Id, ProcessName\")",
-      "Bash(powershell -Command:*)"
+      "Bash(powershell -Command:*)",
+      "Bash(git pull:*)",
+      "Bash(move \"archive\\diagnostic-scripts\\eds_diagnostics.py\" \"eds_diagnostics.py\")",
+      "Bash(mv:*)",
+      "Bash(node fix-theme.js:*)",
+      "Bash(node fix-all-themes.js:*)"
     ],
     "deny": [],
     "ask": []

@@ -278,12 +278,12 @@ const AnalyticsDashboard = ({ devices, edsFiles, stats }) => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">Analytics Dashboard</h2>
-          <p className="text-slate-400 mt-1">Insights and trends from your device library</p>
+          <h2 className="text-2xl font-bold text-foreground">Analytics Dashboard</h2>
+          <p className="text-muted-foreground mt-1">Insights and trends from your device library</p>
         </div>
         <div className="flex items-center gap-4">
           <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-40 bg-slate-800 border-slate-700 text-white">
+            <SelectTrigger className="w-40 bg-secondary border-border text-foreground">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -299,13 +299,13 @@ const AnalyticsDashboard = ({ devices, edsFiles, stats }) => {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {metrics.map((metric, index) => (
-          <Card key={index} className="bg-slate-900 border-slate-800">
+          <Card key={index} className="bg-card border-border">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-slate-300">{metric.title}</p>
-                <div className="text-slate-400">{metric.icon}</div>
+                <p className="text-sm font-medium text-foreground">{metric.title}</p>
+                <div className="text-muted-foreground">{metric.icon}</div>
               </div>
-              <div className="text-3xl font-bold text-white mb-1">{metric.value}</div>
+              <div className="text-3xl font-bold text-foreground mb-1">{metric.value}</div>
               {metric.trend && <p className="text-sm text-green-400">{metric.trend} from last period</p>}
             </CardContent>
           </Card>
@@ -314,7 +314,7 @@ const AnalyticsDashboard = ({ devices, edsFiles, stats }) => {
 
       {/* Charts */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="bg-slate-900 border-b border-slate-800">
+        <TabsList className="bg-card border-b border-border">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="devices">Devices</TabsTrigger>
           <TabsTrigger value="parameters">Parameters</TabsTrigger>
@@ -323,9 +323,9 @@ const AnalyticsDashboard = ({ devices, edsFiles, stats }) => {
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="bg-slate-900 border-slate-800">
+            <Card className="bg-card border-border">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
+                <CardTitle className="text-foreground flex items-center gap-2">
                   <PieChart className="w-5 h-5" />
                   I/O Type Distribution
                 </CardTitle>
@@ -338,9 +338,9 @@ const AnalyticsDashboard = ({ devices, edsFiles, stats }) => {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-900 border-slate-800">
+            <Card className="bg-card border-border">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
+                <CardTitle className="text-foreground flex items-center gap-2">
                   <BarChart3 className="w-5 h-5" />
                   Parameters per Device
                 </CardTitle>
@@ -356,9 +356,9 @@ const AnalyticsDashboard = ({ devices, edsFiles, stats }) => {
         </TabsContent>
 
         <TabsContent value="devices" className="space-y-6">
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
+              <CardTitle className="text-foreground flex items-center gap-2">
                 <BarChart3 className="w-5 h-5" />
                 Top Manufacturers
               </CardTitle>
@@ -373,9 +373,9 @@ const AnalyticsDashboard = ({ devices, edsFiles, stats }) => {
         </TabsContent>
 
         <TabsContent value="parameters" className="space-y-6">
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
+              <CardTitle className="text-foreground flex items-center gap-2">
                 <PieChart className="w-5 h-5" />
                 Data Type Distribution
               </CardTitle>
@@ -390,9 +390,9 @@ const AnalyticsDashboard = ({ devices, edsFiles, stats }) => {
         </TabsContent>
 
         <TabsContent value="eds" className="space-y-6">
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
+              <CardTitle className="text-foreground flex items-center gap-2">
                 <BarChart3 className="w-5 h-5" />
                 EDS Vendors
               </CardTitle>

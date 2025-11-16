@@ -31,7 +31,7 @@ const TicketAttachments = ({ ticket, API_BASE, toast, onAttachmentsChange }) => 
     if (type.startsWith('text/') || ['txt', 'md', 'log', 'csv'].includes(ext)) {
       return <FileText className="w-5 h-5 text-green-400" />;
     }
-    return <Paperclip className="w-5 h-5 text-slate-400" />;
+    return <Paperclip className="w-5 h-5 text-muted-foreground" />;
   };
 
   const handleFileSelect = async (event) => {
@@ -132,10 +132,10 @@ const TicketAttachments = ({ ticket, API_BASE, toast, onAttachmentsChange }) => 
   const attachments = ticket.attachments || [];
 
   return (
-    <Card className="bg-slate-900 border-slate-800">
+    <Card className="bg-card border-border">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-white flex items-center gap-2">
+          <CardTitle className="text-foreground flex items-center gap-2">
             <Paperclip className="w-5 h-5" />
             Attachments ({attachments.length})
           </CardTitle>
@@ -158,7 +158,7 @@ const TicketAttachments = ({ ticket, API_BASE, toast, onAttachmentsChange }) => 
       </CardHeader>
       <CardContent>
         {attachments.length === 0 ? (
-          <div className="text-center py-8 text-slate-500">
+          <div className="text-center py-8 text-muted-foreground">
             <Paperclip className="w-12 h-12 mx-auto mb-3 opacity-30" />
             <p>No attachments yet</p>
             <p className="text-sm mt-1">Upload files to attach them to this ticket</p>
@@ -168,13 +168,13 @@ const TicketAttachments = ({ ticket, API_BASE, toast, onAttachmentsChange }) => 
             {attachments.map((attachment) => (
               <div
                 key={attachment.id}
-                className="flex items-center justify-between p-3 bg-slate-800/50 border border-slate-700 rounded-lg hover:bg-slate-800 transition-colors"
+                className="flex items-center justify-between p-3 bg-secondary/50 border border-border rounded-lg hover:bg-secondary transition-colors"
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   {getFileIcon(attachment.filename, attachment.content_type)}
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-medium truncate">{attachment.filename}</p>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-foreground font-medium truncate">{attachment.filename}</p>
+                    <p className="text-sm text-muted-foreground">
                       {formatFileSize(attachment.file_size)} • {new Date(attachment.uploaded_at).toLocaleString()}
                     </p>
                   </div>
@@ -182,14 +182,14 @@ const TicketAttachments = ({ ticket, API_BASE, toast, onAttachmentsChange }) => 
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleDownload(attachment)}
-                    className="p-2 text-blue-400 hover:text-blue-300 hover:bg-slate-700 rounded transition-colors"
+                    className="p-2 text-blue-400 hover:text-blue-300 hover:bg-muted rounded transition-colors"
                     title="Download"
                   >
                     <Download className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(attachment)}
-                    className="p-2 text-red-400 hover:text-red-300 hover:bg-slate-700 rounded transition-colors"
+                    className="p-2 text-red-400 hover:text-red-300 hover:bg-muted rounded transition-colors"
                     title="Delete"
                   >
                     <Trash2 className="w-4 h-4" />

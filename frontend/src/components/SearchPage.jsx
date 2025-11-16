@@ -276,7 +276,7 @@ const SearchPage = ({ API_BASE, onNavigate }) => {
       case 'enums':
         return <Hash className="w-5 h-5 text-pink-400" />;
       default:
-        return <FileText className="w-5 h-5 text-slate-400" />;
+        return <FileText className="w-5 h-5 text-muted-foreground" />;
     }
   };
 
@@ -331,13 +331,13 @@ const SearchPage = ({ API_BASE, onNavigate }) => {
       <div
         key={`${category}-${item.id}`}
         onClick={() => handleResultClick(item, category)}
-        className="p-4 bg-slate-800/50 border border-slate-700 rounded-lg hover:bg-slate-800 hover:border-slate-600 transition-all cursor-pointer group"
+        className="p-4 bg-secondary/50 border border-border rounded-lg hover:bg-secondary hover:border-border transition-all cursor-pointer group"
       >
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             {/* Device Name/Parameter Name */}
             <div className="flex items-center gap-2 mb-1">
-              <h4 className="text-white font-medium truncate">
+              <h4 className="text-foreground font-medium truncate">
                 {highlightMatch(
                   item.product_name || item.param_name || item.assembly_name || item.connection_name || item.param_name,
                   searchQuery
@@ -354,7 +354,7 @@ const SearchPage = ({ API_BASE, onNavigate }) => {
 
             {/* Vendor/Device Info */}
             {(item.vendor_name || item.device_vendor) && (
-              <p className="text-sm text-slate-400 mb-1">
+              <p className="text-sm text-muted-foreground mb-1">
                 {highlightMatch(item.vendor_name || item.device_vendor, searchQuery)}
                 {(item.product_code || item.device_product_code) &&
                   ` • ${item.product_code || item.device_product_code}`}
@@ -363,10 +363,10 @@ const SearchPage = ({ API_BASE, onNavigate }) => {
 
             {/* Parameter Details */}
             {category === 'parameters' && (
-              <div className="text-sm text-slate-500 space-y-1">
+              <div className="text-sm text-muted-foreground space-y-1">
                 <p>Parameter #{item.param_number} • {item.device_name}</p>
                 {item.description && (
-                  <p className="text-slate-400">{highlightMatch(item.description, searchQuery)}</p>
+                  <p className="text-muted-foreground">{highlightMatch(item.description, searchQuery)}</p>
                 )}
                 {(item.units || item.min_value || item.max_value) && (
                   <p>
@@ -380,48 +380,48 @@ const SearchPage = ({ API_BASE, onNavigate }) => {
 
             {/* Assembly Details */}
             {category === 'assemblies' && (
-              <div className="text-sm text-slate-500">
+              <div className="text-sm text-muted-foreground">
                 <p>Assembly #{item.assembly_number} • {item.device_name}</p>
                 {item.description && (
-                  <p className="text-slate-400 mt-1">{highlightMatch(item.description, searchQuery)}</p>
+                  <p className="text-muted-foreground mt-1">{highlightMatch(item.description, searchQuery)}</p>
                 )}
               </div>
             )}
 
             {/* Connection Details */}
             {category === 'connections' && (
-              <div className="text-sm text-slate-500">
+              <div className="text-sm text-muted-foreground">
                 <p>Connection #{item.connection_number} • {item.device_name}</p>
-                <p className="text-slate-400">Type: {item.connection_type}</p>
+                <p className="text-muted-foreground">Type: {item.connection_type}</p>
               </div>
             )}
 
             {/* Enum Details */}
             {category === 'enums' && (
-              <div className="text-sm text-slate-500">
+              <div className="text-sm text-muted-foreground">
                 <p>Parameter #{item.param_number} • {item.device_name}</p>
                 {item.enum_values && (
-                  <p className="text-slate-400 mt-1">{highlightMatch(item.enum_values, searchQuery)}</p>
+                  <p className="text-muted-foreground mt-1">{highlightMatch(item.enum_values, searchQuery)}</p>
                 )}
               </div>
             )}
 
             {/* Generic Description */}
             {item.description && !['parameters', 'assemblies'].includes(category) && (
-              <p className="text-sm text-slate-400 mt-1 line-clamp-2">
+              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                 {highlightMatch(item.description, searchQuery)}
               </p>
             )}
           </div>
 
-          <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-orange-400 transition-colors flex-shrink-0 ml-3" />
+          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-orange-400 transition-colors flex-shrink-0 ml-3" />
         </div>
       </div>
     );
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-6">
+    <div className="min-h-screen bg-background text-foreground p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -429,18 +429,18 @@ const SearchPage = ({ API_BASE, onNavigate }) => {
             <Search className="w-8 h-8 text-orange-500" />
             Global Search
           </h1>
-          <p className="text-slate-400">
+          <p className="text-muted-foreground">
             Search across all devices, parameters, assemblies, connections, and more
           </p>
         </div>
 
         {/* Search Bar */}
-        <Card className="bg-slate-900 border-slate-800 mb-6">
+        <Card className="bg-card border-border mb-6">
           <CardContent className="p-6">
             <div className="relative">
               <div className="flex gap-3">
                 <div className="relative flex-1">
-                  <Search className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+                  <Search className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
                   <input
                     ref={searchInputRef}
                     type="text"
@@ -448,12 +448,12 @@ const SearchPage = ({ API_BASE, onNavigate }) => {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Search devices, parameters, assemblies..."
-                    className="w-full pl-10 pr-10 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-orange-500"
+                    className="w-full pl-10 pr-10 py-3 bg-secondary border border-border rounded-lg text-foreground placeholder-slate-500 focus:outline-none focus:border-orange-500"
                   />
                   {searchQuery && (
                     <button
                       onClick={clearSearch}
-                      className="absolute right-3 top-3 text-slate-400 hover:text-white"
+                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
                     >
                       <X className="w-5 h-5" />
                     </button>
@@ -461,15 +461,15 @@ const SearchPage = ({ API_BASE, onNavigate }) => {
 
                   {/* Suggestions Dropdown */}
                   {showSuggestions && suggestions.length > 0 && (
-                    <div className="absolute z-10 w-full mt-2 bg-slate-800 border border-slate-700 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                    <div className="absolute z-10 w-full mt-2 bg-secondary border border-border rounded-lg shadow-lg max-h-64 overflow-y-auto">
                       {suggestions.map((suggestion, index) => (
                         <div
                           key={index}
                           onClick={() => handleSuggestionClick(suggestion)}
-                          className="px-4 py-2 hover:bg-slate-700 cursor-pointer flex items-center justify-between"
+                          className="px-4 py-2 hover:bg-muted cursor-pointer flex items-center justify-between"
                         >
-                          <span className="text-white">{suggestion.text}</span>
-                          <span className="text-xs text-slate-400 capitalize">{suggestion.type}</span>
+                          <span className="text-foreground">{suggestion.text}</span>
+                          <span className="text-xs text-muted-foreground capitalize">{suggestion.type}</span>
                         </div>
                       ))}
                     </div>
@@ -487,15 +487,15 @@ const SearchPage = ({ API_BASE, onNavigate }) => {
 
               {/* Device Type Filter */}
               <div className="flex items-center gap-3 mt-4">
-                <Filter className="w-4 h-4 text-slate-400" />
-                <span className="text-sm text-slate-400">Filter by type:</span>
+                <Filter className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Filter by type:</span>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setDeviceTypeFilter(null)}
                     className={`px-3 py-1 text-sm rounded ${
                       deviceTypeFilter === null
-                        ? 'bg-orange-600 text-white'
-                        : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                        ? 'bg-orange-600 text-foreground'
+                        : 'bg-secondary text-muted-foreground hover:bg-muted'
                     }`}
                   >
                     All
@@ -504,8 +504,8 @@ const SearchPage = ({ API_BASE, onNavigate }) => {
                     onClick={() => setDeviceTypeFilter('EDS')}
                     className={`px-3 py-1 text-sm rounded ${
                       deviceTypeFilter === 'EDS'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                        ? 'bg-blue-600 text-foreground'
+                        : 'bg-secondary text-muted-foreground hover:bg-muted'
                     }`}
                   >
                     EDS
@@ -514,8 +514,8 @@ const SearchPage = ({ API_BASE, onNavigate }) => {
                     onClick={() => setDeviceTypeFilter('IODD')}
                     className={`px-3 py-1 text-sm rounded ${
                       deviceTypeFilter === 'IODD'
-                        ? 'bg-green-600 text-white'
-                        : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                        ? 'bg-green-600 text-foreground'
+                        : 'bg-secondary text-muted-foreground hover:bg-muted'
                     }`}
                   >
                     IODD
@@ -524,20 +524,20 @@ const SearchPage = ({ API_BASE, onNavigate }) => {
               </div>
 
               {/* Advanced Filters */}
-              <div className="mt-4 pt-4 border-t border-slate-700">
+              <div className="mt-4 pt-4 border-t border-border">
                 <div className="flex items-start gap-4 flex-wrap">
                   <div className="flex items-center gap-2">
-                    <Tag className="w-4 h-4 text-slate-400" />
-                    <span className="text-sm text-slate-400">Advanced filters:</span>
+                    <Tag className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Advanced filters:</span>
                   </div>
 
                   {/* Vendor Filter */}
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-500">Vendor:</span>
+                    <span className="text-xs text-muted-foreground">Vendor:</span>
                     <select
                       value={vendorFilter || ''}
                       onChange={(e) => setVendorFilter(e.target.value || null)}
-                      className="px-3 py-1 text-sm bg-slate-800 border border-slate-700 rounded text-white focus:outline-none focus:border-orange-500"
+                      className="px-3 py-1 text-sm bg-secondary border border-border rounded text-foreground focus:outline-none focus:border-orange-500"
                     >
                       <option value="">All Vendors</option>
                       {availableVendors.map(vendor => (
@@ -547,25 +547,25 @@ const SearchPage = ({ API_BASE, onNavigate }) => {
                   </div>
 
                   {/* Has Parameters Filter */}
-                  <label className="flex items-center gap-2 px-3 py-1 bg-slate-800 border border-slate-700 rounded cursor-pointer hover:bg-slate-700">
+                  <label className="flex items-center gap-2 px-3 py-1 bg-secondary border border-border rounded cursor-pointer hover:bg-muted">
                     <input
                       type="checkbox"
                       checked={hasParametersFilter}
                       onChange={(e) => setHasParametersFilter(e.target.checked)}
-                      className="w-4 h-4 text-orange-600 bg-slate-700 border-slate-600 rounded focus:ring-orange-500"
+                      className="w-4 h-4 text-orange-600 bg-muted border-border rounded focus:ring-orange-500"
                     />
-                    <span className="text-sm text-white">Has Parameters</span>
+                    <span className="text-sm text-foreground">Has Parameters</span>
                   </label>
 
                   {/* Has Assemblies Filter */}
-                  <label className="flex items-center gap-2 px-3 py-1 bg-slate-800 border border-slate-700 rounded cursor-pointer hover:bg-slate-700">
+                  <label className="flex items-center gap-2 px-3 py-1 bg-secondary border border-border rounded cursor-pointer hover:bg-muted">
                     <input
                       type="checkbox"
                       checked={hasAssembliesFilter}
                       onChange={(e) => setHasAssembliesFilter(e.target.checked)}
-                      className="w-4 h-4 text-orange-600 bg-slate-700 border-slate-600 rounded focus:ring-orange-500"
+                      className="w-4 h-4 text-orange-600 bg-muted border-border rounded focus:ring-orange-500"
                     />
-                    <span className="text-sm text-white">Has Assemblies</span>
+                    <span className="text-sm text-foreground">Has Assemblies</span>
                   </label>
 
                   {/* Clear Filters */}
@@ -584,7 +584,7 @@ const SearchPage = ({ API_BASE, onNavigate }) => {
                 {/* Active Filters Display */}
                 {hasActiveFilters && (
                   <div className="flex items-center gap-2 mt-3 flex-wrap">
-                    <span className="text-xs text-slate-500">Active:</span>
+                    <span className="text-xs text-muted-foreground">Active:</span>
                     {deviceTypeFilter && (
                       <Badge variant="outline" className="text-xs">
                         Type: {deviceTypeFilter}
@@ -657,11 +657,11 @@ const SearchPage = ({ API_BASE, onNavigate }) => {
 
             {/* No Results */}
             {results.total_results === 0 && (
-              <Card className="bg-slate-900 border-slate-800">
+              <Card className="bg-card border-border">
                 <CardContent className="p-12 text-center">
                   <Search className="w-16 h-16 mx-auto mb-4 text-slate-600" />
                   <h3 className="text-xl font-semibold mb-2">No results found</h3>
-                  <p className="text-slate-400">
+                  <p className="text-muted-foreground">
                     Try different keywords or check your spelling
                   </p>
                 </CardContent>
@@ -674,12 +674,12 @@ const SearchPage = ({ API_BASE, onNavigate }) => {
               if (!Array.isArray(items) || items.length === 0) return null;
 
               return (
-                <Card key={category} className="bg-slate-900 border-slate-800">
+                <Card key={category} className="bg-card border-border">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-3 text-white">
+                    <CardTitle className="flex items-center gap-3 text-foreground">
                       {getCategoryIcon(category)}
                       {getCategoryTitle(category)}
-                      <span className="text-sm font-normal text-slate-400">
+                      <span className="text-sm font-normal text-muted-foreground">
                         ({items.length} result{items.length !== 1 ? 's' : ''})
                       </span>
                     </CardTitle>
@@ -697,10 +697,10 @@ const SearchPage = ({ API_BASE, onNavigate }) => {
 
         {/* Loading State */}
         {!results && searching && (
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-card border-border">
             <CardContent className="p-12 text-center">
               <div className="animate-spin w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-              <p className="text-slate-400">Loading devices...</p>
+              <p className="text-muted-foreground">Loading devices...</p>
             </CardContent>
           </Card>
         )}

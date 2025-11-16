@@ -114,11 +114,11 @@ const NodeRedManager = ({ API_BASE, toast }) => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <Workflow className="w-7 h-7 text-[#3DB60F]" />
             Node-RED Manager
           </h2>
-          <p className="text-slate-400 mt-1">Visual workflow automation and orchestration</p>
+          <p className="text-muted-foreground mt-1">Visual workflow automation and orchestration</p>
         </div>
         <div className="flex items-center gap-3">
           <Badge className={status?.connected ? 'bg-[#3DB60F]/20 text-[#3DB60F] border-[#3DB60F]/50' : 'bg-red-500/20 text-red-400 border-red-500/50'}>
@@ -139,48 +139,48 @@ const NodeRedManager = ({ API_BASE, toast }) => {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-card border-border">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Total Flows</p>
-                <p className="text-2xl font-bold text-white mt-1">{flows.length}</p>
+                <p className="text-muted-foreground text-sm">Total Flows</p>
+                <p className="text-2xl font-bold text-foreground mt-1">{flows.length}</p>
               </div>
               <Workflow className="w-8 h-8 text-[#3DB60F]" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-card border-border">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Active Flows</p>
-                <p className="text-2xl font-bold text-white mt-1">{activeFlows}</p>
+                <p className="text-muted-foreground text-sm">Active Flows</p>
+                <p className="text-2xl font-bold text-foreground mt-1">{activeFlows}</p>
               </div>
               <Play className="w-8 h-8 text-green-400" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-card border-border">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Total Nodes</p>
-                <p className="text-2xl font-bold text-white mt-1">{flows.reduce((acc, f) => acc + f.nodes, 0)}</p>
+                <p className="text-muted-foreground text-sm">Total Nodes</p>
+                <p className="text-2xl font-bold text-foreground mt-1">{flows.reduce((acc, f) => acc + f.nodes, 0)}</p>
               </div>
               <Box className="w-8 h-8 text-blue-400" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-card border-border">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Status</p>
-                <p className="text-2xl font-bold text-white mt-1">{status?.uptime || 'N/A'}</p>
+                <p className="text-muted-foreground text-sm">Status</p>
+                <p className="text-2xl font-bold text-foreground mt-1">{status?.uptime || 'N/A'}</p>
               </div>
               <Activity className="w-8 h-8 text-purple-400" />
             </div>
@@ -190,7 +190,7 @@ const NodeRedManager = ({ API_BASE, toast }) => {
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-slate-900 border-slate-800">
+        <TabsList className="bg-card border-border">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="flows">Flows</TabsTrigger>
           <TabsTrigger value="nodes">Node Library</TabsTrigger>
@@ -201,9 +201,9 @@ const NodeRedManager = ({ API_BASE, toast }) => {
         <TabsContent value="overview" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Quick Actions */}
-            <Card className="bg-slate-900 border-slate-800">
+            <Card className="bg-card border-border">
               <CardHeader>
-                <CardTitle className="text-white">Quick Actions</CardTitle>
+                <CardTitle className="text-foreground">Quick Actions</CardTitle>
                 <CardDescription>Common Node-RED operations</CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
@@ -217,7 +217,7 @@ const NodeRedManager = ({ API_BASE, toast }) => {
                     <action.icon className="w-4 h-4 mr-3" />
                     <div className="text-left">
                       <div className="font-semibold">{action.title}</div>
-                      <div className="text-xs text-slate-400">{action.description}</div>
+                      <div className="text-xs text-muted-foreground">{action.description}</div>
                     </div>
                   </Button>
                 ))}
@@ -225,17 +225,17 @@ const NodeRedManager = ({ API_BASE, toast }) => {
             </Card>
 
             {/* Node Categories */}
-            <Card className="bg-slate-900 border-slate-800">
+            <Card className="bg-card border-border">
               <CardHeader>
-                <CardTitle className="text-white">Node Library</CardTitle>
+                <CardTitle className="text-foreground">Node Library</CardTitle>
                 <CardDescription>Available node categories</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-3">
                   {nodeCategories.map((cat, i) => (
-                    <div key={i} className="p-3 bg-slate-800/50 rounded border border-slate-700">
+                    <div key={i} className="p-3 bg-secondary/50 rounded border border-border">
                       <div className="flex items-center justify-between">
-                        <span className="text-slate-300 text-sm">{cat.name}</span>
+                        <span className="text-foreground text-sm">{cat.name}</span>
                         <Badge className={`${cat.color} bg-transparent border-current`}>
                           {cat.count}
                         </Badge>
@@ -248,27 +248,27 @@ const NodeRedManager = ({ API_BASE, toast }) => {
           </div>
 
           {/* Flow Status */}
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white">Flow Status Overview</CardTitle>
+              <CardTitle className="text-foreground">Flow Status Overview</CardTitle>
               <CardDescription>Current state of all flows</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {flows.map((flow) => (
-                  <div key={flow.id} className="flex items-center justify-between p-4 bg-slate-800/50 rounded border border-slate-700">
+                  <div key={flow.id} className="flex items-center justify-between p-4 bg-secondary/50 rounded border border-border">
                     <div className="flex items-center gap-4">
                       <div className={`w-2 h-2 rounded-full ${flow.status === 'running' ? 'bg-[#3DB60F]' : 'bg-slate-600'} animate-pulse`} />
                       <div>
-                        <div className="font-semibold text-white">{flow.label}</div>
-                        <div className="text-sm text-slate-400">{flow.description}</div>
+                        <div className="font-semibold text-foreground">{flow.label}</div>
+                        <div className="text-sm text-muted-foreground">{flow.description}</div>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
                       <Badge variant="outline" className="text-xs">
                         {flow.nodes} nodes
                       </Badge>
-                      <Badge className={flow.status === 'running' ? 'bg-[#3DB60F]/20 text-[#3DB60F] border-[#3DB60F]/50' : 'bg-slate-700 text-slate-400'}>
+                      <Badge className={flow.status === 'running' ? 'bg-[#3DB60F]/20 text-[#3DB60F] border-[#3DB60F]/50' : 'bg-muted text-muted-foreground'}>
                         {flow.status}
                       </Badge>
                       <Button variant="ghost" size="sm">
@@ -285,24 +285,24 @@ const NodeRedManager = ({ API_BASE, toast }) => {
         {/* Flows Tab */}
         <TabsContent value="flows" className="space-y-4">
           {flows.map((flow) => (
-            <Card key={flow.id} className="bg-slate-900 border-slate-800">
+            <Card key={flow.id} className="bg-card border-border">
               <CardContent className="pt-6">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
                       <Workflow className="w-5 h-5 text-[#3DB60F]" />
-                      <h3 className="text-lg font-semibold text-white">{flow.label}</h3>
-                      <Badge className={flow.status === 'running' ? 'bg-[#3DB60F]/20 text-[#3DB60F]' : 'bg-slate-700 text-slate-400'}>
+                      <h3 className="text-lg font-semibold text-foreground">{flow.label}</h3>
+                      <Badge className={flow.status === 'running' ? 'bg-[#3DB60F]/20 text-[#3DB60F]' : 'bg-muted text-muted-foreground'}>
                         {flow.status}
                       </Badge>
                     </div>
-                    <p className="text-slate-400 text-sm mb-4">{flow.description}</p>
+                    <p className="text-muted-foreground text-sm mb-4">{flow.description}</p>
                     <div className="flex items-center gap-6 text-sm">
-                      <div className="flex items-center gap-2 text-slate-400">
+                      <div className="flex items-center gap-2 text-muted-foreground">
                         <Box className="w-4 h-4" />
                         {flow.nodes} nodes
                       </div>
-                      <div className="flex items-center gap-2 text-slate-400">
+                      <div className="flex items-center gap-2 text-muted-foreground">
                         <Clock className="w-4 h-4" />
                         Modified: {new Date(flow.lastModified).toLocaleString()}
                       </div>
@@ -327,9 +327,9 @@ const NodeRedManager = ({ API_BASE, toast }) => {
 
         {/* Nodes Tab */}
         <TabsContent value="nodes" className="space-y-4">
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white">Installed Node Packages</CardTitle>
+              <CardTitle className="text-foreground">Installed Node Packages</CardTitle>
               <CardDescription>Node-RED palette modules</CardDescription>
             </CardHeader>
             <CardContent>
@@ -339,15 +339,15 @@ const NodeRedManager = ({ API_BASE, toast }) => {
                   { name: 'node-red-contrib-influxdb', version: '0.6.1', nodes: 5, description: 'InfluxDB integration' },
                   { name: 'node-red-contrib-telegrambot', version: '15.1.8', nodes: 8, description: 'Telegram bot nodes' },
                 ].map((pkg, i) => (
-                  <div key={i} className="p-4 bg-slate-800/50 rounded border border-slate-700">
+                  <div key={i} className="p-4 bg-secondary/50 rounded border border-border">
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="flex items-center gap-2">
                           <Package className="w-4 h-4 text-[#3DB60F]" />
-                          <span className="font-semibold text-white">{pkg.name}</span>
+                          <span className="font-semibold text-foreground">{pkg.name}</span>
                           <Badge variant="outline" className="text-xs">{pkg.version}</Badge>
                         </div>
-                        <p className="text-sm text-slate-400 mt-1">{pkg.description}</p>
+                        <p className="text-sm text-muted-foreground mt-1">{pkg.description}</p>
                       </div>
                       <Badge className="bg-[#3DB60F]/20 text-[#3DB60F]">{pkg.nodes} nodes</Badge>
                     </div>
@@ -360,20 +360,20 @@ const NodeRedManager = ({ API_BASE, toast }) => {
 
         {/* Activity Tab */}
         <TabsContent value="activity" className="space-y-4">
-          <Card className="bg-slate-900 border-slate-800">
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-white">Recent Activity</CardTitle>
+              <CardTitle className="text-foreground">Recent Activity</CardTitle>
               <CardDescription>Flow modifications and deployments</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
                 {recentActivity.map((activity, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 bg-slate-800/50 rounded border border-slate-700">
-                    <div className="text-sm text-slate-500">{activity.time}</div>
+                  <div key={i} className="flex items-center gap-3 p-3 bg-secondary/50 rounded border border-border">
+                    <div className="text-sm text-muted-foreground">{activity.time}</div>
                     <ArrowRight className="w-4 h-4 text-slate-600" />
                     <div className="flex-1">
-                      <div className="text-white text-sm">{activity.action}</div>
-                      <div className="text-slate-400 text-xs">{activity.flow}</div>
+                      <div className="text-foreground text-sm">{activity.action}</div>
+                      <div className="text-muted-foreground text-xs">{activity.flow}</div>
                     </div>
                     <Badge variant="outline" className="text-xs">{activity.user}</Badge>
                   </div>

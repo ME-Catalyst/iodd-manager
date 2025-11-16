@@ -37,7 +37,7 @@ const PortsSection = ({ edsId }) => {
     return (
       <div className="flex items-center justify-center p-8">
         <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
-        <span className="ml-2 text-slate-400">Loading ports...</span>
+        <span className="ml-2 text-muted-foreground">Loading ports...</span>
       </div>
     );
   }
@@ -53,7 +53,7 @@ const PortsSection = ({ edsId }) => {
 
   if (portsData.total_count === 0) {
     return (
-      <div className="text-center p-8 text-slate-400">
+      <div className="text-center p-8 text-muted-foreground">
         <Network className="w-12 h-12 mx-auto mb-3 opacity-50" />
         <p>No port definitions found in this EDS file.</p>
         <p className="text-sm mt-2">
@@ -105,7 +105,7 @@ const PortsSection = ({ edsId }) => {
               <div className={`text-${color}-400`}>
                 {icon}
               </div>
-              <h3 className="text-lg font-semibold text-white">
+              <h3 className="text-lg font-semibold text-foreground">
                 {portType} Ports
               </h3>
               <Badge className={`bg-${color}-900/50 text-${color}-300 border-${color}-700`}>
@@ -117,22 +117,22 @@ const PortsSection = ({ edsId }) => {
               {ports.map((port) => (
                 <Card
                   key={port.id}
-                  className={`bg-slate-900 border-slate-800 hover:border-${color}-700/50 transition-colors`}
+                  className={`bg-card border-border hover:border-${color}-700/50 transition-colors`}
                 >
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <CardTitle className="text-white text-base flex items-center gap-2">
+                        <CardTitle className="text-foreground text-base flex items-center gap-2">
                           <span className={`font-mono text-${color}-300`}>
                             Port {port.port_number}
                           </span>
-                          <span className="text-slate-400">→</span>
+                          <span className="text-muted-foreground">→</span>
                           <span>{port.port_name}</span>
                         </CardTitle>
                       </div>
                       <Badge
                         variant="outline"
-                        className="text-xs text-slate-400 border-slate-700"
+                        className="text-xs text-muted-foreground border-border"
                       >
                         #{port.port_number}
                       </Badge>
@@ -141,15 +141,15 @@ const PortsSection = ({ edsId }) => {
                   <CardContent className="space-y-3">
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <div className="text-xs text-slate-500 mb-1">Port Type</div>
+                        <div className="text-xs text-muted-foreground mb-1">Port Type</div>
                         <div className={`font-mono text-${color}-300`}>
                           {port.port_type || 'N/A'}
                         </div>
                       </div>
                       {port.link_number !== null && port.link_number !== undefined && (
                         <div>
-                          <div className="text-xs text-slate-500 mb-1">Link Number</div>
-                          <div className="font-mono text-white">
+                          <div className="text-xs text-muted-foreground mb-1">Link Number</div>
+                          <div className="font-mono text-foreground">
                             {port.link_number}
                           </div>
                         </div>
@@ -157,8 +157,8 @@ const PortsSection = ({ edsId }) => {
                     </div>
 
                     {port.port_path && (
-                      <div className="bg-slate-800/50 rounded p-2">
-                        <div className="text-xs text-slate-500 mb-1">Port Path</div>
+                      <div className="bg-secondary/50 rounded p-2">
+                        <div className="text-xs text-muted-foreground mb-1">Port Path</div>
                         <div className="font-mono text-xs text-cyan-300">
                           {port.port_path}
                         </div>
@@ -174,7 +174,7 @@ const PortsSection = ({ edsId }) => {
 
       {/* Info Footer */}
       <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-4">
-        <div className="text-sm text-slate-300">
+        <div className="text-sm text-foreground">
           <strong className="text-blue-300">Ports</strong> define the communication
           interfaces available on the device, including protocol type, addressing,
           and link information for network connectivity.

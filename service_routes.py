@@ -11,6 +11,7 @@ import psutil
 import os
 import json
 import socket
+import shutil
 from pathlib import Path
 
 router = APIRouter()

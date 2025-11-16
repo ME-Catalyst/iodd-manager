@@ -16,6 +16,7 @@ import * as SelectPrimitive from '@radix-ui/react-select';
 import * as SeparatorPrimitive from '@radix-ui/react-separator';
 // Note: @radix-ui/react-sheet doesn't exist, using Dialog as replacement
 import * as SheetPrimitive from '@radix-ui/react-dialog';
+import * as SwitchPrimitive from '@radix-ui/react-switch';
 import * as TabsPrimitive from '@radix-ui/react-tabs';
 import * as ToastPrimitive from '@radix-ui/react-toast';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
@@ -590,3 +591,29 @@ export const TooltipContent = React.forwardRef(({ className, ...props }, ref) =>
   />
 ));
 TooltipContent.displayName = 'TooltipContent';
+
+// ============================================================================
+// Switch Component
+// ============================================================================
+
+export const Switch = React.forwardRef(({ className, ...props }, ref) => (
+  <SwitchPrimitive.Root
+    ref={ref}
+    className={cn(
+      'peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors',
+      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+      'disabled:cursor-not-allowed disabled:opacity-50',
+      'data-[state=checked]:bg-primary data-[state=unchecked]:bg-input',
+      className
+    )}
+    {...props}
+  >
+    <SwitchPrimitive.Thumb
+      className={cn(
+        'pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform',
+        'data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0'
+      )}
+    />
+  </SwitchPrimitive.Root>
+));
+Switch.displayName = 'Switch';

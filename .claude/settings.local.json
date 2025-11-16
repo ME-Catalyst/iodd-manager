@@ -58,7 +58,8 @@
       "Bash(node fix-all-themes.js:*)",
       "Bash(=5.9.0)",
       "Bash(=1.6.0)",
-      "Bash(=2.31.0)"
+      "Bash(=2.31.0)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []

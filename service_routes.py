@@ -124,57 +124,48 @@ def save_service_config(config: Dict[str, Dict]):
         raise HTTPException(status_code=500, detail=f"Failed to save configuration: {str(e)}")
 
 def check_port_available(port: int) -> tuple[bool, Optional[Dict]]:
-    """Check if a port is available and return conflict info if not"""
+    """Check if a port is available (simplified for performance)"""
     try:
         # Try to bind to the port
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(1)
-        result = sock.connect_ex(('localhost', port))
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.settimeout(0.1)
+        sock.bind(('localhost', port))
         sock.close()
-
-        if result == 0:
-            # Port is in use, find the process
-            for conn in psutil.net_connections():
-                if conn.laddr.port == port:
-                    try:
-                        proc = psutil.Process(conn.pid)
-                        return False, {
-                            "port": port,
-                            "process_name": proc.name(),
-                            "pid": conn.pid,
-                            "cmdline": " ".join(proc.cmdline()) if proc.cmdline() else proc.name()
-                        }
-                    except (psutil.NoSuchProcess, psutil.AccessDenied):
-                        return False, {
-                            "port": port,
-                            "process_name": "Unknown",
-                            "pid": conn.pid,
-                            "cmdline": "Access denied"
-                        }
-            return False, {"port": port, "process_name": "Unknown", "pid": None}
-        return True, None
-    except Exception as e:
+        return True, None  # Port is available
+    except OSError:
+        # Port is in use
+        return False, {
+            "port": port,
+            "process_name": "Unknown",
+            "pid": 0,
+            "cmdline": "Port in use"
+        }
+    except Exception:
         # If we can't check, assume it's available
         return True, None
 
 def find_process_by_name(name: str, process_cache: Optional[list] = None) -> Optional[psutil.Process]:
-    """Find a process by name
+    """Find a process by name (optimized for performance)
 
     Args:
         name: Process name to search for
         process_cache: Optional list of processes to search through (for performance)
     """
-    processes = process_cache if process_cache is not None else psutil.process_iter(['name', 'exe', 'cmdline'])
-
-    for proc in processes:
+    if process_cache is None:
+        # Collect processes with minimal info for speed
         try:
-            proc_info = proc.info if process_cache else proc.as_dict(['name', 'exe', 'cmdline'])
-            if name.lower() in proc_info.get('name', '').lower():
+            process_cache = list(psutil.process_iter(['name']))
+        except Exception:
+            return None
+
+    name_lower = name.lower()
+    for proc in process_cache:
+        try:
+            proc_info = proc.info if hasattr(proc, 'info') else proc.as_dict(['name'])
+            proc_name = proc_info.get('name', '').lower()
+            if name_lower in proc_name:
                 return proc
-            if proc_info.get('cmdline'):
-                cmdline = " ".join(proc_info['cmdline']).lower()
-                if name.lower() in cmdline:
-                    return proc
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, AttributeError):
             pass
     return None
@@ -192,9 +183,9 @@ async def get_services_status():
     config = load_service_config()
     status = {}
 
-    # Collect process list once for performance
+    # Collect process list once for performance (minimal info only)
     try:
-        process_cache = list(psutil.process_iter(['name', 'exe', 'cmdline']))
+        process_cache = list(psutil.process_iter(['name']))
     except Exception:
         process_cache = None
 
@@ -248,9 +239,9 @@ async def get_port_conflicts():
     config = load_service_config()
     conflicts = []
 
-    # Collect process list once for performance
+    # Collect process list once for performance (minimal info only)
     try:
-        process_cache = list(psutil.process_iter(['name', 'exe', 'cmdline']))
+        process_cache = list(psutil.process_iter(['name']))
     except Exception:
         process_cache = None
 

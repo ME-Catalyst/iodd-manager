@@ -34,16 +34,17 @@ const ServicesAdmin = ({ API_BASE, toast }) => {
 
   useEffect(() => {
     loadServicesData();
-    const interval = setInterval(loadServicesData, 5000); // Refresh every 5 seconds
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(loadServicesData, 30000);
     return () => clearInterval(interval);
   }, []);
 
   const loadServicesData = async () => {
     try {
       const [statusRes, conflictsRes, healthRes] = await Promise.all([
-        axios.get(`${API_BASE}/api/services/status`),
-        axios.get(`${API_BASE}/api/services/conflicts`),
-        axios.get(`${API_BASE}/api/services/health`)
+        axios.get(`${API_BASE}/api/services/status`, { timeout: 10000 }),
+        axios.get(`${API_BASE}/api/services/conflicts`, { timeout: 10000 }),
+        axios.get(`${API_BASE}/api/services/health`, { timeout: 10000 })
       ]);
 
       setServices(statusRes.data);
@@ -51,6 +52,11 @@ const ServicesAdmin = ({ API_BASE, toast }) => {
       setHealth(healthRes.data);
     } catch (error) {
       console.error('Failed to load services data:', error);
+      toast({
+        title: 'Error',
+        description: `Failed to load services: ${error.message}`,
+        variant: 'destructive'
+      });
     }
   };
 

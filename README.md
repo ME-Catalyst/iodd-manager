@@ -91,18 +91,40 @@ chmod +x setup.sh
 
 ## Documentation
 
-📚 **All documentation is now built into the platform!**
+📚 **Complete in-platform documentation system with 28 comprehensive pages!**
 
-Access comprehensive documentation directly in the web interface:
+Access all documentation directly in the web interface at http://localhost:5173 → Click **"Docs"**
 
-### 📖 In-Platform Documentation
-- **Web Interface**: http://localhost:5173 → Click **"Docs"** in the navigation menu
-- **Interactive guides** with live examples and searchable content
-- **Getting Started** - Installation, Quick Start, Configuration
-- **User Guides** - Web Interface, Troubleshooting
-- **API Reference** - Endpoints, Authentication, Error Handling
-- **Developer Guides** - Frontend, Backend, Architecture
-- **Deployment** - Production, Docker, Monitoring
+### 📖 In-Platform Documentation (28 Pages)
+
+**Getting Started** (4 pages)
+- Quick Start Guide, Installation, Windows Setup, Docker
+
+**User Guides** (3 pages)
+- Web Interface Tour, Configuration Reference, Troubleshooting
+
+**API Documentation** (4 pages)
+- Overview, Endpoints Reference, Authentication, Error Handling
+
+**Component Gallery** (4 pages)
+- Overview, Interactive Gallery, Theme System, UI Components
+
+**Developer Guides** (6 pages)
+- Overview, Architecture (with 8 Mermaid diagrams), Backend, Frontend, Testing, Contributing
+
+**Operations** (2 pages)
+- Docker Deployment, Monitoring & Logging
+
+**Support Resources** (3 pages)
+- Common Issues, Debugging Guide, FAQ (30+ questions)
+
+**Features:**
+- 🎨 11 interactive Mermaid diagrams
+- 💻 100+ code examples with syntax highlighting
+- 🔍 Searchable sidebar navigation
+- 📱 Responsive design
+- 🌙 Dark theme optimized
+- ⚡ Fast page navigation with React lazy loading
 
 ### 🔧 API Documentation
 - **OpenAPI/Swagger**: http://localhost:8000/docs

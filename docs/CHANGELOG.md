@@ -9,6 +9,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added - Latest Features
 
+#### Complete In-Platform Documentation System (2025-01-17)
+
+**28 comprehensive documentation pages** now built into the web interface with modern, interactive design:
+
+**Phase 1 - Core Documentation** (7 pages)
+- Getting Started: Quick Start, Installation, Windows Installation, Docker Setup
+- User Guide: Web Interface, Configuration Reference, Troubleshooting
+
+**Phase 2 - API & Components** (8 pages)
+- API Documentation: Overview, Endpoints Reference, Authentication, Error Handling
+- Component Gallery: Overview, Interactive Gallery, Theme System, UI Components Reference
+
+**Phase 3 - Developer Guides** (6 pages)
+- Developer Overview with contribution paths
+- System Architecture with **8 interactive Mermaid diagrams**:
+  - 3-tier architecture visualization
+  - Backend request flow
+  - Frontend component hierarchy
+  - IODD upload sequence diagram
+  - Database ER diagram
+  - API endpoint structure
+  - Security layers
+  - Deployment architecture
+- Backend Development: FastAPI patterns, database, parsers
+- Frontend Development: React patterns, state management, components
+- Testing Guide: pytest, fixtures, best practices, CI/CD
+- Contributing Guide with **interactive Git workflow diagram**
+
+**Phase 4 - Operations** (2 pages)
+- Docker Deployment: multi-container architecture, docker-compose, Dockerfiles, production deployment
+- Monitoring & Logging: observability stack, structured logging, health checks, performance metrics, alerting
+
+**Phase 5 - Support Resources** (3 pages)
+- Common Issues & Solutions: 15+ backend/frontend/database issues with practical fixes
+- Debugging Guide: systematic debugging workflow with **interactive Mermaid diagram**, tools comparison
+- FAQ: 30+ questions across 6 categories (General, Installation, Usage, API, Troubleshooting, Contributing)
+
+**Technical Features:**
+- DocsMermaid component for modern diagram rendering with brand colors
+- Complete navigation system with prev/next links
+- Sidebar navigation with search functionality
+- Responsive design for desktop and mobile
+- Dark theme optimized
+- 100+ code examples with syntax highlighting
+- Cross-referenced between pages
+- React.lazy code splitting for performance
+
+**Visual Modernization:**
+- Replaced ASCII art with 11 interactive Mermaid diagrams
+- Brand-consistent styling (#3DB60F, #2d5016, #51cf66)
+- Professional flowcharts, sequence diagrams, and ER diagrams
+- Emojis and numbered steps for clarity
+
 #### User Experience Enhancements
 - **Dark/Light Theme Toggle** - System preference detection with manual override, localStorage persistence
 - **Keyboard Shortcuts System** - Comprehensive shortcuts for navigation (h/d/s/c/a), actions (Ctrl+U, Ctrl+Shift+T, Ctrl+R), and help (Shift+?)

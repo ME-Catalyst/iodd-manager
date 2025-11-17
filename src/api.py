@@ -354,7 +354,7 @@ async def root():
 @app.post("/api/iodd/upload",
           response_model=Union[UploadResponse, MultiUploadResponse],
           tags=["IODD Management"])
-@limiter.limit("10/minute")  # Rate limit: 10 uploads per minute
+@limiter.limit("1000/minute")  # Rate limit: 1000 uploads per minute (high-performance server)
 async def upload_iodd(
     request: Request,
     background_tasks: BackgroundTasks,

@@ -67,7 +67,7 @@ GENERATED_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 CORS_ORIGINS_STR = os.getenv(
     'CORS_ORIGINS',
-    'http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173'
+    'http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174'
 )
 CORS_ORIGINS: List[str] = [origin.strip() for origin in CORS_ORIGINS_STR.split(',')]
 

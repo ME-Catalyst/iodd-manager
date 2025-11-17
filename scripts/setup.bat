@@ -1,12 +1,12 @@
 @echo off
 setlocal enabledelayedexpansion
-title IODD Manager - Quick Setup
+title GreenStack - Quick Setup
 
 :: Change to project root directory
 cd /d "%~dp0\.."
 
 echo ╔══════════════════════════════════════════════════════════════╗
-echo ║                 IODD MANAGER - QUICK SETUP                  ║
+echo ║                 GREENSTACK - QUICK SETUP                     ║
 echo ╚══════════════════════════════════════════════════════════════╝
 echo.
 
@@ -41,12 +41,12 @@ echo.
 
 
 :: Launch the application
-echo √ Launching IODD Manager...
+echo √ Launching GreenStack...
 echo.
 echo ══════════════════════════════════════════════════════════════
 echo   The application will start in a moment...
 echo   • API Server: http://localhost:8000
-echo   • Web Interface: http://localhost:5173
+echo   • Web Interface: http://localhost:5173 (or next available port)
 echo   • API Documentation: http://localhost:8000/docs
 echo ══════════════════════════════════════════════════════════════
 echo.
@@ -54,6 +54,7 @@ echo Press Ctrl+C to stop the application
 echo.
 
 :: Start the application
+:: Note: The Python script will auto-detect and use the next available port
 python -m src.start --frontend-port 5173
 if %errorlevel% neq 0 (
     echo.

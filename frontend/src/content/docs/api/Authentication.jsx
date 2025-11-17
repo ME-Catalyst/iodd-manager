@@ -335,7 +335,7 @@ docker run -e CORS_ORIGINS="http://localhost:5173,https://your-domain.com" ...`}
             <li><strong>Audit Logging:</strong> Track all API access and changes</li>
             <li><strong>Two-Factor Authentication:</strong> Optional 2FA for enhanced security</li>
           </ul>
-        </DocsParagraph>
+        </DocsCallout>
 
         <DocsParagraph className="mt-4">
           Want to contribute? See the <DocsLink href="/docs/developer/contributing" external={false} onNavigate={onNavigate}>

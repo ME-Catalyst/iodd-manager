@@ -139,6 +139,7 @@ export const Badge = ({ className, variant = 'default', ...props }) => {
     default: 'bg-primary text-primary-foreground hover:bg-primary/80',
     secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
     destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/80',
+    warning: 'bg-warning text-gray-900 hover:bg-warning/80',
     outline: 'text-foreground border border-input',
   };
 

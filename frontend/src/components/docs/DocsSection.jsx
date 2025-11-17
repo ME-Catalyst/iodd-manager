@@ -18,7 +18,7 @@ const DocsSection = ({ title, children, id, className = '' }) => {
   const sectionId = id || (title ? title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') : undefined);
 
   return (
-    <section className={`docs-section mb-8 ${className}`} id={sectionId}>
+    <section className={`docs-section mb-8 ${className}`}>
       {title && (
         <DocsHeading level={2} id={sectionId}>
           {title}

@@ -6,6 +6,7 @@ import DocsSection from '../../../components/docs/DocsSection';
 import DocsCallout from '../../../components/docs/DocsCallout';
 import { DocsParagraph, DocsLink } from '../../../components/docs/DocsText';
 import DocsCodeBlock from '../../../components/docs/DocsCodeBlock';
+import DocsMermaid from '../../../components/docs/DocsMermaid';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, Badge } from '../../../components/ui';
 
 export const metadata = {
@@ -325,66 +326,50 @@ export default DeviceList;`}
           Follow this workflow when contributing code to Greenstack.
         </DocsParagraph>
 
-        <Card className="my-6 bg-gradient-to-br from-surface to-surface-hover">
-          <CardContent className="pt-6">
-            <pre className="text-sm font-mono text-foreground overflow-x-auto">
-{`┌─────────────────────────────────────────────────────────────────┐
-│                     Git Contribution Workflow                   │
-└─────────────────────────────────────────────────────────────────┘
+        <DocsMermaid chart={`
+graph TB
+    Start["🚀 Start Contributing"] --> Update["1️⃣ Update Your Fork"]
+    Update --> UpdateCmds["git checkout main<br/>git pull upstream main"]
+    UpdateCmds --> Branch["2️⃣ Create Feature Branch"]
+    Branch --> BranchCmd["git checkout -b<br/>feature/your-feature-name"]
+    BranchCmd --> Changes["3️⃣ Make Changes"]
+    Changes --> ChangesList["✏️ Edit code following style guidelines<br/>🧪 Add tests for new features<br/>📝 Update documentation if needed"]
+    ChangesList --> Quality["4️⃣ Run Quality Checks"]
+    Quality --> QualityList["make format<br/>make lint<br/>make type-check<br/>make security<br/>make test"]
+    QualityList --> Commit["5️⃣ Commit Changes"]
+    Commit --> CommitCmd["git add .<br/>git commit -m 'feat: add your feature'<br/><i>Pre-commit hooks run automatically</i>"]
+    CommitCmd --> Push["6️⃣ Push to Your Fork"]
+    Push --> PushCmd["git push origin<br/>feature/your-feature-name"]
+    PushCmd --> PR["7️⃣ Create Pull Request"]
+    PR --> PRSteps["📋 Go to GitHub<br/>➕ Click 'New Pull Request'<br/>🔀 Select your feature branch<br/>📝 Describe your changes<br/>✅ Submit for review"]
+    PRSteps --> Review{"Review<br/>Feedback?"}
+    Review -->|Yes| Feedback["8️⃣ Address Feedback"]
+    Feedback --> FeedbackSteps["Make requested changes<br/>Push updates to same branch<br/><i>PR automatically updates</i>"]
+    FeedbackSteps --> Review
+    Review -->|Approved| Merge["9️⃣ Merge"]
+    Merge --> MergeComplete["✨ Maintainer merges your PR<br/>🎉 Contribution Complete!"]
 
-1. UPDATE YOUR FORK
-   │
-   ├─► git checkout main
-   └─► git pull upstream main
-
-2. CREATE FEATURE BRANCH
-   │
-   └─► git checkout -b feature/your-feature-name
-
-3. MAKE CHANGES
-   │
-   ├─► Edit code following style guidelines
-   ├─► Add tests for new features
-   └─► Update documentation if needed
-
-4. RUN QUALITY CHECKS
-   │
-   ├─► make format    # Auto-format code
-   ├─► make lint      # Check code quality
-   ├─► make type-check # Verify types
-   ├─► make security  # Security scan
-   └─► make test      # Run tests
-
-5. COMMIT CHANGES
-   │
-   ├─► git add .
-   └─► git commit -m "feat: add your feature"
-       # Pre-commit hooks run automatically
-
-6. PUSH TO YOUR FORK
-   │
-   └─► git push origin feature/your-feature-name
-
-7. CREATE PULL REQUEST
-   │
-   ├─► Go to GitHub
-   ├─► Click "New Pull Request"
-   ├─► Select your feature branch
-   ├─► Describe your changes
-   └─► Submit for review
-
-8. ADDRESS FEEDBACK
-   │
-   ├─► Make requested changes
-   ├─► Push updates to same branch
-   └─► PR automatically updates
-
-9. MERGE
-   │
-   └─► Maintainer merges your PR`}
-            </pre>
-          </CardContent>
-        </Card>
+    style Start fill:#2d5016,stroke:#3DB60F,stroke-width:3px,color:#fff
+    style Update fill:#1a1f3a,stroke:#3DB60F,stroke-width:2px,color:#fff
+    style Branch fill:#1a1f3a,stroke:#3DB60F,stroke-width:2px,color:#fff
+    style Changes fill:#1a1f3a,stroke:#3DB60F,stroke-width:2px,color:#fff
+    style Quality fill:#1a1f3a,stroke:#51cf66,stroke-width:2px,color:#fff
+    style Commit fill:#1a1f3a,stroke:#3DB60F,stroke-width:2px,color:#fff
+    style Push fill:#1a1f3a,stroke:#3DB60F,stroke-width:2px,color:#fff
+    style PR fill:#1a1f3a,stroke:#3DB60F,stroke-width:2px,color:#fff
+    style Review fill:#2d5016,stroke:#3DB60F,stroke-width:3px,color:#fff
+    style Feedback fill:#1a1f3a,stroke:#51cf66,stroke-width:2px,color:#fff
+    style Merge fill:#2d5016,stroke:#3DB60F,stroke-width:3px,color:#fff
+    style MergeComplete fill:#2d5016,stroke:#3DB60F,stroke-width:3px,color:#fff
+    style UpdateCmds fill:#2a3050,stroke:#51cf66,stroke-width:1px,color:#fff
+    style BranchCmd fill:#2a3050,stroke:#51cf66,stroke-width:1px,color:#fff
+    style ChangesList fill:#2a3050,stroke:#51cf66,stroke-width:1px,color:#fff
+    style QualityList fill:#2a3050,stroke:#51cf66,stroke-width:1px,color:#fff
+    style CommitCmd fill:#2a3050,stroke:#51cf66,stroke-width:1px,color:#fff
+    style PushCmd fill:#2a3050,stroke:#51cf66,stroke-width:1px,color:#fff
+    style PRSteps fill:#2a3050,stroke:#51cf66,stroke-width:1px,color:#fff
+    style FeedbackSteps fill:#2a3050,stroke:#51cf66,stroke-width:1px,color:#fff
+`} className="my-6" />
 
         <DocsCodeBlock language="bash">
 {`# Example workflow

@@ -5,7 +5,29 @@
  * Provides metadata for navigation, search, and rendering
  */
 
+// Getting Started
 import QuickStart, { metadata as quickStartMeta } from './getting-started/QuickStart';
+import Installation, { metadata as installationMeta } from './getting-started/Installation';
+
+// User Guide
+import Configuration, { metadata as configurationMeta } from './user-guide/Configuration';
+import WebInterface, { metadata as webInterfaceMeta } from './user-guide/WebInterface';
+import Troubleshooting, { metadata as troubleshootingMeta } from './user-guide/Troubleshooting';
+
+// API
+import ApiOverview, { metadata as apiOverviewMeta } from './api/Overview';
+
+// Components
+import ComponentsOverview, { metadata as componentsOverviewMeta } from './components/Overview';
+
+// Developer
+import DeveloperOverview, { metadata as developerOverviewMeta } from './developer/Overview';
+
+// Architecture
+import ArchitectureOverview, { metadata as architectureOverviewMeta } from './architecture/Overview';
+
+// Deployment
+import ProductionGuide, { metadata as productionGuideMeta } from './deployment/ProductionGuide';
 
 // Documentation Pages Registry
 // Format: { 'page-id': { component, metadata, navigation } }
@@ -19,23 +41,16 @@ export const docsRegistry = {
     }
   },
 
-  // Placeholder pages (will be implemented)
   'getting-started/installation': {
-    component: null,
-    metadata: {
-      id: 'getting-started/installation',
-      title: 'Installation Guide',
-      description: 'Detailed installation instructions for all platforms',
-      category: 'getting-started',
-      keywords: ['install', 'setup', 'configure'],
-    },
+    component: Installation,
+    metadata: installationMeta,
     previous: {
       id: 'getting-started/quick-start',
       title: 'Quick Start'
     },
     next: {
-      id: 'getting-started/windows-installation',
-      title: 'Windows Installation'
+      id: 'user-guide/web-interface',
+      title: 'Web Interface Guide'
     }
   },
 
@@ -74,57 +89,54 @@ export const docsRegistry = {
   },
 
   'user-guide/web-interface': {
-    component: null,
-    metadata: {
-      id: 'user-guide/web-interface',
-      title: 'Web Interface Guide',
-      description: 'Navigate and use the Greenstack web interface',
-      category: 'user-guide',
-      keywords: ['ui', 'interface', 'dashboard', 'navigation'],
-    }
-  },
-
-  'user-guide/device-management': {
-    component: null,
-    metadata: {
-      id: 'user-guide/device-management',
-      title: 'Device Management',
-      description: 'Import, view, and manage devices',
-      category: 'user-guide',
-      keywords: ['device', 'import', 'eds', 'iodd', 'manage'],
+    component: WebInterface,
+    metadata: webInterfaceMeta,
+    previous: {
+      id: 'getting-started/installation',
+      title: 'Installation Guide'
+    },
+    next: {
+      id: 'user-guide/configuration',
+      title: 'Configuration Reference'
     }
   },
 
   'user-guide/configuration': {
-    component: null,
-    metadata: {
-      id: 'user-guide/configuration',
-      title: 'Configuration Reference',
-      description: 'Complete guide to Greenstack configuration options',
-      category: 'user-guide',
-      keywords: ['config', 'settings', 'options', 'environment'],
+    component: Configuration,
+    metadata: configurationMeta,
+    previous: {
+      id: 'user-guide/web-interface',
+      title: 'Web Interface Guide'
+    },
+    next: {
+      id: 'user-guide/troubleshooting',
+      title: 'Troubleshooting'
     }
   },
 
-  'user-guide/features': {
-    component: null,
-    metadata: {
-      id: 'user-guide/features',
-      title: 'Features Overview',
-      description: 'Explore all Greenstack features',
-      category: 'user-guide',
-      keywords: ['features', 'capabilities', 'analytics', 'search', 'theme'],
+  'user-guide/troubleshooting': {
+    component: Troubleshooting,
+    metadata: troubleshootingMeta,
+    previous: {
+      id: 'user-guide/configuration',
+      title: 'Configuration Reference'
+    },
+    next: {
+      id: 'api/overview',
+      title: 'API Overview'
     }
   },
 
   'api/overview': {
-    component: null,
-    metadata: {
-      id: 'api/overview',
-      title: 'API Overview',
-      description: 'Introduction to the Greenstack REST API',
-      category: 'api-reference',
-      keywords: ['api', 'rest', 'http', 'endpoints'],
+    component: ApiOverview,
+    metadata: apiOverviewMeta,
+    previous: {
+      id: 'user-guide/troubleshooting',
+      title: 'Troubleshooting'
+    },
+    next: {
+      id: 'components/overview',
+      title: 'Component Gallery'
     }
   },
 
@@ -161,6 +173,19 @@ export const docsRegistry = {
     }
   },
 
+  'components/overview': {
+    component: ComponentsOverview,
+    metadata: componentsOverviewMeta,
+    previous: {
+      id: 'api/overview',
+      title: 'API Overview'
+    },
+    next: {
+      id: 'developer/overview',
+      title: 'Developer Guide'
+    }
+  },
+
   'components/gallery': {
     component: null,
     metadata: {
@@ -191,6 +216,19 @@ export const docsRegistry = {
       description: 'Reusable UI component reference',
       category: 'components',
       keywords: ['ui', 'components', 'button', 'card', 'dialog'],
+    }
+  },
+
+  'developer/overview': {
+    component: DeveloperOverview,
+    metadata: developerOverviewMeta,
+    previous: {
+      id: 'components/overview',
+      title: 'Component Gallery'
+    },
+    next: {
+      id: 'architecture/overview',
+      title: 'System Architecture'
     }
   },
 
@@ -249,14 +287,25 @@ export const docsRegistry = {
     }
   },
 
-  'deployment/production': {
-    component: null,
-    metadata: {
+  'architecture/overview': {
+    component: ArchitectureOverview,
+    metadata: architectureOverviewMeta,
+    previous: {
+      id: 'developer/overview',
+      title: 'Developer Guide'
+    },
+    next: {
       id: 'deployment/production',
-      title: 'Production Deployment',
-      description: 'Deploy Greenstack to production',
-      category: 'deployment',
-      keywords: ['production', 'deployment', 'hosting'],
+      title: 'Production Deployment'
+    }
+  },
+
+  'deployment/production': {
+    component: ProductionGuide,
+    metadata: productionGuideMeta,
+    previous: {
+      id: 'architecture/overview',
+      title: 'System Architecture'
     }
   },
 

@@ -839,16 +839,34 @@ const DatabaseTab = ({ overview, dbHealth, handleVacuum, handleBackup, handleDow
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
+            {/* Overall Health Status */}
+            <div className={`flex items-center justify-between p-4 rounded-lg border ${
+              dbHealth?.health_status === 'healthy' ? 'bg-green-500/10 border-green-500/50' :
+              dbHealth?.health_status === 'needs_attention' ? 'bg-blue-500/10 border-blue-500/50' :
+              dbHealth?.health_status === 'warning' ? 'bg-yellow-500/10 border-yellow-500/50' :
+              'bg-red-500/10 border-red-500/50'
+            }`}>
               <div className="flex items-center gap-3">
-                {dbHealth?.healthy ? (
+                {dbHealth?.health_status === 'healthy' ? (
                   <CheckCircle className="w-6 h-6 text-green-500" />
+                ) : dbHealth?.health_status === 'needs_attention' ? (
+                  <Info className="w-6 h-6 text-blue-500" />
+                ) : dbHealth?.health_status === 'warning' ? (
+                  <AlertTriangle className="w-6 h-6 text-yellow-500" />
                 ) : (
                   <AlertTriangle className="w-6 h-6 text-red-500" />
                 )}
                 <div>
-                  <p className="text-foreground font-medium">
-                    {dbHealth?.healthy ? 'Healthy' : 'Issues Detected'}
+                  <p className={`font-medium ${
+                    dbHealth?.health_status === 'healthy' ? 'text-green-400' :
+                    dbHealth?.health_status === 'needs_attention' ? 'text-blue-400' :
+                    dbHealth?.health_status === 'warning' ? 'text-yellow-400' :
+                    'text-red-400'
+                  }`}>
+                    {dbHealth?.health_status === 'healthy' ? 'Healthy' :
+                     dbHealth?.health_status === 'needs_attention' ? 'Needs Attention' :
+                     dbHealth?.health_status === 'warning' ? 'Warning' :
+                     'Critical Issues Detected'}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     Integrity: {dbHealth?.integrity} • FK Violations: {dbHealth?.foreign_key_violations}
@@ -861,6 +879,75 @@ const DatabaseTab = ({ overview, dbHealth, handleVacuum, handleBackup, handleDow
               </div>
             </div>
 
+            {/* Database Issues */}
+            {dbHealth?.issues && dbHealth.issues.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-orange-500" />
+                  Detected Issues ({dbHealth.issues.length})
+                </h4>
+                {dbHealth.issues.map((issue, idx) => (
+                  <div key={idx} className={`p-4 rounded-lg border ${
+                    issue.severity === 'critical' ? 'bg-red-500/10 border-red-500/50' :
+                    issue.severity === 'high' ? 'bg-orange-500/10 border-orange-500/50' :
+                    issue.severity === 'medium' ? 'bg-yellow-500/10 border-yellow-500/50' :
+                    'bg-blue-500/10 border-blue-500/50'
+                  }`}>
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge className={
+                            issue.severity === 'critical' ? 'bg-red-900/30 text-red-300 border-red-700/50' :
+                            issue.severity === 'high' ? 'bg-orange-900/30 text-orange-300 border-orange-700/50' :
+                            issue.severity === 'medium' ? 'bg-yellow-900/30 text-yellow-300 border-yellow-700/50' :
+                            'bg-blue-900/30 text-blue-300 border-blue-700/50'
+                          }>
+                            {issue.severity?.toUpperCase()}
+                          </Badge>
+                          <span className="font-semibold text-foreground">{issue.title}</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{issue.description}</p>
+                      </div>
+                      {issue.action && (
+                        <Button
+                          size="sm"
+                          onClick={issue.action === 'backup' ? handleBackup :
+                                   issue.action === 'vacuum' ? handleVacuum :
+                                   null}
+                          className={
+                            issue.severity === 'critical' ? 'bg-red-600 hover:bg-red-700' :
+                            issue.severity === 'high' ? 'bg-orange-600 hover:bg-orange-700' :
+                            'bg-blue-600 hover:bg-blue-700'
+                          }
+                        >
+                          {issue.action_label || 'Fix Now'}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Recommendations */}
+            {dbHealth?.recommendations && dbHealth.recommendations.length > 0 && (
+              <div className="p-4 bg-blue-500/10 border border-blue-500/50 rounded-lg">
+                <h4 className="text-sm font-semibold text-blue-400 mb-2 flex items-center gap-2">
+                  <Info className="w-4 h-4" />
+                  Recommendations
+                </h4>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  {dbHealth.recommendations.map((rec, idx) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <span className="text-blue-400 mt-1">•</span>
+                      <span>{rec}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Database Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-4 bg-secondary/30 rounded-lg border border-border">
                 <div className="flex items-center gap-2 mb-2">

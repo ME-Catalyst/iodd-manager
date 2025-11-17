@@ -35,27 +35,27 @@ jobs:
 
       - name: Run Black (Check Only)
         run: |
-          black --check iodd_manager.py api.py start.py
+          black --check greenstack.py api.py start.py
         continue-on-error: true
 
       - name: Run Ruff
         run: |
-          ruff check iodd_manager.py api.py start.py
+          ruff check greenstack.py api.py start.py
         continue-on-error: true
 
       - name: Run Pylint
         run: |
-          pylint iodd_manager.py api.py start.py --exit-zero
+          pylint greenstack.py api.py start.py --exit-zero
         continue-on-error: true
 
       - name: Run MyPy
         run: |
-          mypy iodd_manager.py api.py start.py
+          mypy greenstack.py api.py start.py
         continue-on-error: true
 
       - name: Run Bandit Security Scan
         run: |
-          bandit -c pyproject.toml -r iodd_manager.py api.py start.py
+          bandit -c pyproject.toml -r greenstack.py api.py start.py
         continue-on-error: true
 
   # ============================================================================
@@ -166,14 +166,14 @@ jobs:
 
       - name: Verify Python imports
         run: |
-          python -c "import iodd_manager; print('iodd_manager imported successfully')"
+          python -c "import greenstack; print('iodd_manager imported successfully')"
           python -c "import api; print('api imported successfully')"
           python -c "import start; print('start imported successfully')"
 
       - name: Check database initialization
         run: |
           python -c "
-          from iodd_manager import StorageManager
+          from greenstack import StorageManager
           import tempfile
           import os
           tmp = tempfile.NamedTemporaryFile(suffix='.db', delete=False)

@@ -422,16 +422,24 @@ async def upload_iodd(
             )
 
     # Save uploaded file temporarily
-    with tempfile.NamedTemporaryFile(delete=False, suffix=file.filename) as tmp_file:
-        tmp_file.write(content)
-        tmp_path = tmp_file.name
-    
+    tmp_path = None
     try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=file.filename) as tmp_file:
+            tmp_file.write(content)
+            tmp_path = tmp_file.name
+
+        logger.info(f"Processing IODD upload: {file.filename} (temp: {tmp_path})")
+
         # Import IODD file (may return int or List[int])
         result = manager.import_iodd(tmp_path)
 
-        # Clean up temp file in background
-        background_tasks.add_task(lambda: Path(tmp_path).unlink(missing_ok=True))
+        # Clean up temp file immediately after successful import
+        if tmp_path and Path(tmp_path).exists():
+            try:
+                Path(tmp_path).unlink()
+                logger.info(f"Cleaned up temp file: {tmp_path}")
+            except Exception as cleanup_error:
+                logger.warning(f"Failed to clean up temp file {tmp_path}: {cleanup_error}")
 
         # Check if nested ZIP (multiple devices)
         if isinstance(result, list):
@@ -462,9 +470,25 @@ async def upload_iodd(
                 parameters_count=len(device.get('parameters', []))
             )
 
+    except HTTPException:
+        # Clean up temp file on HTTP exception
+        if tmp_path and Path(tmp_path).exists():
+            try:
+                Path(tmp_path).unlink()
+                logger.info(f"Cleaned up temp file after HTTP error: {tmp_path}")
+            except Exception:
+                pass
+        # Re-raise HTTP exceptions without modification
+        raise
     except Exception as e:
-        # Clean up on error
-        Path(tmp_path).unlink(missing_ok=True)
+        # Clean up temp file on any error
+        if tmp_path and Path(tmp_path).exists():
+            try:
+                Path(tmp_path).unlink()
+                logger.info(f"Cleaned up temp file after error: {tmp_path}")
+            except Exception:
+                pass
+        logger.error(f"Failed to import IODD file {file.filename}: {str(e)}", exc_info=True)
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.get("/api/iodd", 

@@ -8,6 +8,7 @@ import DocsTabs, { DocsTab } from '../../../components/docs/DocsTabs';
 import DocsSteps, { DocsStep } from '../../../components/docs/DocsSteps';
 import DocsCallout from '../../../components/docs/DocsCallout';
 import { DocsParagraph, DocsLink } from '../../../components/docs/DocsText';
+import DocsFlowchart from '../../../components/docs/DocsFlowchart';
 
 export const metadata = {
   id: 'getting-started/installation',
@@ -269,6 +270,57 @@ python -m src.api`}
         <DocsParagraph>
           For more help, see the <DocsLink href="/docs/troubleshooting/common-issues" external={false}>Troubleshooting Guide</DocsLink> or <DocsLink href="https://github.com/ME-Catalyst/greenstack/issues">open an issue on GitHub</DocsLink>.
         </DocsParagraph>
+      </DocsSection>
+
+      <DocsSection title="Installation Process Overview">
+        <DocsParagraph>
+          Here's a visual overview of the typical installation process:
+        </DocsParagraph>
+
+        <DocsFlowchart.Container
+          title="Greenstack Installation Flow"
+          description="Step-by-step installation process from requirements to running application"
+        >
+          <DocsFlowchart.Step type="start" title="Start" description="Begin installation" />
+
+          <DocsFlowchart.Connector />
+
+          <DocsFlowchart.Step type="process" title="Check Requirements" description="Python 3.10+, pip, Node.js (optional)" />
+
+          <DocsFlowchart.Connector />
+
+          <DocsFlowchart.Step type="decision" title="Method?" description="Choose installation method" />
+
+          <DocsFlowchart.Branch>
+            <DocsFlowchart.Path label="pip" variant="success">
+              <DocsFlowchart.Step type="process" title="Install with pip" description="pip install greenstack" />
+              <DocsFlowchart.Connector />
+              <DocsFlowchart.Step type="success" title="Ready" description="Run greenstack-api" />
+            </DocsFlowchart.Path>
+
+            <DocsFlowchart.Path label="Docker" variant="success">
+              <DocsFlowchart.Step type="process" title="Pull Docker Image" description="docker pull ghcr.io/..." />
+              <DocsFlowchart.Connector />
+              <DocsFlowchart.Step type="success" title="Ready" description="Run container" />
+            </DocsFlowchart.Path>
+
+            <DocsFlowchart.Path label="Source" variant="success">
+              <DocsFlowchart.Step type="process" title="Clone Repository" description="git clone ..." />
+              <DocsFlowchart.Connector />
+              <DocsFlowchart.Step type="process" title="Install Dependencies" description="pip install -r requirements.txt" />
+              <DocsFlowchart.Connector />
+              <DocsFlowchart.Step type="success" title="Ready" description="Run python api.py" />
+            </DocsFlowchart.Path>
+          </DocsFlowchart.Branch>
+
+          <DocsFlowchart.Connector />
+
+          <DocsFlowchart.Step type="process" title="Access Application" description="Open http://localhost:8000" />
+
+          <DocsFlowchart.Connector />
+
+          <DocsFlowchart.Step type="end" title="Complete" description="Installation successful!" />
+        </DocsFlowchart.Container>
       </DocsSection>
 
       <DocsSection title="Next Steps">

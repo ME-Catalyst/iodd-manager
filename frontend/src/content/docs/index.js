@@ -14,6 +14,8 @@ const QuickStart = lazy(() => import('./getting-started/QuickStart'));
 const Installation = lazy(() => import('./getting-started/Installation'));
 const WindowsInstallation = lazy(() => import('./getting-started/WindowsInstallation'));
 const DockerSetup = lazy(() => import('./getting-started/DockerSetup'));
+const Features = lazy(() => import('./user-guide/Features'));
+const DeviceManagement = lazy(() => import('./user-guide/DeviceManagement'));
 const Configuration = lazy(() => import('./user-guide/Configuration'));
 const WebInterface = lazy(() => import('./user-guide/WebInterface'));
 const Troubleshooting = lazy(() => import('./user-guide/Troubleshooting'));
@@ -44,6 +46,8 @@ export { metadata as quickStartMeta } from './getting-started/QuickStart';
 export { metadata as installationMeta } from './getting-started/Installation';
 export { metadata as windowsInstallationMeta } from './getting-started/WindowsInstallation';
 export { metadata as dockerSetupMeta } from './getting-started/DockerSetup';
+export { metadata as featuresMeta } from './user-guide/Features';
+export { metadata as deviceManagementMeta } from './user-guide/DeviceManagement';
 export { metadata as configurationMeta } from './user-guide/Configuration';
 export { metadata as webInterfaceMeta } from './user-guide/WebInterface';
 export { metadata as troubleshootingMeta } from './user-guide/Troubleshooting';
@@ -74,6 +78,8 @@ import { metadata as quickStartMeta } from './getting-started/QuickStart';
 import { metadata as installationMeta } from './getting-started/Installation';
 import { metadata as windowsInstallationMeta } from './getting-started/WindowsInstallation';
 import { metadata as dockerSetupMeta } from './getting-started/DockerSetup';
+import { metadata as featuresMeta } from './user-guide/Features';
+import { metadata as deviceManagementMeta } from './user-guide/DeviceManagement';
 import { metadata as configurationMeta } from './user-guide/Configuration';
 import { metadata as webInterfaceMeta } from './user-guide/WebInterface';
 import { metadata as troubleshootingMeta } from './user-guide/Troubleshooting';
@@ -143,6 +149,36 @@ export const docsRegistry = {
     previous: {
       id: 'getting-started/windows-installation',
       title: 'Windows Installation'
+    },
+    next: {
+      id: 'user-guide/features',
+      title: 'Features Overview'
+    }
+  },
+
+  'user-guide/features': {
+    component: Features,
+    metadata: featuresMeta,
+    previous: {
+      id: 'getting-started/docker',
+      title: 'Docker Setup'
+    },
+    next: {
+      id: 'user-guide/device-management',
+      title: 'Device Management'
+    }
+  },
+
+  'user-guide/device-management': {
+    component: DeviceManagement,
+    metadata: deviceManagementMeta,
+    previous: {
+      id: 'user-guide/features',
+      title: 'Features Overview'
+    },
+    next: {
+      id: 'user-guide/web-interface',
+      title: 'Web Interface Guide'
     }
   },
 
@@ -150,8 +186,8 @@ export const docsRegistry = {
     component: WebInterface,
     metadata: webInterfaceMeta,
     previous: {
-      id: 'getting-started/installation',
-      title: 'Installation Guide'
+      id: 'user-guide/device-management',
+      title: 'Device Management'
     },
     next: {
       id: 'user-guide/configuration',

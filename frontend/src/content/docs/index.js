@@ -26,6 +26,9 @@ const ComponentsGallery = lazy(() => import('./components/Gallery'));
 const ComponentsThemeSystem = lazy(() => import('./components/ThemeSystem'));
 const ComponentsUIComponents = lazy(() => import('./components/UIComponents'));
 const DeveloperOverview = lazy(() => import('./developer/Overview'));
+const DeveloperArchitecture = lazy(() => import('./developer/Architecture'));
+const DeveloperTesting = lazy(() => import('./developer/Testing'));
+const DeveloperContributing = lazy(() => import('./developer/Contributing'));
 const BackendDevelopment = lazy(() => import('./developer/Backend'));
 const FrontendDevelopment = lazy(() => import('./developer/Frontend'));
 const ArchitectureOverview = lazy(() => import('./architecture/Overview'));
@@ -48,6 +51,9 @@ export { metadata as componentsGalleryMeta } from './components/Gallery';
 export { metadata as componentsThemeSystemMeta } from './components/ThemeSystem';
 export { metadata as componentsUIComponentsMeta } from './components/UIComponents';
 export { metadata as developerOverviewMeta } from './developer/Overview';
+export { metadata as developerArchitectureMeta } from './developer/Architecture';
+export { metadata as developerTestingMeta } from './developer/Testing';
+export { metadata as developerContributingMeta } from './developer/Contributing';
 export { metadata as backendDevelopmentMeta } from './developer/Backend';
 export { metadata as frontendDevelopmentMeta } from './developer/Frontend';
 export { metadata as architectureOverviewMeta } from './architecture/Overview';
@@ -70,6 +76,9 @@ import { metadata as componentsGalleryMeta } from './components/Gallery';
 import { metadata as componentsThemeSystemMeta } from './components/ThemeSystem';
 import { metadata as componentsUIComponentsMeta } from './components/UIComponents';
 import { metadata as developerOverviewMeta } from './developer/Overview';
+import { metadata as developerArchitectureMeta } from './developer/Architecture';
+import { metadata as developerTestingMeta } from './developer/Testing';
+import { metadata as developerContributingMeta } from './developer/Contributing';
 import { metadata as backendDevelopmentMeta } from './developer/Backend';
 import { metadata as frontendDevelopmentMeta } from './developer/Frontend';
 import { metadata as architectureOverviewMeta } from './architecture/Overview';
@@ -269,8 +278,21 @@ export const docsRegistry = {
     component: DeveloperOverview,
     metadata: developerOverviewMeta,
     previous: {
-      id: 'components/overview',
-      title: 'Component Gallery'
+      id: 'components/ui-components',
+      title: 'UI Components Reference'
+    },
+    next: {
+      id: 'developer/architecture',
+      title: 'System Architecture'
+    }
+  },
+
+  'developer/architecture': {
+    component: DeveloperArchitecture,
+    metadata: developerArchitectureMeta,
+    previous: {
+      id: 'developer/overview',
+      title: 'Developer Guide'
     },
     next: {
       id: 'developer/backend',
@@ -278,23 +300,12 @@ export const docsRegistry = {
     }
   },
 
-  'developer/architecture': {
-    component: null,
-    metadata: {
-      id: 'developer/architecture',
-      title: 'System Architecture',
-      description: 'Greenstack architecture and design',
-      category: 'developer',
-      keywords: ['architecture', 'design', 'structure', 'system'],
-    }
-  },
-
   'developer/backend': {
     component: BackendDevelopment,
     metadata: backendDevelopmentMeta,
     previous: {
-      id: 'developer/overview',
-      title: 'Developer Guide'
+      id: 'developer/architecture',
+      title: 'System Architecture'
     },
     next: {
       id: 'developer/frontend',
@@ -310,30 +321,34 @@ export const docsRegistry = {
       title: 'Backend Development'
     },
     next: {
-      id: 'architecture/overview',
-      title: 'System Architecture'
+      id: 'developer/testing',
+      title: 'Testing Guide'
     }
   },
 
   'developer/testing': {
-    component: null,
-    metadata: {
-      id: 'developer/testing',
-      title: 'Testing Guide',
-      description: 'Write and run tests for Greenstack',
-      category: 'developer',
-      keywords: ['testing', 'tests', 'pytest', 'qa'],
+    component: DeveloperTesting,
+    metadata: developerTestingMeta,
+    previous: {
+      id: 'developer/frontend',
+      title: 'Frontend Development'
+    },
+    next: {
+      id: 'developer/contributing',
+      title: 'Contributing Guide'
     }
   },
 
   'developer/contributing': {
-    component: null,
-    metadata: {
-      id: 'developer/contributing',
-      title: 'Contributing Guide',
-      description: 'How to contribute to Greenstack',
-      category: 'developer',
-      keywords: ['contributing', 'contribute', 'development', 'pull-request'],
+    component: DeveloperContributing,
+    metadata: developerContributingMeta,
+    previous: {
+      id: 'developer/testing',
+      title: 'Testing Guide'
+    },
+    next: {
+      id: 'architecture/overview',
+      title: 'Architecture Overview'
     }
   },
 

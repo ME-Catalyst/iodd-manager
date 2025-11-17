@@ -2,7 +2,7 @@
  * UI Components - Barrel export for all UI components
  *
  * This file re-exports components from Radix UI and provides
- * styled wrappers for the IODD Manager dashboard.
+ * styled wrappers for the Greenstack dashboard.
  */
 
 import React from 'react';

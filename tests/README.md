@@ -1,6 +1,6 @@
-# IODD Manager Test Suite
+# Greenstack Test Suite
 
-This directory contains the comprehensive test suite for IODD Manager.
+This directory contains the comprehensive test suite for Greenstack.
 
 ## Structure
 
@@ -105,7 +105,7 @@ The `conftest.py` file provides shared fixtures:
 ### Database Fixtures
 - `temp_db_path` - Temporary database file (auto-cleanup)
 - `storage_manager` - StorageManager with temp database
-- `iodd_manager` - IODDManager with temp database
+- `greenstack` - IODDManager with temp database
 
 ### API Fixtures
 - `test_client` - FastAPI TestClient
@@ -187,7 +187,7 @@ assert True  # Meaningless
 Target minimum coverage levels:
 
 - **Overall**: 70%+
-- **Core modules** (iodd_manager.py): 80%+
+- **Core modules** (greenstack.py): 80%+
 - **API endpoints** (api.py): 75%+
 - **Critical paths**: 90%+
 
@@ -218,7 +218,7 @@ If modules can't be imported:
 
 ```bash
 # Ensure you're in the project root
-cd /path/to/iodd-manager
+cd /path/to/greenstack
 
 # Install in development mode
 pip install -e .

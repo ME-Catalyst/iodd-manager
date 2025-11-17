@@ -1,6 +1,6 @@
 # API Authentication
 
-**Note**: Authentication is not currently implemented in IODD Manager 2.0. This document outlines planned authentication features for future versions.
+**Note**: Authentication is not currently implemented in Greenstack 2.0. This document outlines planned authentication features for future versions.
 
 ## Current Status
 
@@ -176,7 +176,7 @@ Use nginx for HTTP Basic Authentication:
 
 ```nginx
 location /api/ {
-    auth_basic "IODD Manager";
+    auth_basic "Greenstack";
     auth_basic_user_file /etc/nginx/.htpasswd;
 
     proxy_pass http://127.0.0.1:8000;
@@ -208,7 +208,7 @@ Use API gateway like Kong or AWS API Gateway:
 
 Restrict API access to VPN:
 
-- Deploy IODD Manager on private network
+- Deploy Greenstack on private network
 - Require VPN connection
 - Network-level security
 
@@ -276,7 +276,7 @@ OAUTH_CLIENT_SECRET=your-client-secret
 Interested in implementing authentication? See:
 
 - **[Contributing Guide](../developer-guide/contributing.md)**
-- **GitHub Issue**: [#123 - Add authentication support](https://github.com/ME-Catalyst/iodd-manager/issues/)
+- **GitHub Issue**: [#123 - Add authentication support](https://github.com/ME-Catalyst/greenstack/issues/)
 
 ## Next Steps
 

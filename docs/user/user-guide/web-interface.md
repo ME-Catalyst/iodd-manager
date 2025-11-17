@@ -1,6 +1,6 @@
 # Web Interface Guide
 
-The IODD Manager web interface provides an intuitive way to manage IODD files, view device information, and generate adapters.
+The Greenstack web interface provides an intuitive way to manage IODD files, view device information, and generate adapters.
 
 ## Accessing the Interface
 
@@ -20,7 +20,7 @@ The dashboard consists of several key areas:
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│  IODD Manager                    Search... 🔍 ⚙️   │
+│  Greenstack                    Search... 🔍 ⚙️   │
 ├─────────────────────────────────────────────────────┤
 │                                                      │
 │  📊 Statistics Cards                                │

@@ -1,4 +1,4 @@
-# IODD Manager Frontend
+# Greenstack Frontend
 
 Modern React-based web interface for the IODD Management System.
 

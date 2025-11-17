@@ -1,4 +1,4 @@
-# IODD Manager - System Architecture
+# Greenstack - System Architecture
 
 **Version 2.0** | **Production Release** | **November 2025**
 
@@ -6,7 +6,7 @@
 
 ## Overview
 
-GreenStack (formerly IODD Manager) is a comprehensive intelligent device management platform for importing, managing, and analyzing IO-Link Device Description (IODD) and EtherNet/IP (EDS) device configurations. The system provides a REST API backend, modern React frontend with advanced UX features, and complete database storage for device data.
+GreenStack (formerly Greenstack) is a comprehensive intelligent device management platform for importing, managing, and analyzing IO-Link Device Description (IODD) and EtherNet/IP (EDS) device configurations. The system provides a REST API backend, modern React frontend with advanced UX features, and complete database storage for device data.
 
 **Core Capabilities:**
 - Import and parse IODD XML files and EDS device descriptions
@@ -769,7 +769,7 @@ WHERE deleted_at IS NULL;
 
 ## Core Components
 
-### 1. IODD Parser (iodd_manager.py)
+### 1. IODD Parser (greenstack.py)
 
 **Responsibilities:**
 - Parse IODD XML files using lxml
@@ -841,7 +841,7 @@ GreenStack includes advanced user experience features built with modern web tech
 ```mermaid
 graph LR
     System[System Preferences<br/>prefers-color-scheme]
-    Storage[localStorage<br/>iodd-manager-theme]
+    Storage[localStorage<br/>greenstack-theme]
     Context[ThemeContext<br/>React Context API]
     Toggle[ThemeToggle Component]
     DOM[Document Root<br/>class='dark' or 'light']
@@ -1095,7 +1095,7 @@ graph LR
     Dev[Developer<br/>Workstation]
     Dev --> API[API Server<br/>localhost:8000]
     Dev --> Frontend[Frontend Dev Server<br/>localhost:5173]
-    API --> DB[(SQLite<br/>iodd_manager.db)]
+    API --> DB[(SQLite<br/>greenstack.db)]
     Frontend -.->|Proxy| API
 
     style Dev fill:#f0f0f0
@@ -1606,7 +1606,7 @@ flowchart TB
    - JavaScript: `eslint src/`, `prettier --check .`
 
 2. **Type Checking** (45s):
-   - Python: `mypy iodd_manager.py api.py`
+   - Python: `mypy greenstack.py api.py`
    - TypeScript: `tsc --noEmit`
 
 3. **Unit Tests** (2min):
@@ -1624,7 +1624,7 @@ flowchart TB
 
 6. **Build** (2min):
    - Frontend: `npm run build` → dist/
-   - Docker: `docker build -t iodd-manager:latest .`
+   - Docker: `docker build -t greenstack:latest .`
 
 7. **Deploy** (3min):
    - Staging: Automatic on merge to `main`
@@ -1753,7 +1753,7 @@ graph TB
     end
 
     subgraph "Core Business Logic"
-        Manager[iodd_manager.py<br/>IODDManager]
+        Manager[greenstack.py<br/>IODDManager]
         Parser[iodd_parser.py<br/>IODDParser]
         MenuBuilder[menu_builder.py<br/>Menu Construction]
     end
@@ -1919,7 +1919,7 @@ API_RELOAD = True  # Dev only
 API_WORKERS = 4  # Production
 
 # Database
-DATABASE_URL = "sqlite:///iodd_manager.db"
+DATABASE_URL = "sqlite:///greenstack.db"
 
 # Storage
 IODD_STORAGE_PATH = "./iodd_storage"
@@ -1944,7 +1944,7 @@ CORS_ORIGINS = "http://localhost:5173,http://localhost:3000"
 ```python
 # Example log entry
 2025-11-12 14:30:45 INFO [api.py:253] IODD file uploaded successfully device_id=42 vendor=ifm
-2025-11-12 14:30:46 DEBUG [iodd_manager.py:375] Extracted 147 parameters from IODD
+2025-11-12 14:30:46 DEBUG [greenstack.py:375] Extracted 147 parameters from IODD
 2025-11-12 14:30:47 WARNING [api.py:682] Large menu structure detected menu_items=89
 ```
 

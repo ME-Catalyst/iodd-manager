@@ -4,7 +4,7 @@ Maintaining high code quality through automated tools and best practices.
 
 ## Overview
 
-IODD Manager uses multiple tools to ensure code quality:
+Greenstack uses multiple tools to ensure code quality:
 
 - **Black**: Code formatting
 - **Ruff**: Fast Python linting
@@ -148,7 +148,7 @@ mypy .
 mypy api.py
 
 # Strict mode
-mypy --strict iodd_manager.py
+mypy --strict greenstack.py
 
 # Show error codes
 mypy --show-error-codes .

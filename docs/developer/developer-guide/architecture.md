@@ -1,6 +1,6 @@
 # Architecture Overview
 
-Understanding the IODD Manager architecture and codebase structure.
+Understanding the Greenstack architecture and codebase structure.
 
 ## System Architecture
 
@@ -39,9 +39,9 @@ Understanding the IODD Manager architecture and codebase structure.
 ## Project Structure
 
 ```
-iodd-manager/
+greenstack/
 ├── api.py                    # FastAPI application
-├── iodd_manager.py           # Core IODD parser
+├── greenstack.py           # Core IODD parser
 ├── config.py                 # Configuration management
 ├── start.py                  # Development server launcher
 │
@@ -120,7 +120,7 @@ FastAPI application providing REST API endpoints.
 @app.delete("/api/devices/{vid}/{did}") # Delete device
 ```
 
-### 2. IODD Parser (`iodd_manager.py`)
+### 2. IODD Parser (`greenstack.py`)
 
 Core XML parsing and data extraction logic.
 
@@ -168,7 +168,7 @@ API_HOST = os.getenv('API_HOST', '127.0.0.1')
 API_PORT = int(os.getenv('API_PORT', '8000'))
 
 # Database settings
-IODD_DATABASE_URL = os.getenv('IODD_DATABASE_URL', 'sqlite:///./iodd_manager.db')
+IODD_DATABASE_URL = os.getenv('IODD_DATABASE_URL', 'sqlite:///./greenstack.db')
 
 # Helper functions
 def print_config():
@@ -511,7 +511,7 @@ localhost:3000 (Frontend) → localhost:8000 (API) → SQLite DB
 ### Production (Docker)
 
 ```
-nginx:80 → iodd-manager:8000 → Persistent Volume
+nginx:80 → greenstack:8000 → Persistent Volume
 ```
 
 ## Extension Points

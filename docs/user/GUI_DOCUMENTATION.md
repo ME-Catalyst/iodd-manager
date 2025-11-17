@@ -1,8 +1,8 @@
-# IODD Manager - Web Interface Documentation
+# Greenstack - Web Interface Documentation
 
 ## 🎨 GUI Overview
 
-The IODD Manager features a stunning, modern web interface with advanced visualizations, real-time updates, and an intuitive user experience. The interface is available in two versions:
+The Greenstack features a stunning, modern web interface with advanced visualizations, real-time updates, and an intuitive user experience. The interface is available in two versions:
 
 1. **Vue.js Version** - Lightweight, single-file implementation
 2. **React Version** - Advanced dashboard with 3D visualizations

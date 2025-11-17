@@ -1,18 +1,18 @@
 # Command-Line Interface (CLI)
 
-Use IODD Manager from the command line for automation, scripting, and headless operations.
+Use Greenstack from the command line for automation, scripting, and headless operations.
 
 ## Basic Usage
 
 ```bash
 # Import IODD file
-python iodd_manager.py import device.xml
+python greenstack.py import device.xml
 
 # List all devices
-python iodd_manager.py list
+python greenstack.py list
 
 # Generate adapter
-python iodd_manager.py generate 12345 67890 nodered
+python greenstack.py generate 12345 67890 nodered
 ```
 
 ## Commands Reference
@@ -24,7 +24,7 @@ Import an IODD file into the database.
 **Syntax:**
 
 ```bash
-python iodd_manager.py import <file_path> [options]
+python greenstack.py import <file_path> [options]
 ```
 
 **Options:**
@@ -38,16 +38,16 @@ python iodd_manager.py import <file_path> [options]
 
 ```bash
 # Basic import
-python iodd_manager.py import sensor.xml
+python greenstack.py import sensor.xml
 
 # Validate without importing
-python iodd_manager.py import sensor.xml --validate-only
+python greenstack.py import sensor.xml --validate-only
 
 # Force overwrite existing device
-python iodd_manager.py import sensor.xml --force
+python greenstack.py import sensor.xml --force
 
 # JSON output for scripting
-python iodd_manager.py import sensor.xml --json
+python greenstack.py import sensor.xml --json
 ```
 
 **Output:**
@@ -85,7 +85,7 @@ List all imported devices.
 **Syntax:**
 
 ```bash
-python iodd_manager.py list [options]
+python greenstack.py list [options]
 ```
 
 **Options:**
@@ -99,22 +99,22 @@ python iodd_manager.py list [options]
 
 ```bash
 # List all devices
-python iodd_manager.py list
+python greenstack.py list
 
 # Filter by vendor
-python iodd_manager.py list --vendor 12345
+python greenstack.py list --vendor 12345
 
 # JSON output
-python iodd_manager.py list --format json
+python greenstack.py list --format json
 
 # CSV export
-python iodd_manager.py list --format csv > devices.csv
+python greenstack.py list --format csv > devices.csv
 
 # Sort by device name
-python iodd_manager.py list --sort device_name
+python greenstack.py list --sort device_name
 
 # Limit to 10 devices
-python iodd_manager.py list --limit 10
+python greenstack.py list --limit 10
 ```
 
 **Table Output:**
@@ -137,7 +137,7 @@ Display detailed information about a specific device.
 **Syntax:**
 
 ```bash
-python iodd_manager.py show <vendor_id> <device_id> [options]
+python greenstack.py show <vendor_id> <device_id> [options]
 ```
 
 **Options:**
@@ -152,16 +152,16 @@ python iodd_manager.py show <vendor_id> <device_id> [options]
 
 ```bash
 # Show device overview
-python iodd_manager.py show 12345 67890
+python greenstack.py show 12345 67890
 
 # Show with parameters
-python iodd_manager.py show 12345 67890 --parameters
+python greenstack.py show 12345 67890 --parameters
 
 # Show process data layout
-python iodd_manager.py show 12345 67890 --process-data
+python greenstack.py show 12345 67890 --process-data
 
 # JSON output
-python iodd_manager.py show 12345 67890 --json
+python greenstack.py show 12345 67890 --json
 ```
 
 **Output:**
@@ -194,7 +194,7 @@ Generate platform-specific adapter code.
 **Syntax:**
 
 ```bash
-python iodd_manager.py generate <vendor_id> <device_id> <platform> [options]
+python greenstack.py generate <vendor_id> <device_id> <platform> [options]
 ```
 
 **Platforms:**
@@ -216,16 +216,16 @@ python iodd_manager.py generate <vendor_id> <device_id> <platform> [options]
 
 ```bash
 # Generate Node-RED adapter
-python iodd_manager.py generate 12345 67890 nodered
+python greenstack.py generate 12345 67890 nodered
 
 # Generate with custom output path
-python iodd_manager.py generate 12345 67890 python --output sensor_adapter.py
+python greenstack.py generate 12345 67890 python --output sensor_adapter.py
 
 # Generate with all features
-python iodd_manager.py generate 12345 67890 nodered --include-params --include-events
+python greenstack.py generate 12345 67890 nodered --include-params --include-events
 
 # Use custom template
-python iodd_manager.py generate 12345 67890 custom --template my_template.j2
+python greenstack.py generate 12345 67890 custom --template my_template.j2
 ```
 
 **Output:**
@@ -248,7 +248,7 @@ Search for devices by various criteria.
 **Syntax:**
 
 ```bash
-python iodd_manager.py search <query> [options]
+python greenstack.py search <query> [options]
 ```
 
 **Options:**
@@ -261,16 +261,16 @@ python iodd_manager.py search <query> [options]
 
 ```bash
 # Search by vendor name
-python iodd_manager.py search "ifm"
+python greenstack.py search "ifm"
 
 # Search device names only
-python iodd_manager.py search "sensor" --field device_name
+python greenstack.py search "sensor" --field device_name
 
 # Search with JSON output
-python iodd_manager.py search "temperature" --json
+python greenstack.py search "temperature" --json
 
 # Limit results
-python iodd_manager.py search "sensor" --limit 5
+python greenstack.py search "sensor" --limit 5
 ```
 
 ### `export` - Export Data
@@ -280,7 +280,7 @@ Export devices or database to various formats.
 **Syntax:**
 
 ```bash
-python iodd_manager.py export <format> [options]
+python greenstack.py export <format> [options]
 ```
 
 **Formats:**
@@ -300,16 +300,16 @@ python iodd_manager.py export <format> [options]
 
 ```bash
 # Export all devices to JSON
-python iodd_manager.py export json --output devices.json
+python greenstack.py export json --output devices.json
 
 # Export to CSV
-python iodd_manager.py export csv --output devices.csv
+python greenstack.py export csv --output devices.csv
 
 # Export specific vendor
-python iodd_manager.py export json --vendor 12345 --output ifm_devices.json
+python greenstack.py export json --vendor 12345 --output ifm_devices.json
 
 # SQL dump
-python iodd_manager.py export sql --output backup.sql
+python greenstack.py export sql --output backup.sql
 ```
 
 ### `delete` - Delete Device
@@ -319,7 +319,7 @@ Remove a device from the database.
 **Syntax:**
 
 ```bash
-python iodd_manager.py delete <vendor_id> <device_id> [options]
+python greenstack.py delete <vendor_id> <device_id> [options]
 ```
 
 **Options:**
@@ -332,13 +332,13 @@ python iodd_manager.py delete <vendor_id> <device_id> [options]
 
 ```bash
 # Delete device (with confirmation)
-python iodd_manager.py delete 12345 67890
+python greenstack.py delete 12345 67890
 
 # Force delete without confirmation
-python iodd_manager.py delete 12345 67890 --force
+python greenstack.py delete 12345 67890 --force
 
 # Delete but keep IODD file
-python iodd_manager.py delete 12345 67890 --keep-files
+python greenstack.py delete 12345 67890 --keep-files
 ```
 
 **Output:**
@@ -363,7 +363,7 @@ Validate an IODD file without importing.
 **Syntax:**
 
 ```bash
-python iodd_manager.py validate <file_path> [options]
+python greenstack.py validate <file_path> [options]
 ```
 
 **Options:**
@@ -376,16 +376,16 @@ python iodd_manager.py validate <file_path> [options]
 
 ```bash
 # Basic validation
-python iodd_manager.py validate sensor.xml
+python greenstack.py validate sensor.xml
 
 # Strict validation
-python iodd_manager.py validate sensor.xml --strict
+python greenstack.py validate sensor.xml --strict
 
 # Verbose output
-python iodd_manager.py validate sensor.xml --verbose
+python greenstack.py validate sensor.xml --verbose
 
 # JSON output
-python iodd_manager.py validate sensor.xml --json
+python greenstack.py validate sensor.xml --json
 ```
 
 **Output:**
@@ -410,7 +410,7 @@ Import multiple IODD files at once.
 **Syntax:**
 
 ```bash
-python iodd_manager.py batch <directory> [options]
+python greenstack.py batch <directory> [options]
 ```
 
 **Options:**
@@ -424,16 +424,16 @@ python iodd_manager.py batch <directory> [options]
 
 ```bash
 # Import all XML files in directory
-python iodd_manager.py batch iodd_files/
+python greenstack.py batch iodd_files/
 
 # Recursive import
-python iodd_manager.py batch iodd_files/ --recursive
+python greenstack.py batch iodd_files/ --recursive
 
 # Custom pattern
-python iodd_manager.py batch iodd_files/ --pattern "*.iodd"
+python greenstack.py batch iodd_files/ --pattern "*.iodd"
 
 # Continue on errors with report
-python iodd_manager.py batch iodd_files/ --continue-on-error --report import_report.txt
+python greenstack.py batch iodd_files/ --continue-on-error --report import_report.txt
 ```
 
 **Output:**
@@ -470,7 +470,7 @@ REPORT_FILE="import_report_$(date +%Y%m%d_%H%M%S).txt"
 
 echo "Starting batch import from $IODD_DIR"
 
-python iodd_manager.py batch "$IODD_DIR" \
+python greenstack.py batch "$IODD_DIR" \
   --recursive \
   --continue-on-error \
   --report "$REPORT_FILE" \
@@ -497,7 +497,7 @@ import json
 
 # Get all devices
 result = subprocess.run(
-    ["python", "iodd_manager.py", "list", "--format", "json"],
+    ["python", "greenstack.py", "list", "--format", "json"],
     capture_output=True,
     text=True
 )
@@ -528,10 +528,10 @@ for vendor, vendor_devices in vendors.items():
 # generate_all_adapters.sh
 
 # Get all device IDs
-python iodd_manager.py list --format csv | tail -n +2 | while IFS=',' read -r vendor device rest; do
+python greenstack.py list --format csv | tail -n +2 | while IFS=',' read -r vendor device rest; do
   echo "Generating adapter for $vendor/$device"
 
-  python iodd_manager.py generate "$vendor" "$device" nodered \
+  python greenstack.py generate "$vendor" "$device" nodered \
     --output "adapters/nodered_${vendor}_${device}.json" \
     --include-params \
     --include-events
@@ -552,7 +552,7 @@ Configure CLI behavior with environment variables:
 
 ```bash
 # Database location
-export IODD_DATABASE_URL=sqlite:///./iodd_manager.db
+export IODD_DATABASE_URL=sqlite:///./greenstack.db
 
 # Storage directories
 export IODD_STORAGE_DIR=./iodd_storage
@@ -572,9 +572,9 @@ Create `.ioddrc` in your home directory:
 
 ```ini
 [default]
-database = ~/.iodd_manager/database.db
-storage = ~/.iodd_manager/storage
-generated = ~/.iodd_manager/generated
+database = ~/.greenstack/database.db
+storage = ~/.greenstack/storage
+generated = ~/.greenstack/generated
 
 [output]
 format = table
@@ -603,7 +603,7 @@ overwrite = false
 **Usage in scripts:**
 
 ```bash
-python iodd_manager.py import sensor.xml
+python greenstack.py import sensor.xml
 if [ $? -eq 0 ]; then
   echo "Import successful"
 else
@@ -618,13 +618,13 @@ fi
 
 ```bash
 # Check if command succeeded
-if ! python iodd_manager.py import sensor.xml; then
+if ! python greenstack.py import sensor.xml; then
   echo "Import failed"
   exit 1
 fi
 
 # Capture output
-OUTPUT=$(python iodd_manager.py list --json 2>&1)
+OUTPUT=$(python greenstack.py list --json 2>&1)
 if [ $? -ne 0 ]; then
   echo "Error: $OUTPUT"
 fi
@@ -634,17 +634,17 @@ fi
 
 ```bash
 # Log to file
-python iodd_manager.py batch iodd_files/ 2>&1 | tee import.log
+python greenstack.py batch iodd_files/ 2>&1 | tee import.log
 
 # Timestamp logs
-python iodd_manager.py import sensor.xml 2>&1 | ts >> import.log
+python greenstack.py import sensor.xml 2>&1 | ts >> import.log
 ```
 
 ### Parallel Processing
 
 ```bash
 # Process multiple files in parallel
-find iodd_files/ -name "*.xml" | parallel -j4 python iodd_manager.py import {}
+find iodd_files/ -name "*.xml" | parallel -j4 python greenstack.py import {}
 ```
 
 ## Troubleshooting
@@ -653,7 +653,7 @@ find iodd_files/ -name "*.xml" | parallel -j4 python iodd_manager.py import {}
 
 ```bash
 # Use full path
-python /path/to/iodd_manager.py import sensor.xml
+python /path/to/greenstack.py import sensor.xml
 
 # Or add to PATH
 export PATH=$PATH:$(pwd)
@@ -663,23 +663,23 @@ export PATH=$PATH:$(pwd)
 
 ```bash
 # Make script executable
-chmod +x iodd_manager.py
+chmod +x greenstack.py
 
 # Run with sudo if needed
-sudo python iodd_manager.py import sensor.xml
+sudo python greenstack.py import sensor.xml
 ```
 
 ### Database Locked
 
 ```bash
 # Check for running processes
-ps aux | grep iodd_manager
+ps aux | grep greenstack
 
 # Kill if needed
-pkill -f iodd_manager
+pkill -f greenstack
 
 # Or use different database
-python iodd_manager.py --database /tmp/iodd_test.db import sensor.xml
+python greenstack.py --database /tmp/iodd_test.db import sensor.xml
 ```
 
 ## Next Steps

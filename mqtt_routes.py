@@ -57,7 +57,7 @@ def setup_mqtt_client():
     if mqtt_client is not None:
         return mqtt_client
 
-    client = mqtt.Client(client_id="iodd-manager-api", clean_session=True)
+    client = mqtt.Client(client_id="greenstack-api", clean_session=True)
 
     if MQTT_USERNAME and MQTT_PASSWORD:
         client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)

@@ -12,7 +12,7 @@ import json
 class ParsingQualityAnalyzer:
     """Analyzes parsing quality for EDS and IODD files"""
 
-    def __init__(self, db_path: str = "iodd_manager.db"):
+    def __init__(self, db_path: str = "greenstack.db"):
         self.db_path = db_path
 
     def get_connection(self):

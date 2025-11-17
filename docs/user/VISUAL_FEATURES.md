@@ -1,4 +1,4 @@
-# 🎨 IODD Manager - Visual Features Showcase
+# 🎨 Greenstack - Visual Features Showcase
 
 ## ✨ Amazing Visual Features Implemented
 
@@ -213,7 +213,7 @@ Want different colors? Edit these values:
 
 ## 📷 **Visual Impact Summary**
 
-The IODD Manager GUI is designed to be:
+The Greenstack GUI is designed to be:
 - **Professional**: Enterprise-ready appearance
 - **Modern**: Latest design trends and techniques
 - **Intuitive**: Clear visual hierarchy and flow

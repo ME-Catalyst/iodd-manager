@@ -593,7 +593,7 @@ These services are **ready and configured** for:
 - **Documentation:** Visit `/docs` folder
 - **Troubleshooting:** See [TROUBLESHOOTING.md](../troubleshooting/TROUBLESHOOTING.md)
 - **API Reference:** Available at `/docs` endpoint when running
-- **GitHub Issues:** [Report bugs or request features](https://github.com/ME-Catalyst/iodd-manager/issues)
+- **GitHub Issues:** [Report bugs or request features](https://github.com/ME-Catalyst/greenstack/issues)
 
 ---
 

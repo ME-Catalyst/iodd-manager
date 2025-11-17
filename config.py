@@ -1,5 +1,5 @@
 """
-Configuration management for IODD Manager.
+Configuration management for Greenstack.
 
 Loads configuration from environment variables with sensible defaults.
 Uses python-dotenv to load from .env file if present.
@@ -20,7 +20,7 @@ if env_path.exists():
 # ============================================================================
 
 ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
-APP_NAME = os.getenv('APP_NAME', 'IODD Manager')
+APP_NAME = os.getenv('APP_NAME', 'Greenstack')
 APP_VERSION = os.getenv('APP_VERSION', '2.0.0')
 DEBUG = os.getenv('DEBUG', 'true').lower() == 'true'
 
@@ -45,7 +45,7 @@ AUTO_OPEN_BROWSER = os.getenv('AUTO_OPEN_BROWSER', 'true').lower() == 'true'
 # Database Settings
 # ============================================================================
 
-DATABASE_URL = os.getenv('IODD_DATABASE_URL', 'sqlite:///iodd_manager.db')
+DATABASE_URL = os.getenv('IODD_DATABASE_URL', 'sqlite:///greenstack.db')
 AUTO_MIGRATE = os.getenv('AUTO_MIGRATE', 'false').lower() == 'true'
 
 # ============================================================================
@@ -86,7 +86,7 @@ ENABLE_AUTH = os.getenv('ENABLE_AUTH', 'false').lower() == 'true'
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO').upper()
 LOG_FORMAT = os.getenv('LOG_FORMAT', 'text').lower()
 LOG_TO_FILE = os.getenv('LOG_TO_FILE', 'false').lower() == 'true'
-LOG_FILE_PATH = Path(os.getenv('LOG_FILE_PATH', './logs/iodd_manager.log'))
+LOG_FILE_PATH = Path(os.getenv('LOG_FILE_PATH', './logs/greenstack.log'))
 LOG_MAX_BYTES = int(os.getenv('LOG_MAX_BYTES', '10485760'))  # 10MB
 LOG_BACKUP_COUNT = int(os.getenv('LOG_BACKUP_COUNT', '5'))
 

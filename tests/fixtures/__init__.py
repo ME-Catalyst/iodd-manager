@@ -1,1 +1,1 @@
-"""Test fixtures for IODD Manager tests."""
+"""Test fixtures for Greenstack tests."""

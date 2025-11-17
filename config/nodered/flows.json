@@ -426,7 +426,7 @@
   {
     "id": "mqtt_broker",
     "type": "mqtt-broker",
-    "name": "IODD Manager MQTT",
+    "name": "Greenstack MQTT",
     "broker": "mosquitto",
     "port": "1883",
     "clientid": "nodered",

@@ -9,7 +9,7 @@ import sqlite3
 
 router = APIRouter(prefix="/api/search", tags=["Search"])
 
-DB_PATH = "iodd_manager.db"
+DB_PATH = "greenstack.db"
 
 
 @router.get("")

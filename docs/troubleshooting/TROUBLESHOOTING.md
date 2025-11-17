@@ -1,4 +1,4 @@
-# IODD Manager Troubleshooting Guide
+# Greenstack Troubleshooting Guide
 
 ## Common Issues and Solutions
 
@@ -74,13 +74,13 @@ API_PORT=8001 python api.py
 ```bash
 # Stop all running instances
 # Delete the database file
-rm iodd_manager.db
+rm greenstack.db
 
 # Reinitialize
 python start.py --init-db
 
 # Or use PostgreSQL for better concurrency
-DATABASE_URL=postgresql://user:pass@localhost/iodd_manager
+DATABASE_URL=postgresql://user:pass@localhost/greenstack
 ```
 
 #### CORS Error in Browser
@@ -112,7 +112,7 @@ Restart backend after changing CORS settings.
 3. Try with different IODD file to isolate issue
 4. Check backend logs for detailed error:
    ```bash
-   tail -f logs/iodd_manager.log
+   tail -f logs/greenstack.log
    ```
 
 #### ZIP Import Fails
@@ -147,7 +147,7 @@ Restart backend after changing CORS settings.
 1. Refresh the page
 2. Check database integrity:
    ```bash
-   sqlite3 iodd_manager.db "PRAGMA integrity_check;"
+   sqlite3 greenstack.db "PRAGMA integrity_check;"
    ```
 3. If corrupted, restore from backup or re-import
 
@@ -162,7 +162,7 @@ Restart backend after changing CORS settings.
 **Solution:**
 ```bash
 # Check assets in database
-sqlite3 iodd_manager.db "SELECT COUNT(*) FROM iodd_assets WHERE device_id = X;"
+sqlite3 greenstack.db "SELECT COUNT(*) FROM iodd_assets WHERE device_id = X;"
 
 # Re-import device to extract assets again
 ```
@@ -235,7 +235,7 @@ alembic downgrade base
 alembic upgrade head
 
 # Or reset database
-rm iodd_manager.db
+rm greenstack.db
 alembic upgrade head
 ```
 
@@ -324,7 +324,7 @@ docker-compose up
 - Check firewall rules
 - Try with container IP:
   ```bash
-  docker inspect iodd-manager_frontend_1 | grep IPAddress
+  docker inspect greenstack_frontend_1 | grep IPAddress
   ```
 
 ---
@@ -342,12 +342,12 @@ node --version
 npm --version
 
 # Backend logs
-tail -n 100 logs/iodd_manager.log
+tail -n 100 logs/greenstack.log
 
 # Frontend console errors (F12 in browser)
 
 # Database info
-sqlite3 iodd_manager.db "SELECT COUNT(*) FROM iodd_devices;"
+sqlite3 greenstack.db "SELECT COUNT(*) FROM iodd_devices;"
 
 # Environment
 cat .env | grep -v API_KEY
@@ -355,7 +355,7 @@ cat .env | grep -v API_KEY
 
 ### Log Files
 
-- **Backend logs:** `logs/iodd_manager.log`
+- **Backend logs:** `logs/greenstack.log`
 - **Frontend logs:** Browser console (F12)
 - **Database logs:** SQLite doesn't have separate logs
 
@@ -388,6 +388,6 @@ See our GitHub issues and milestones for planned improvements.
 ---
 
 **Still having issues?** Check:
-- [GitHub Issues](https://github.com/ME-Catalyst/iodd-manager/issues)
+- [GitHub Issues](https://github.com/ME-Catalyst/greenstack/issues)
 - [API Documentation](../developer/API_SPECIFICATION.md)
 - [Developer Reference](../developer/DEVELOPER_REFERENCE.md)

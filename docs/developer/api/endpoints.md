@@ -1,6 +1,6 @@
 # API Endpoints Reference
 
-Complete reference for all IODD Manager API endpoints.
+Complete reference for all Greenstack API endpoints.
 
 For usage examples and client code, see the **[API Usage Guide](../../user/user-guide/api.md)**.
 

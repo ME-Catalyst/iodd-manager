@@ -1,4 +1,4 @@
-# IODD Manager Developer Reference
+# Greenstack Developer Reference
 
 ## Table of Contents
 1. [Architecture Overview](#architecture-overview)
@@ -30,7 +30,7 @@ See [System Architecture](../architecture/ARCHITECTURE.md) for detailed system a
 ### Core Modules
 
 **`api.py`** - FastAPI application with REST endpoints
-**`iodd_manager.py`** - Core IODD parsing and management logic
+**`greenstack.py`** - Core IODD parsing and management logic
 **`config.py`** - Configuration management
 
 ### Key API Endpoints
@@ -208,7 +208,7 @@ button_value, menu_ref
 
 ### Core Parser Class
 
-**`IODDParser`** in `iodd_manager.py`
+**`IODDParser`** in `greenstack.py`
 
 **Key Methods:**
 ```python

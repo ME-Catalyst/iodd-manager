@@ -377,7 +377,7 @@ sequenceDiagram
     Note over Browser,Components: Initial Load
 
     Browser->>ThemeProvider: Component Mounts
-    ThemeProvider->>LocalStorage: Read 'iodd-manager-theme'
+    ThemeProvider->>LocalStorage: Read 'greenstack-theme'
 
     alt Theme Stored
         LocalStorage-->>ThemeProvider: 'light' or 'dark'
@@ -468,7 +468,7 @@ const { theme, toggleTheme, setTheme } = useTheme();
 
 **Implementation Details:**
 - Detects system preference on initial load
-- Saves user preference to `iodd-manager-theme` in localStorage
+- Saves user preference to `greenstack-theme` in localStorage
 - Applies theme class (`light` or `dark`) to document root
 - Listens for system preference changes
 

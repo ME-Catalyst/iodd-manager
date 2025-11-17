@@ -1,6 +1,6 @@
 # Database Migrations with Alembic
 
-This directory contains Alembic database migration scripts for IODD Manager.
+This directory contains Alembic database migration scripts for Greenstack.
 
 ## Overview
 
@@ -31,7 +31,7 @@ Migration settings are in `alembic.ini` at the project root.
 The database URL is configured in `alembic.ini`:
 
 ```ini
-sqlalchemy.url = sqlite:///iodd_manager.db
+sqlalchemy.url = sqlite:///greenstack.db
 ```
 
 You can override this with an environment variable:
@@ -166,7 +166,7 @@ alembic stamp head
 
 ```bash
 # Create a backup before migrating
-cp iodd_manager.db iodd_manager.db.backup
+cp greenstack.db greenstack.db.backup
 
 # Test upgrade
 alembic upgrade head
@@ -175,7 +175,7 @@ alembic upgrade head
 alembic downgrade -1
 
 # Restore if needed
-mv iodd_manager.db.backup iodd_manager.db
+mv greenstack.db.backup greenstack.db
 ```
 
 ### 2. Make Migrations Reversible

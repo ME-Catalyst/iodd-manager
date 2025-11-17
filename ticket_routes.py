@@ -18,7 +18,7 @@ from pathlib import Path
 
 router = APIRouter(prefix="/api/tickets", tags=["Tickets"])
 
-DB_PATH = "iodd_manager.db"
+DB_PATH = "greenstack.db"
 ATTACHMENTS_DIR = Path("ticket_attachments")
 
 # Ensure attachments directory exists

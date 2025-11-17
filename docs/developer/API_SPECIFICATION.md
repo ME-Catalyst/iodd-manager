@@ -1,4 +1,4 @@
-# IODD Manager API Specification
+# Greenstack API Specification
 
 **Version:** 2.0
 **Base URL:** `http://localhost:8000`

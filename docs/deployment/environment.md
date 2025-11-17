@@ -4,7 +4,7 @@ Managing environment-specific configuration for different deployment scenarios.
 
 ## Configuration Overview
 
-IODD Manager uses environment variables for configuration. See the complete **[Configuration Guide](../user/CONFIGURATION.md)** for all available options.
+Greenstack uses environment variables for configuration. See the complete **[Configuration Guide](../user/CONFIGURATION.md)** for all available options.
 
 ## Environment Profiles
 
@@ -28,7 +28,7 @@ FRONTEND_PORT=3000
 AUTO_OPEN_BROWSER=true
 
 # Database
-IODD_DATABASE_URL=sqlite:///./iodd_manager.db
+IODD_DATABASE_URL=sqlite:///./greenstack.db
 
 # Storage
 IODD_STORAGE_DIR=./iodd_storage
@@ -62,16 +62,16 @@ API_RELOAD=false
 API_WORKERS=4
 
 # Database (absolute path)
-IODD_DATABASE_URL=sqlite:////opt/iodd-manager/data/iodd_manager.db
+IODD_DATABASE_URL=sqlite:////opt/greenstack/data/greenstack.db
 
 # Storage (absolute paths)
-IODD_STORAGE_DIR=/opt/iodd-manager/data/storage
-GENERATED_OUTPUT_DIR=/opt/iodd-manager/data/generated
+IODD_STORAGE_DIR=/opt/greenstack/data/storage
+GENERATED_OUTPUT_DIR=/opt/greenstack/data/generated
 
 # Logging
 LOG_LEVEL=INFO
 LOG_TO_FILE=true
-LOG_FILE_PATH=/opt/iodd-manager/data/logs/app.log
+LOG_FILE_PATH=/opt/greenstack/data/logs/app.log
 LOG_FORMAT=json
 LOG_MAX_BYTES=10485760
 LOG_BACKUP_COUNT=5
@@ -104,7 +104,7 @@ API_HOST=0.0.0.0
 API_PORT=8000
 
 # Database (container path)
-IODD_DATABASE_URL=sqlite:////data/iodd_manager.db
+IODD_DATABASE_URL=sqlite:////data/greenstack.db
 
 # Storage (container paths)
 IODD_STORAGE_DIR=/data/storage
@@ -130,7 +130,7 @@ ENVIRONMENT=testing
 DEBUG=false
 
 # Database (separate test database)
-IODD_DATABASE_URL=sqlite:///./test_iodd_manager.db
+IODD_DATABASE_URL=sqlite:///./test_greenstack.db
 
 # Storage (test directories)
 IODD_STORAGE_DIR=./test_storage
@@ -182,7 +182,7 @@ python api.py
 ```yaml
 # docker-compose.yml
 services:
-  iodd-manager:
+  greenstack:
     environment:
       - ENVIRONMENT=production
       - DEBUG=false
@@ -193,7 +193,7 @@ Or use env file:
 
 ```yaml
 services:
-  iodd-manager:
+  greenstack:
     env_file:
       - .env.production
 ```
@@ -228,7 +228,7 @@ Environment="API_KEY=key123"
 ```yaml
 # docker-compose.yml
 services:
-  iodd-manager:
+  greenstack:
     secrets:
       - db_password
       - api_key
@@ -246,7 +246,7 @@ secrets:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: iodd-manager-secrets
+  name: greenstack-secrets
 type: Opaque
 data:
   db_password: c2VjcmV0MTIz  # base64 encoded
@@ -258,10 +258,10 @@ spec:
   template:
     spec:
       containers:
-      - name: iodd-manager
+      - name: greenstack
         envFrom:
         - secretRef:
-            name: iodd-manager-secrets
+            name: greenstack-secrets
 ```
 
 **Option 4: HashiCorp Vault**
@@ -271,7 +271,7 @@ spec:
 import hvac
 
 client = hvac.Client(url='https://vault.example.com')
-secrets = client.secrets.kv.v2.read_secret_version(path='iodd-manager')
+secrets = client.secrets.kv.v2.read_secret_version(path='greenstack')
 DB_PASSWORD = secrets['data']['data']['db_password']
 ```
 

@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to IODD Manager will be documented in this file.
+All notable changes to Greenstack will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -123,7 +123,7 @@ This release focuses on repository structure, documentation completeness, accura
 #### Other Changes
 - Updated README.md LICENSE link to point to LICENSE.md
 - Renamed old LICENSE file to LICENSE.md with proper formatting
-- Verified all code has proper docstrings (api.py, iodd_manager.py)
+- Verified all code has proper docstrings (api.py, greenstack.py)
 
 ### Removed
 
@@ -172,7 +172,7 @@ This release completes the production-ready documentation set:
 
 ### Major Release - Complete Project Modernization
 
-This release represents a complete overhaul of the IODD Manager with professional-grade infrastructure, testing, and deployment capabilities.
+This release represents a complete overhaul of the Greenstack with professional-grade infrastructure, testing, and deployment capabilities.
 
 ### Added
 

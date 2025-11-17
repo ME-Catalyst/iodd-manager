@@ -14,15 +14,15 @@ Create `docker-compose.prod.yml`:
 version: '3.8'
 
 services:
-  iodd-manager:
-    image: iodd-manager:2.0.0
+  greenstack:
+    image: greenstack:2.0.0
     build:
       context: .
       dockerfile: Dockerfile
       args:
         - BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
         - VCS_REF=$(git rev-parse --short HEAD)
-    container_name: iodd-manager
+    container_name: greenstack
     restart: always
     ports:
       - "127.0.0.1:8000:8000"  # Only listen on localhost
@@ -47,12 +47,12 @@ services:
         max-size: "10m"
         max-file: "3"
     labels:
-      - "com.iodd-manager.version=2.0.0"
-      - "com.iodd-manager.environment=production"
+      - "com.greenstack.version=2.0.0"
+      - "com.greenstack.environment=production"
 
   nginx:
     image: nginx:alpine
-    container_name: iodd-manager-nginx
+    container_name: greenstack-nginx
     restart: always
     ports:
       - "80:80"
@@ -62,7 +62,7 @@ services:
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - ./frontend/dist:/usr/share/nginx/html:ro
     depends_on:
-      - iodd-manager
+      - greenstack
     networks:
       - iodd-network
     logging:
@@ -77,7 +77,7 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /opt/iodd-manager/data
+      device: /opt/greenstack/data
 
 networks:
   iodd-network:
@@ -104,7 +104,7 @@ FROM python:3.10-slim
 # Labels
 LABEL maintainer="your-email@example.com" \
       version="2.0.0" \
-      description="IODD Manager - IO-Link Device Description Manager"
+      description="Greenstack - IO-Link Device Description Manager"
 
 # Install only required system packages
 RUN apt-get update && apt-get install -y \
@@ -126,7 +126,7 @@ COPY --chown=iodd:iodd requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY --chown=iodd:iodd api.py iodd_manager.py start.py config.py ./
+COPY --chown=iodd:iodd api.py greenstack.py start.py config.py ./
 COPY --chown=iodd:iodd alembic.ini ./
 COPY --chown=iodd:iodd alembic/ ./alembic/
 
@@ -151,15 +151,15 @@ CMD ["sh", "-c", "alembic upgrade head && python api.py"]
 
 ```bash
 # Build production image
-docker build -t iodd-manager:2.0.0 -f Dockerfile .
+docker build -t greenstack:2.0.0 -f Dockerfile .
 
 # Tag for registry
-docker tag iodd-manager:2.0.0 yourdomain.com/iodd-manager:2.0.0
-docker tag iodd-manager:2.0.0 yourdomain.com/iodd-manager:latest
+docker tag greenstack:2.0.0 yourdomain.com/greenstack:2.0.0
+docker tag greenstack:2.0.0 yourdomain.com/greenstack:latest
 
 # Push to registry
-docker push yourdomain.com/iodd-manager:2.0.0
-docker push yourdomain.com/iodd-manager:latest
+docker push yourdomain.com/greenstack:2.0.0
+docker push yourdomain.com/greenstack:latest
 
 # Deploy on production server
 docker-compose -f docker-compose.prod.yml up -d
@@ -176,8 +176,8 @@ Deploy as Docker Swarm stack:
 version: '3.8'
 
 services:
-  iodd-manager:
-    image: yourdomain.com/iodd-manager:2.0.0
+  greenstack:
+    image: yourdomain.com/greenstack:2.0.0
     deploy:
       replicas: 3
       update_config:
@@ -233,10 +233,10 @@ docker stack deploy -c docker-stack.yml iodd-stack
 docker stack services iodd-stack
 
 # Scale services
-docker service scale iodd-stack_iodd-manager=5
+docker service scale iodd-stack_greenstack=5
 
 # Update service
-docker service update --image yourdomain.com/iodd-manager:2.0.1 iodd-stack_iodd-manager
+docker service update --image yourdomain.com/greenstack:2.0.1 iodd-stack_greenstack
 ```
 
 ### Kubernetes
@@ -248,13 +248,13 @@ Deploy to Kubernetes:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: iodd-manager
+  name: greenstack
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: iodd-manager-config
-  namespace: iodd-manager
+  name: greenstack-config
+  namespace: greenstack
 data:
   ENVIRONMENT: "production"
   DEBUG: "false"
@@ -264,8 +264,8 @@ data:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: iodd-manager-pvc
-  namespace: iodd-manager
+  name: greenstack-pvc
+  namespace: greenstack
 spec:
   accessModes:
     - ReadWriteOnce
@@ -276,26 +276,26 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: iodd-manager
-  namespace: iodd-manager
+  name: greenstack
+  namespace: greenstack
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: iodd-manager
+      app: greenstack
   template:
     metadata:
       labels:
-        app: iodd-manager
+        app: greenstack
     spec:
       containers:
-      - name: iodd-manager
-        image: yourdomain.com/iodd-manager:2.0.0
+      - name: greenstack
+        image: yourdomain.com/greenstack:2.0.0
         ports:
         - containerPort: 8000
         envFrom:
         - configMapRef:
-            name: iodd-manager-config
+            name: greenstack-config
         volumeMounts:
         - name: data
           mountPath: /data
@@ -321,16 +321,16 @@ spec:
       volumes:
       - name: data
         persistentVolumeClaim:
-          claimName: iodd-manager-pvc
+          claimName: greenstack-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: iodd-manager-service
-  namespace: iodd-manager
+  name: greenstack-service
+  namespace: greenstack
 spec:
   selector:
-    app: iodd-manager
+    app: greenstack
   ports:
   - protocol: TCP
     port: 8000
@@ -343,17 +343,17 @@ spec:
 kubectl apply -f k8s-deployment.yml
 
 # Check deployment
-kubectl get pods -n iodd-manager
-kubectl get services -n iodd-manager
+kubectl get pods -n greenstack
+kubectl get services -n greenstack
 
 # Scale deployment
-kubectl scale deployment iodd-manager --replicas=5 -n iodd-manager
+kubectl scale deployment greenstack --replicas=5 -n greenstack
 
 # Update image
-kubectl set image deployment/iodd-manager iodd-manager=yourdomain.com/iodd-manager:2.0.1 -n iodd-manager
+kubectl set image deployment/greenstack greenstack=yourdomain.com/greenstack:2.0.1 -n greenstack
 
 # View logs
-kubectl logs -f deployment/iodd-manager -n iodd-manager
+kubectl logs -f deployment/greenstack -n greenstack
 ```
 
 ## Container Security
@@ -365,10 +365,10 @@ kubectl logs -f deployment/iodd-manager -n iodd-manager
 
 ```bash
 # Scan with Trivy
-trivy image iodd-manager:2.0.0
+trivy image greenstack:2.0.0
 
 # Scan with Snyk
-snyk container test iodd-manager:2.0.0
+snyk container test greenstack:2.0.0
 ```
 
 3. **Use minimal base images**:
@@ -381,7 +381,7 @@ FROM python:3.10-slim  # Not 'python:3.10' (much larger)
 
 ```yaml
 services:
-  iodd-manager:
+  greenstack:
     read_only: true
     tmpfs:
       - /tmp
@@ -393,7 +393,7 @@ services:
 
 ```yaml
 services:
-  iodd-manager:
+  greenstack:
     cap_drop:
       - ALL
     cap_add:
@@ -406,30 +406,30 @@ services:
 
 ```bash
 # Real-time stats
-docker stats iodd-manager
+docker stats greenstack
 
 # Inspect resource usage
-docker inspect iodd-manager | jq '.[0].HostConfig.Memory'
+docker inspect greenstack | jq '.[0].HostConfig.Memory'
 ```
 
 ### Logging
 
 ```bash
 # View logs
-docker logs iodd-manager -f --tail=100
+docker logs greenstack -f --tail=100
 
 # Export logs
-docker logs iodd-manager > iodd-manager.log 2>&1
+docker logs greenstack > greenstack.log 2>&1
 ```
 
 ### Health Checks
 
 ```bash
 # Check health status
-docker inspect --format='{{.State.Health.Status}}' iodd-manager
+docker inspect --format='{{.State.Health.Status}}' greenstack
 
 # View health check history
-docker inspect --format='{{json .State.Health}}' iodd-manager | jq
+docker inspect --format='{{json .State.Health}}' greenstack | jq
 ```
 
 ## Backup in Docker
@@ -446,8 +446,8 @@ docker run --rm \
   tar czf /backup/iodd-data-$(date +%Y%m%d).tar.gz /data
 
 # Backup database only
-docker exec iodd-manager \
-  sh -c 'tar czf - /data/iodd_manager.db' > backup-$(date +%Y%m%d).tar.gz
+docker exec greenstack \
+  sh -c 'tar czf - /data/greenstack.db' > backup-$(date +%Y%m%d).tar.gz
 ```
 
 ## Performance Tuning
@@ -456,7 +456,7 @@ docker exec iodd-manager \
 
 ```yaml
 services:
-  iodd-manager:
+  greenstack:
     deploy:
       resources:
         limits:
@@ -471,7 +471,7 @@ services:
 
 ```yaml
 services:
-  iodd-manager:
+  greenstack:
     sysctls:
       - net.core.somaxconn=1024
       - net.ipv4.tcp_tw_reuse=1
@@ -483,23 +483,23 @@ services:
 
 ```bash
 # Check logs
-docker logs iodd-manager
+docker logs greenstack
 
 # Check if port is available
 sudo lsof -i :8000
 
 # Inspect container
-docker inspect iodd-manager
+docker inspect greenstack
 ```
 
 ### Permission Issues
 
 ```bash
 # Check volume permissions
-docker exec iodd-manager ls -la /data
+docker exec greenstack ls -la /data
 
 # Fix permissions
-docker exec -u root iodd-manager chown -R iodd:iodd /data
+docker exec -u root greenstack chown -R iodd:iodd /data
 ```
 
 ### Network Issues
@@ -509,7 +509,7 @@ docker exec -u root iodd-manager chown -R iodd:iodd /data
 docker network inspect iodd-network
 
 # Test connectivity
-docker exec iodd-manager ping nginx
+docker exec greenstack ping nginx
 ```
 
 ## Next Steps

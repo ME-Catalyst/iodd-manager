@@ -1473,7 +1473,7 @@ class IODDIngester:
 class StorageManager:
     """Manage IODD data storage in SQLite database"""
     
-    def __init__(self, db_path: str = "iodd_manager.db"):
+    def __init__(self, db_path: str = "greenstack.db"):
         self.db_path = db_path
         self._init_database()
     
@@ -2060,7 +2060,7 @@ class NodeREDGenerator(AdapterGenerator):
                     safe_name: f"{safe_name}.js"
                 }
             },
-            "author": "IODD Manager",
+            "author": "Greenstack",
             "license": "MIT"
         }
         return json.dumps(package, indent=2)
@@ -2323,13 +2323,13 @@ MIT
         )
 
 # ============================================================================
-# Main IODD Manager
+# Main Greenstack
 # ============================================================================
 
 class IODDManager:
     """Main IODD management system"""
     
-    def __init__(self, storage_path: str = "./iodd_storage", db_path: str = "iodd_manager.db"):
+    def __init__(self, storage_path: str = "./iodd_storage", db_path: str = "greenstack.db"):
         self.ingester = IODDIngester(Path(storage_path))
         self.storage = StorageManager(db_path)
         self.generators = {
@@ -2425,7 +2425,7 @@ class IODDManager:
 # ============================================================================
 
 def main():
-    """Command-line interface for IODD Manager"""
+    """Command-line interface for Greenstack"""
     import argparse
     
     parser = argparse.ArgumentParser(description='IODD Management System')

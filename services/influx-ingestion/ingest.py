@@ -18,7 +18,7 @@ MQTT_USERNAME = os.getenv('MQTT_USERNAME', 'iodd')
 MQTT_PASSWORD = os.getenv('MQTT_PASSWORD', 'mqtt123')
 INFLUXDB_URL = os.getenv('INFLUXDB_URL', 'http://localhost:8086')
 INFLUXDB_TOKEN = os.getenv('INFLUXDB_TOKEN', 'my-super-secret-auth-token')
-INFLUXDB_ORG = os.getenv('INFLUXDB_ORG', 'iodd-manager')
+INFLUXDB_ORG = os.getenv('INFLUXDB_ORG', 'greenstack')
 INFLUXDB_BUCKET = os.getenv('INFLUXDB_BUCKET', 'device-telemetry')
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
 

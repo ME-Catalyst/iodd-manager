@@ -16,8 +16,8 @@ These were one-time migration/fix scripts that are no longer needed:
 - `update_api.py` - API update script
 - `update_save_device.py` - Device save function update
 - `enhanced_params_section.jsx` - Test component
-- `iodd_manager_backup_20251111_182945.py` - Backup file
-- `iodd_manager_backup_20251111_182952.py` - Backup file
+- `greenstack_backup_20251111_182945.py` - Backup file
+- `greenstack_backup_20251111_182952.py` - Backup file
 
 #### Temporary Documentation (4 files)
 Development notes and fix summaries that are now obsolete:
@@ -39,12 +39,12 @@ Development notes and fix summaries that are now obsolete:
 
 #### Core Application Files
 - `api.py` - Main REST API server
-- `iodd_manager.py` - Core IODD management logic
+- `greenstack.py` - Core IODD management logic
 - `config.py` - Application configuration
 - `start.py` - Startup script
 
 #### Database
-- `iodd_manager.db` - Main SQLite database
+- `greenstack.db` - Main SQLite database
 - `alembic/` - Database migration system
 - `alembic.ini` - Alembic configuration
 
@@ -78,7 +78,7 @@ Development notes and fix summaries that are now obsolete:
 ### Repository Structure (Clean)
 
 ```
-iodd-manager/
+greenstack/
 ├── .github/           # GitHub Actions & templates
 ├── .claude/           # Claude Code configuration
 ├── alembic/           # Database migrations
@@ -89,9 +89,9 @@ iodd-manager/
 ├── iodd_storage/      # IODD file storage
 ├── tests/             # Unit/integration tests
 ├── api.py             # FastAPI server
-├── iodd_manager.py    # Core logic
+├── greenstack.py    # Core logic
 ├── config.py          # Configuration
-├── iodd_manager.db    # SQLite database
+├── greenstack.db    # SQLite database
 └── [documentation]    # Various .md files
 ```
 

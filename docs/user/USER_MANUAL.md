@@ -1,4 +1,4 @@
-# IODD Manager User Manual
+# Greenstack User Manual
 
 ## Table of Contents
 1. [Installation](#installation)
@@ -34,8 +34,8 @@ chmod +x setup.sh
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/ME-Catalyst/iodd-manager.git
-   cd iodd-manager
+   git clone https://github.com/ME-Catalyst/greenstack.git
+   cd greenstack
    ```
 
 2. **Install Python dependencies:**
@@ -93,7 +93,7 @@ Create a `.env` file in the root directory:
 
 ```bash
 # Database
-DATABASE_URL=sqlite:///./iodd_manager.db
+DATABASE_URL=sqlite:///./greenstack.db
 
 # API Settings
 API_HOST=0.0.0.0
@@ -116,12 +116,12 @@ CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 
 **SQLite (Default):**
 ```python
-DATABASE_URL=sqlite:///./iodd_manager.db
+DATABASE_URL=sqlite:///./greenstack.db
 ```
 
 **PostgreSQL:**
 ```python
-DATABASE_URL=postgresql://user:password@localhost/iodd_manager
+DATABASE_URL=postgresql://user:password@localhost/greenstack
 ```
 
 For detailed configuration options, see `CONFIGURATION.md`.

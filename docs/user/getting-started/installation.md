@@ -1,6 +1,6 @@
 # Installation
 
-This guide will walk you through installing IODD Manager on your system.
+This guide will walk you through installing Greenstack on your system.
 
 ---
 
@@ -21,7 +21,7 @@ Includes:
 
 ## Prerequisites
 
-Before installing IODD Manager, ensure you have:
+Before installing Greenstack, ensure you have:
 
 - **Python 3.10 or higher** - [Download Python](https://www.python.org/downloads/)
 - **Node.js 18 or higher** - [Download Node.js](https://nodejs.org/)
@@ -51,11 +51,11 @@ git --version
 
     ```bash
     # Install via pip
-    pip install iodd-manager
+    pip install greenstack
 
     # Create working directory
-    mkdir iodd-manager-workspace
-    cd iodd-manager-workspace
+    mkdir greenstack-workspace
+    cd greenstack-workspace
 
     # Initialize database
     alembic upgrade head
@@ -70,13 +70,13 @@ git --version
 
     ```bash
     # Install with all features
-    pip install iodd-manager[all]
+    pip install greenstack[all]
 
     # Or install specific extras:
-    pip install iodd-manager[dev]       # Development tools
-    pip install iodd-manager[docs]      # Documentation tools
-    pip install iodd-manager[advanced]  # Advanced features
-    pip install iodd-manager[security]  # Security features
+    pip install greenstack[dev]       # Development tools
+    pip install greenstack[docs]      # Documentation tools
+    pip install greenstack[advanced]  # Advanced features
+    pip install greenstack[security]  # Security features
     ```
 
 === "Docker (Production Ready)"
@@ -85,14 +85,14 @@ git --version
 
     ```bash
     # Pull the latest image
-    docker pull ghcr.io/me-catalyst/iodd-manager:latest
+    docker pull ghcr.io/me-catalyst/greenstack:latest
 
     # Run container
     docker run -d \
-      --name iodd-manager \
+      --name greenstack \
       -p 8000:8000 \
       -v iodd-data:/data \
-      ghcr.io/me-catalyst/iodd-manager:latest
+      ghcr.io/me-catalyst/greenstack:latest
     ```
 
     Access the application at http://localhost:8000
@@ -101,8 +101,8 @@ git --version
 
     ```bash
     # Clone repository for docker-compose.yml
-    git clone https://github.com/ME-Catalyst/iodd-manager.git
-    cd iodd-manager
+    git clone https://github.com/ME-Catalyst/greenstack.git
+    cd greenstack
 
     # Start services
     docker-compose up -d
@@ -119,8 +119,8 @@ git --version
     ### 1. Clone the Repository
 
     ```bash
-    git clone https://github.com/ME-Catalyst/iodd-manager.git
-    cd iodd-manager
+    git clone https://github.com/ME-Catalyst/greenstack.git
+    cd greenstack
     ```
 
     ### 2. Configure Environment
@@ -170,8 +170,8 @@ git --version
     ### 1. Clone and Enter Directory
 
     ```bash
-    git clone https://github.com/ME-Catalyst/iodd-manager.git
-    cd iodd-manager
+    git clone https://github.com/ME-Catalyst/greenstack.git
+    cd greenstack
     ```
 
     ### 2. Create Virtual Environment
@@ -282,7 +282,7 @@ Reset the database:
 
 ```bash
 # Delete existing database
-rm iodd_manager.db
+rm greenstack.db
 
 # Run migrations again
 alembic upgrade head
@@ -323,7 +323,7 @@ pip install -r requirements.txt
 
 ## Uninstallation
 
-To completely remove IODD Manager:
+To completely remove Greenstack:
 
 ```bash
 # Stop running processes
@@ -331,7 +331,7 @@ To completely remove IODD Manager:
 
 # Remove directory
 cd ..
-rm -rf iodd-manager
+rm -rf greenstack
 
 # (Optional) Remove virtual environment if created
 rm -rf venv

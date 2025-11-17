@@ -17,7 +17,7 @@ export const useTheme = () => {
 export const ThemeProvider = ({ children }) => {
   // Check localStorage and system preference
   const getInitialTheme = () => {
-    const savedTheme = localStorage.getItem('iodd-manager-theme');
+    const savedTheme = localStorage.getItem('greenstack-theme');
     if (savedTheme) {
       return savedTheme;
     }
@@ -42,7 +42,7 @@ export const ThemeProvider = ({ children }) => {
     root.classList.add(theme);
 
     // Save to localStorage
-    localStorage.setItem('iodd-manager-theme', theme);
+    localStorage.setItem('greenstack-theme', theme);
   }, [theme]);
 
   // Listen for system theme changes
@@ -50,7 +50,7 @@ export const ThemeProvider = ({ children }) => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
     const handleChange = (e) => {
-      const savedTheme = localStorage.getItem('iodd-manager-theme');
+      const savedTheme = localStorage.getItem('greenstack-theme');
       // Only update if user hasn't manually set a theme
       if (!savedTheme) {
         setThemeState(e.matches ? 'dark' : 'light');

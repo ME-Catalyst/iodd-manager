@@ -1,6 +1,6 @@
 # Developer Setup
 
-Set up your development environment to contribute to IODD Manager.
+Set up your development environment to contribute to Greenstack.
 
 ## Prerequisites
 
@@ -15,8 +15,8 @@ Ensure you have the required tools installed:
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/ME-Catalyst/iodd-manager.git
-cd iodd-manager
+git clone https://github.com/ME-Catalyst/greenstack.git
+cd greenstack
 
 # 2. Create virtual environment
 python -m venv venv
@@ -398,20 +398,20 @@ alembic revision -m "Custom migration"
 
 ```bash
 # Delete database
-rm iodd_manager.db
+rm greenstack.db
 
 # Recreate with migrations
 alembic upgrade head
 
 # Or use development script
-python -c "from iodd_manager import init_db; init_db()"
+python -c "from greenstack import init_db; init_db()"
 ```
 
 ### Inspect Database
 
 ```bash
 # Using sqlite3
-sqlite3 iodd_manager.db
+sqlite3 greenstack.db
 
 # List tables
 .tables
@@ -556,7 +556,7 @@ FRONTEND_PORT=3000
 AUTO_OPEN_BROWSER=true
 
 # Database
-IODD_DATABASE_URL=sqlite:///./iodd_manager.db
+IODD_DATABASE_URL=sqlite:///./greenstack.db
 
 # Storage
 IODD_STORAGE_DIR=./iodd_storage
@@ -603,8 +603,8 @@ pip install -r requirements.txt
 pkill -f python
 
 # Remove lock files
-rm iodd_manager.db-shm
-rm iodd_manager.db-wal
+rm greenstack.db-shm
+rm greenstack.db-wal
 ```
 
 ### Frontend Build Errors

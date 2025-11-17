@@ -59,7 +59,9 @@
       "Bash(=5.9.0)",
       "Bash(=1.6.0)",
       "Bash(=2.31.0)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(del /s /q F:githubgreenstack__pycache__service_routes*.pyc 2)",
+      "Bash(git restore:*)"
     ],
     "deny": [],
     "ask": []

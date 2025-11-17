@@ -1,6 +1,6 @@
-# Contributing to IODD Manager
+# Contributing to Greenstack
 
-Thank you for your interest in contributing to IODD Manager! This guide will help you set up your development environment and understand our code quality standards.
+Thank you for your interest in contributing to Greenstack! This guide will help you set up your development environment and understand our code quality standards.
 
 ## Development Setup
 
@@ -14,8 +14,8 @@ Thank you for your interest in contributing to IODD Manager! This guide will hel
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/iodd-manager.git
-cd iodd-manager
+git clone https://github.com/yourusername/greenstack.git
+cd greenstack
 
 # Install dependencies
 make install
@@ -75,10 +75,10 @@ make test-cov
 
 ```bash
 # Format all Python files
-black iodd_manager.py api.py start.py
+black greenstack.py api.py start.py
 
 # Check without modifying
-black --check iodd_manager.py api.py start.py
+black --check greenstack.py api.py start.py
 
 # Format a specific file
 black api.py
@@ -88,17 +88,17 @@ black api.py
 
 ```bash
 # Lint with auto-fix
-ruff check --fix iodd_manager.py api.py start.py
+ruff check --fix greenstack.py api.py start.py
 
 # Lint without fixing
-ruff check iodd_manager.py api.py start.py
+ruff check greenstack.py api.py start.py
 ```
 
 #### Python Type Checking with MyPy
 
 ```bash
 # Type check all files
-mypy iodd_manager.py api.py start.py
+mypy greenstack.py api.py start.py
 
 # Type check a specific file
 mypy api.py
@@ -273,7 +273,7 @@ Example:
 ```python
 # tests/test_parser.py
 import pytest
-from iodd_manager import IODDParser
+from greenstack import IODDParser
 
 def test_parse_valid_iodd():
     """Test parsing of valid IODD XML."""
@@ -357,4 +357,4 @@ Convenient commands for development tasks
 
 ## License
 
-By contributing to IODD Manager, you agree that your contributions will be licensed under the MIT License.
+By contributing to Greenstack, you agree that your contributions will be licensed under the MIT License.

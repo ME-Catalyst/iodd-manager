@@ -1,11 +1,11 @@
-# Contributing to IODD Manager
+# Contributing to Greenstack
 
-Thank you for your interest in contributing to IODD Manager! This guide will help you get started.
+Thank you for your interest in contributing to Greenstack! This guide will help you get started.
 
 ## Quick Links
 
-- **Repository**: [https://github.com/ME-Catalyst/iodd-manager](https://github.com/ME-Catalyst/iodd-manager)
-- **Issues**: [Report bugs or request features](https://github.com/ME-Catalyst/iodd-manager/issues)
+- **Repository**: [https://github.com/ME-Catalyst/greenstack](https://github.com/ME-Catalyst/greenstack)
+- **Issues**: [Report bugs or request features](https://github.com/ME-Catalyst/greenstack/issues)
 
 ## Ways to Contribute
 
@@ -74,11 +74,11 @@ See the [Development Workflow](#development-workflow) section below.
 ```bash
 # Fork the repository on GitHub
 # Then clone your fork
-git clone https://github.com/YOUR_USERNAME/iodd-manager.git
-cd iodd-manager
+git clone https://github.com/YOUR_USERNAME/greenstack.git
+cd greenstack
 
 # Add upstream remote
-git remote add upstream https://github.com/ME-Catalyst/iodd-manager.git
+git remote add upstream https://github.com/ME-Catalyst/greenstack.git
 ```
 
 ### 2. Create a Branch
@@ -570,7 +570,7 @@ By contributing, you agree that your contributions will be licensed under the MI
 
 ## Questions?
 
-- **GitHub Issues**: [Report issues](https://github.com/ME-Catalyst/iodd-manager/issues)
+- **GitHub Issues**: [Report issues](https://github.com/ME-Catalyst/greenstack/issues)
 
 ## Next Steps
 
@@ -579,4 +579,4 @@ By contributing, you agree that your contributions will be licensed under the MI
 - **[Testing Guide](testing.md)** - Write tests
 - **[Code Quality](code-quality.md)** - Standards and best practices
 
-Thank you for contributing to IODD Manager! 🚀
+Thank you for contributing to Greenstack! 🚀

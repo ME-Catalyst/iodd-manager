@@ -18,7 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import uvicorn
 
-from iodd_manager import (
+from greenstack import (
     IODDManager, DeviceProfile, Parameter,
     IODDDataType, AccessRights
 )
@@ -257,7 +257,7 @@ app.add_middleware(
     expose_headers=["content-disposition"],  # Allow frontend to read Content-Disposition header
 )
 
-# Initialize IODD Manager
+# Initialize Greenstack
 manager = IODDManager()
 
 # Include EDS routes
@@ -300,7 +300,7 @@ app.include_router(service_routes.router, tags=["Services"])
 async def root():
     """Root endpoint with API information"""
     return {
-        "name": "IODD Manager API",
+        "name": "Greenstack API",
         "version": "1.0.0",
         "endpoints": {
             "upload": "/api/iodd/upload",
@@ -1584,7 +1584,7 @@ async def generate_adapter(request: GenerateRequest):
     try:
         # For demonstration, we'll create a simple mock profile
         # In production, this would be properly deserialized from the database
-        from iodd_manager import (
+        from greenstack import (
             DeviceProfile, VendorInfo, DeviceInfo as DeviceInfoModel,
             ProcessDataCollection
         )

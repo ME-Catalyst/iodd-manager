@@ -1,14 +1,14 @@
-# IODD Manager - Industrial IoT Platform Deployment Guide
+# Greenstack - Industrial IoT Platform Deployment Guide
 
 ## Overview
 
-The IODD Manager Industrial IoT Platform provides a complete solution for managing IO-Link and EDS devices with integrated MQTT messaging, time-series data storage, visualization, and workflow automation.
+The Greenstack Industrial IoT Platform provides a complete solution for managing IO-Link and EDS devices with integrated MQTT messaging, time-series data storage, visualization, and workflow automation.
 
 ## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        IODD Manager Platform                         │
+│                        Greenstack Platform                         │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                       │
 │  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐          │
@@ -88,8 +88,8 @@ The IODD Manager Industrial IoT Platform provides a complete solution for managi
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/iodd-manager.git
-cd iodd-manager
+git clone https://github.com/yourusername/greenstack.git
+cd greenstack
 ```
 
 ### 2. Configure Environment
@@ -129,7 +129,7 @@ docker-compose -f docker-compose.iot.yml ps
 
 | Service | URL | Default Credentials |
 |---------|-----|-------------------|
-| **IODD Manager** | http://localhost:3000 | N/A |
+| **Greenstack** | http://localhost:3000 | N/A |
 | **API Docs** | http://localhost:8000/docs | N/A |
 | **Grafana** | http://localhost:3001 | admin / admin123changeme |
 | **Node-RED** | http://localhost:1880 | N/A |
@@ -256,7 +256,7 @@ The platform includes example flows for:
 ### Creating Custom Flows
 
 1. Drag nodes from the palette
-2. Connect to MQTT broker (pre-configured as "IODD Manager MQTT")
+2. Connect to MQTT broker (pre-configured as "Greenstack MQTT")
 3. Use topics matching `devices/+/telemetry` pattern
 4. Deploy your flow
 
@@ -343,7 +343,7 @@ docker-compose -f docker-compose.iot.yml exec influxdb influx
 ```bash
 # PostgreSQL
 docker-compose -f docker-compose.iot.yml exec postgres \
-  pg_dump -U iodd iodd_manager > backup_$(date +%Y%m%d).sql
+  pg_dump -U iodd greenstack > backup_$(date +%Y%m%d).sql
 
 # InfluxDB
 docker-compose -f docker-compose.iot.yml exec influxdb \
@@ -355,7 +355,7 @@ docker-compose -f docker-compose.iot.yml exec influxdb \
 ```bash
 # PostgreSQL
 cat backup_20251114.sql | docker-compose -f docker-compose.iot.yml exec -T postgres \
-  psql -U iodd iodd_manager
+  psql -U iodd greenstack
 
 # InfluxDB
 docker-compose -f docker-compose.iot.yml exec influxdb \

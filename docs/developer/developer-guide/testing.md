@@ -1,6 +1,6 @@
 # Testing Guide
 
-Comprehensive guide to testing IODD Manager.
+Comprehensive guide to testing Greenstack.
 
 ## Test Suite Overview
 
@@ -134,7 +134,7 @@ def temp_db_path() -> Path
     """Temporary database with auto-cleanup"""
 
 @pytest.fixture
-def iodd_manager(temp_db_path) -> IODDManager
+def greenstack(temp_db_path) -> IODDManager
     """Initialized IODDManager instance"""
 
 # API fixtures
@@ -172,9 +172,9 @@ def parameter_data() -> List[Dict]
 ### Using Fixtures
 
 ```python
-def test_import_iodd(iodd_manager, sample_iodd_path):
+def test_import_iodd(greenstack, sample_iodd_path):
     """Test importing a valid IODD file"""
-    result = iodd_manager.import_iodd(sample_iodd_path)
+    result = greenstack.import_iodd(sample_iodd_path)
     assert result is True
 
 def test_api_upload(test_client, sample_iodd_path):
@@ -279,13 +279,13 @@ def test_upload_invalid_file_type(test_client):
 ```python
 # tests/test_storage.py
 
-def test_save_and_retrieve_device(iodd_manager, device_data):
+def test_save_and_retrieve_device(greenstack, device_data):
     """Test saving and retrieving device"""
     # Save
-    iodd_manager.storage.save_device(device_data)
+    greenstack.storage.save_device(device_data)
 
     # Retrieve
-    device = iodd_manager.storage.get_device(
+    device = greenstack.storage.get_device(
         device_data['vendor_id'],
         device_data['device_id']
     )
@@ -293,11 +293,11 @@ def test_save_and_retrieve_device(iodd_manager, device_data):
     assert device is not None
     assert device['device_name'] == device_data['device_name']
 
-def test_list_devices(iodd_manager):
+def test_list_devices(greenstack):
     """Test listing all devices"""
     # Add multiple devices
     for i in range(5):
-        iodd_manager.storage.save_device({
+        greenstack.storage.save_device({
             'vendor_id': 12345,
             'device_id': i,
             'vendor_name': "Test Vendor",
@@ -305,17 +305,17 @@ def test_list_devices(iodd_manager):
         })
 
     # List devices
-    devices = iodd_manager.storage.list_devices()
+    devices = greenstack.storage.list_devices()
 
     assert len(devices) == 5
 
-def test_delete_device(iodd_manager, device_data):
+def test_delete_device(greenstack, device_data):
     """Test deleting device"""
     # Save
-    iodd_manager.storage.save_device(device_data)
+    greenstack.storage.save_device(device_data)
 
     # Delete
-    result = iodd_manager.storage.delete_device(
+    result = greenstack.storage.delete_device(
         device_data['vendor_id'],
         device_data['device_id']
     )
@@ -323,7 +323,7 @@ def test_delete_device(iodd_manager, device_data):
     assert result is True
 
     # Verify deletion
-    device = iodd_manager.storage.get_device(
+    device = greenstack.storage.get_device(
         device_data['vendor_id'],
         device_data['device_id']
     )
@@ -336,12 +336,12 @@ def test_delete_device(iodd_manager, device_data):
 ### Arrange-Act-Assert (AAA)
 
 ```python
-def test_generate_adapter(iodd_manager, device_data):
+def test_generate_adapter(greenstack, device_data):
     # Arrange
-    iodd_manager.storage.save_device(device_data)
+    greenstack.storage.save_device(device_data)
 
     # Act
-    adapter = iodd_manager.generate_adapter(
+    adapter = greenstack.generate_adapter(
         device_data['vendor_id'],
         device_data['device_id'],
         'nodered'
@@ -360,11 +360,11 @@ def test_generate_adapter(iodd_manager, device_data):
     ("python", "py"),
     ("cpp", "cpp"),
 ])
-def test_adapter_platforms(iodd_manager, device_data, platform, expected_format):
+def test_adapter_platforms(greenstack, device_data, platform, expected_format):
     """Test adapter generation for different platforms"""
-    iodd_manager.storage.save_device(device_data)
+    greenstack.storage.save_device(device_data)
 
-    adapter = iodd_manager.generate_adapter(
+    adapter = greenstack.generate_adapter(
         device_data['vendor_id'],
         device_data['device_id'],
         platform
@@ -377,14 +377,14 @@ def test_adapter_platforms(iodd_manager, device_data, platform, expected_format)
 ### Testing Exceptions
 
 ```python
-def test_import_nonexistent_file(iodd_manager):
+def test_import_nonexistent_file(greenstack):
     """Test importing file that doesn't exist"""
     with pytest.raises(FileNotFoundError):
-        iodd_manager.import_iodd("/nonexistent/file.xml")
+        greenstack.import_iodd("/nonexistent/file.xml")
 
-def test_invalid_device_id(iodd_manager):
+def test_invalid_device_id(greenstack):
     """Test retrieving device with invalid ID"""
-    device = iodd_manager.storage.get_device(99999, 99999)
+    device = greenstack.storage.get_device(99999, 99999)
     assert device is None
 ```
 
@@ -490,7 +490,7 @@ pytest --cov=. --cov-report=term-missing
 Name              Stmts   Miss  Cover   Missing
 ------------------------------------------------
 api.py              250     15    94%   45-47, 203
-iodd_manager.py     180      8    96%   92, 145-147
+greenstack.py     180      8    96%   92, 145-147
 config.py            45      2    96%   23, 67
 ------------------------------------------------
 TOTAL               475     25    95%
@@ -549,8 +549,8 @@ def test_second():
 
 ```python
 # Good - use fixtures
-def test_with_fixture(iodd_manager, device_data):
-    iodd_manager.save(device_data)
+def test_with_fixture(greenstack, device_data):
+    greenstack.save(device_data)
 
 # Bad - create instances in test
 def test_without_fixture():
@@ -607,8 +607,8 @@ pytest -s tests/test_api.py::test_with_debug
 ### PDB Debugging
 
 ```python
-def test_with_pdb(iodd_manager):
-    device = iodd_manager.get_device(12345, 67890)
+def test_with_pdb(greenstack):
+    device = greenstack.get_device(12345, 67890)
     breakpoint()  # Debugger stops here
     assert device is not None
 ```

@@ -10,7 +10,7 @@ Implemented support for importing nested ZIP files containing multiple IODD devi
 
 ## Implementation Details
 
-### 1. Nested ZIP Detection (`iodd_manager.py`)
+### 1. Nested ZIP Detection (`greenstack.py`)
 
 Added `_is_nested_zip()` method to detect if a ZIP contains child ZIPs:
 
@@ -41,7 +41,7 @@ def _is_nested_zip(self, zip_path: Path) -> bool:
 - Normal ZIP = contains XML files at root level
 - Ignores macOS metadata folders (`__MACOSX/`)
 
-### 2. Nested Package Processing (`iodd_manager.py`)
+### 2. Nested Package Processing (`greenstack.py`)
 
 Added `ingest_nested_package()` method to process multiple child ZIPs:
 
@@ -93,7 +93,7 @@ def ingest_nested_package(self, package_path: Path) -> List[Tuple[DeviceProfile,
 - Cleans up temporary files automatically
 - Logs detailed progress information
 
-### 3. Depth Limiting (`iodd_manager.py`)
+### 3. Depth Limiting (`greenstack.py`)
 
 Modified `ingest_file()` to prevent recursive nesting:
 
@@ -116,7 +116,7 @@ def ingest_file(self, file_path: Union[str, Path], _depth: int = 0) -> Tuple[Dev
 - `_depth=1`: Child level, nested ZIP detection disabled
 - Maximum nesting depth: **1 level only**
 
-### 4. Multi-Device Import (`iodd_manager.py`)
+### 4. Multi-Device Import (`greenstack.py`)
 
 Updated `import_iodd()` to handle both single and nested imports:
 
@@ -341,7 +341,7 @@ INFO:     Nested ZIP import complete: 3 device(s) imported
 ## Files Modified
 
 ### Backend
-- **`iodd_manager.py`** (lines 525-642, 1348-1377):
+- **`greenstack.py`** (lines 525-642, 1348-1377):
   - Added `_is_nested_zip()` method
   - Added `ingest_nested_package()` method
   - Modified `ingest_file()` with depth tracking

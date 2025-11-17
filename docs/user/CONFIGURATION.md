@@ -1,10 +1,10 @@
-# IODD Manager Configuration Guide
+# Greenstack Configuration Guide
 
-This guide explains how to configure IODD Manager using environment variables.
+This guide explains how to configure Greenstack using environment variables.
 
 ## Overview
 
-IODD Manager uses environment variables for configuration, making it easy to:
+Greenstack uses environment variables for configuration, making it easy to:
 
 - Deploy to different environments (development, staging, production)
 - Keep secrets out of version control
@@ -57,7 +57,7 @@ python start.py --api-port 9000 --frontend-port 4000
 
 #### APP_NAME
 - **Description**: Application name
-- **Default**: `IODD Manager`
+- **Default**: `Greenstack`
 
 #### DEBUG
 - **Description**: Enable debug mode with detailed error messages
@@ -111,14 +111,14 @@ python start.py --api-port 9000 --frontend-port 4000
 #### IODD_DATABASE_URL
 - **Description**: Database connection URL
 - **Format**: `sqlite:///path/to/database.db`
-- **Default**: `sqlite:///iodd_manager.db`
+- **Default**: `sqlite:///greenstack.db`
 - **Examples**:
   ```bash
   # Relative path
   IODD_DATABASE_URL=sqlite:///./data/iodd.db
 
   # Absolute path
-  IODD_DATABASE_URL=sqlite:////var/lib/iodd-manager/database.db
+  IODD_DATABASE_URL=sqlite:////var/lib/greenstack/database.db
 
   # In-memory (testing)
   IODD_DATABASE_URL=sqlite:///:memory:
@@ -135,12 +135,12 @@ python start.py --api-port 9000 --frontend-port 4000
 #### IODD_STORAGE_DIR
 - **Description**: Directory for storing uploaded IODD files
 - **Default**: `./iodd_storage`
-- **Example**: `IODD_STORAGE_DIR=/var/lib/iodd-manager/storage`
+- **Example**: `IODD_STORAGE_DIR=/var/lib/greenstack/storage`
 
 #### GENERATED_OUTPUT_DIR
 - **Description**: Directory for generated adapter files
 - **Default**: `./generated`
-- **Example**: `GENERATED_OUTPUT_DIR=/var/lib/iodd-manager/output`
+- **Example**: `GENERATED_OUTPUT_DIR=/var/lib/greenstack/output`
 
 #### MAX_UPLOAD_SIZE
 - **Description**: Maximum file upload size in bytes
@@ -194,8 +194,8 @@ python start.py --api-port 9000 --frontend-port 4000
 
 #### LOG_FILE_PATH
 - **Description**: Path to log file (when LOG_TO_FILE=true)
-- **Default**: `./logs/iodd_manager.log`
-- **Example**: `LOG_FILE_PATH=/var/log/iodd-manager/app.log`
+- **Default**: `./logs/greenstack.log`
+- **Example**: `LOG_FILE_PATH=/var/log/greenstack/app.log`
 
 #### LOG_MAX_BYTES
 - **Description**: Maximum log file size before rotation
@@ -249,15 +249,15 @@ API_RELOAD=false
 API_WORKERS=4
 LOG_LEVEL=WARNING
 LOG_TO_FILE=true
-LOG_FILE_PATH=/var/log/iodd-manager/app.log
+LOG_FILE_PATH=/var/log/greenstack/app.log
 ENABLE_DOCS=false
 SHOW_ERROR_DETAILS=false
 AUTO_OPEN_BROWSER=false
 
 # Use absolute paths
-IODD_DATABASE_URL=sqlite:////var/lib/iodd-manager/database.db
-IODD_STORAGE_DIR=/var/lib/iodd-manager/storage
-GENERATED_OUTPUT_DIR=/var/lib/iodd-manager/output
+IODD_DATABASE_URL=sqlite:////var/lib/greenstack/database.db
+IODD_STORAGE_DIR=/var/lib/greenstack/storage
+GENERATED_OUTPUT_DIR=/var/lib/greenstack/output
 
 # Security
 CORS_ORIGINS=https://iodd.example.com
@@ -276,7 +276,7 @@ FRONTEND_HOST=0.0.0.0
 FRONTEND_PORT=3000
 
 # Use container paths
-IODD_DATABASE_URL=sqlite:////data/iodd_manager.db
+IODD_DATABASE_URL=sqlite:////data/greenstack.db
 IODD_STORAGE_DIR=/data/storage
 GENERATED_OUTPUT_DIR=/data/generated
 
@@ -314,16 +314,16 @@ python -c "import config; config.print_config()"
 Output:
 ```
 ============================================================
-  IODD Manager Configuration
+  Greenstack Configuration
 ============================================================
   environment         : development
-  app_name            : IODD Manager
+  app_name            : Greenstack
   app_version         : 2.0.0
   debug               : True
   api_host            : 0.0.0.0
   api_port            : 8000
   frontend_port       : 3000
-  database_url        : sqlite:///iodd_manager.db
+  database_url        : sqlite:///greenstack.db
   cors_origins        : ['http://localhost:3000', ...]
   log_level           : INFO
   enable_docs         : True
@@ -413,7 +413,7 @@ CORS_ORIGINS=https://iodd.example.com  # Note: https, not http
 
 **Solutions**:
 1. Check directory permissions
-2. Use absolute path: `IODD_DATABASE_URL=sqlite:////var/lib/iodd-manager/db.sqlite`
+2. Use absolute path: `IODD_DATABASE_URL=sqlite:////var/lib/greenstack/db.sqlite`
 3. Ensure parent directory exists
 
 ### CORS Errors

@@ -1,6 +1,6 @@
 # Production Deployment
 
-Deploy IODD Manager to production environments.
+Deploy Greenstack to production environments.
 
 ## Deployment Options
 
@@ -64,32 +64,32 @@ sudo apt install -y certbot python3-certbot-nginx
 
 ```bash
 # Create user without login shell
-sudo useradd -r -s /bin/false iodd-manager
+sudo useradd -r -s /bin/false greenstack
 
 # Create application directory
-sudo mkdir -p /opt/iodd-manager
-sudo chown iodd-manager:iodd-manager /opt/iodd-manager
+sudo mkdir -p /opt/greenstack
+sudo chown greenstack:greenstack /opt/greenstack
 ```
 
 ### Step 3: Deploy Application
 
 ```bash
 # Switch to application directory
-cd /opt/iodd-manager
+cd /opt/greenstack
 
 # Clone repository
-sudo -u iodd-manager git clone https://github.com/ME-Catalyst/iodd-manager.git .
+sudo -u greenstack git clone https://github.com/ME-Catalyst/greenstack.git .
 
 # Create virtual environment
-sudo -u iodd-manager python3 -m venv venv
+sudo -u greenstack python3 -m venv venv
 
 # Install Python dependencies
-sudo -u iodd-manager venv/bin/pip install -r requirements.txt
+sudo -u greenstack venv/bin/pip install -r requirements.txt
 
 # Build frontend
 cd frontend
-sudo -u iodd-manager npm install
-sudo -u iodd-manager npm run build
+sudo -u greenstack npm install
+sudo -u greenstack npm run build
 cd ..
 ```
 
@@ -97,7 +97,7 @@ cd ..
 
 ```bash
 # Create production configuration
-sudo -u iodd-manager nano .env
+sudo -u greenstack nano .env
 ```
 
 **Production `.env`:**
@@ -106,7 +106,7 @@ sudo -u iodd-manager nano .env
 # Application
 ENVIRONMENT=production
 DEBUG=false
-APP_NAME=IODD Manager
+APP_NAME=Greenstack
 APP_VERSION=2.0.0
 
 # API Server
@@ -116,16 +116,16 @@ API_RELOAD=false
 API_WORKERS=4
 
 # Database (use absolute path)
-IODD_DATABASE_URL=sqlite:////opt/iodd-manager/data/iodd_manager.db
+IODD_DATABASE_URL=sqlite:////opt/greenstack/data/greenstack.db
 
 # Storage (use absolute paths)
-IODD_STORAGE_DIR=/opt/iodd-manager/data/storage
-GENERATED_OUTPUT_DIR=/opt/iodd-manager/data/generated
+IODD_STORAGE_DIR=/opt/greenstack/data/storage
+GENERATED_OUTPUT_DIR=/opt/greenstack/data/generated
 
 # Logging
 LOG_LEVEL=INFO
 LOG_TO_FILE=true
-LOG_FILE_PATH=/opt/iodd-manager/data/logs/app.log
+LOG_FILE_PATH=/opt/greenstack/data/logs/app.log
 LOG_FORMAT=json
 
 # Security
@@ -140,7 +140,7 @@ CACHE_ENABLED=true
 
 ```bash
 # Create data directories
-sudo -u iodd-manager mkdir -p data/storage data/generated data/logs
+sudo -u greenstack mkdir -p data/storage data/generated data/logs
 
 # Set permissions
 sudo chmod 755 data
@@ -151,32 +151,32 @@ sudo chmod 755 data/storage data/generated data/logs
 
 ```bash
 # Run migrations
-sudo -u iodd-manager venv/bin/alembic upgrade head
+sudo -u greenstack venv/bin/alembic upgrade head
 
 # Verify database
-sudo -u iodd-manager ls -lh data/iodd_manager.db
+sudo -u greenstack ls -lh data/greenstack.db
 ```
 
 ### Step 6: Create Systemd Service
 
 ```bash
-sudo nano /etc/systemd/system/iodd-manager.service
+sudo nano /etc/systemd/system/greenstack.service
 ```
 
 **Service file:**
 
 ```ini
 [Unit]
-Description=IODD Manager API Server
+Description=Greenstack API Server
 After=network.target
 
 [Service]
 Type=simple
-User=iodd-manager
-Group=iodd-manager
-WorkingDirectory=/opt/iodd-manager
-Environment="PATH=/opt/iodd-manager/venv/bin"
-ExecStart=/opt/iodd-manager/venv/bin/python api.py
+User=greenstack
+Group=greenstack
+WorkingDirectory=/opt/greenstack
+Environment="PATH=/opt/greenstack/venv/bin"
+ExecStart=/opt/greenstack/venv/bin/python api.py
 
 # Restart on failure
 Restart=always
@@ -187,7 +187,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/opt/iodd-manager/data
+ReadWritePaths=/opt/greenstack/data
 
 [Install]
 WantedBy=multi-user.target
@@ -198,19 +198,19 @@ WantedBy=multi-user.target
 sudo systemctl daemon-reload
 
 # Enable service
-sudo systemctl enable iodd-manager
+sudo systemctl enable greenstack
 
 # Start service
-sudo systemctl start iodd-manager
+sudo systemctl start greenstack
 
 # Check status
-sudo systemctl status iodd-manager
+sudo systemctl status greenstack
 ```
 
 ### Step 7: Configure Nginx
 
 ```bash
-sudo nano /etc/nginx/sites-available/iodd-manager
+sudo nano /etc/nginx/sites-available/greenstack
 ```
 
 **Nginx configuration:**
@@ -235,12 +235,12 @@ server {
     ssl_ciphers HIGH:!aNULL:!MD5;
 
     # Logging
-    access_log /var/log/nginx/iodd-manager-access.log;
-    error_log /var/log/nginx/iodd-manager-error.log;
+    access_log /var/log/nginx/greenstack-access.log;
+    error_log /var/log/nginx/greenstack-error.log;
 
     # Serve frontend static files
     location / {
-        root /opt/iodd-manager/frontend/dist;
+        root /opt/greenstack/frontend/dist;
         try_files $uri $uri/ /index.html;
 
         # Cache static assets
@@ -284,7 +284,7 @@ server {
 
 ```bash
 # Enable site
-sudo ln -s /etc/nginx/sites-available/iodd-manager /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/greenstack /etc/nginx/sites-enabled/
 
 # Test configuration
 sudo nginx -t
@@ -327,7 +327,7 @@ curl https://yourdomain.com/api/health
 curl -I https://yourdomain.com
 
 # Check service status
-sudo systemctl status iodd-manager
+sudo systemctl status greenstack
 sudo systemctl status nginx
 ```
 
@@ -356,62 +356,62 @@ Before going live:
 
 ```bash
 # Stop service
-sudo systemctl stop iodd-manager
+sudo systemctl stop greenstack
 
 # Backup database
-sudo -u iodd-manager cp /opt/iodd-manager/data/iodd_manager.db \
-    /opt/iodd-manager/data/backups/iodd_manager.db.$(date +%Y%m%d%H%M%S)
+sudo -u greenstack cp /opt/greenstack/data/greenstack.db \
+    /opt/greenstack/data/backups/greenstack.db.$(date +%Y%m%d%H%M%S)
 
 # Pull latest code
-cd /opt/iodd-manager
-sudo -u iodd-manager git pull origin main
+cd /opt/greenstack
+sudo -u greenstack git pull origin main
 
 # Update dependencies
-sudo -u iodd-manager venv/bin/pip install -r requirements.txt --upgrade
+sudo -u greenstack venv/bin/pip install -r requirements.txt --upgrade
 
 # Rebuild frontend
 cd frontend
-sudo -u iodd-manager npm install
-sudo -u iodd-manager npm run build
+sudo -u greenstack npm install
+sudo -u greenstack npm run build
 cd ..
 
 # Run migrations
-sudo -u iodd-manager venv/bin/alembic upgrade head
+sudo -u greenstack venv/bin/alembic upgrade head
 
 # Restart service
-sudo systemctl start iodd-manager
+sudo systemctl start greenstack
 
 # Check status
-sudo systemctl status iodd-manager
+sudo systemctl status greenstack
 ```
 
 ### View Logs
 
 ```bash
 # Application logs
-sudo journalctl -u iodd-manager -f
+sudo journalctl -u greenstack -f
 
 # Nginx access logs
-sudo tail -f /var/log/nginx/iodd-manager-access.log
+sudo tail -f /var/log/nginx/greenstack-access.log
 
 # Nginx error logs
-sudo tail -f /var/log/nginx/iodd-manager-error.log
+sudo tail -f /var/log/nginx/greenstack-error.log
 
 # Application log file
-sudo tail -f /opt/iodd-manager/data/logs/app.log
+sudo tail -f /opt/greenstack/data/logs/app.log
 ```
 
 ### Restart Services
 
 ```bash
 # Restart application
-sudo systemctl restart iodd-manager
+sudo systemctl restart greenstack
 
 # Restart nginx
 sudo systemctl restart nginx
 
 # Restart both
-sudo systemctl restart iodd-manager nginx
+sudo systemctl restart greenstack nginx
 ```
 
 ## Backup Strategy
@@ -420,19 +420,19 @@ sudo systemctl restart iodd-manager nginx
 
 ```bash
 #!/bin/bash
-# /opt/iodd-manager/scripts/backup.sh
+# /opt/greenstack/scripts/backup.sh
 
-BACKUP_DIR="/opt/iodd-manager/data/backups"
+BACKUP_DIR="/opt/greenstack/data/backups"
 DATE=$(date +%Y%m%d%H%M%S)
 
 # Create backup directory
 mkdir -p "$BACKUP_DIR"
 
 # Backup database
-cp /opt/iodd-manager/data/iodd_manager.db "$BACKUP_DIR/iodd_manager.db.$DATE"
+cp /opt/greenstack/data/greenstack.db "$BACKUP_DIR/greenstack.db.$DATE"
 
 # Backup IODD files
-tar -czf "$BACKUP_DIR/storage.$DATE.tar.gz" /opt/iodd-manager/data/storage
+tar -czf "$BACKUP_DIR/storage.$DATE.tar.gz" /opt/greenstack/data/storage
 
 # Keep only last 7 days
 find "$BACKUP_DIR" -name "*.db.*" -mtime +7 -delete
@@ -443,12 +443,12 @@ echo "Backup completed: $DATE"
 
 ```bash
 # Make executable
-chmod +x /opt/iodd-manager/scripts/backup.sh
+chmod +x /opt/greenstack/scripts/backup.sh
 
 # Add to crontab (daily at 2 AM)
 sudo crontab -e
 # Add line:
-0 2 * * * /opt/iodd-manager/scripts/backup.sh >> /var/log/iodd-manager-backup.log 2>&1
+0 2 * * * /opt/greenstack/scripts/backup.sh >> /var/log/greenstack-backup.log 2>&1
 ```
 
 ## Monitoring
@@ -466,7 +466,7 @@ Increase server resources:
 API_WORKERS=8
 
 # Restart service
-sudo systemctl restart iodd-manager
+sudo systemctl restart greenstack
 ```
 
 ### Horizontal Scaling
@@ -475,9 +475,9 @@ Run multiple instances behind load balancer:
 
 ```
 Load Balancer (nginx)
-    ├─▶ IODD Manager Instance 1
-    ├─▶ IODD Manager Instance 2
-    └─▶ IODD Manager Instance 3
+    ├─▶ Greenstack Instance 1
+    ├─▶ Greenstack Instance 2
+    └─▶ Greenstack Instance 3
 
 Shared:
     ├─▶ Database (PostgreSQL cluster)
@@ -501,13 +501,13 @@ Shared:
 
 ```bash
 # Check logs
-sudo journalctl -u iodd-manager -n 50
+sudo journalctl -u greenstack -n 50
 
 # Check permissions
-ls -la /opt/iodd-manager/data
+ls -la /opt/greenstack/data
 
 # Check configuration
-sudo -u iodd-manager /opt/iodd-manager/venv/bin/python -c "from config import print_config; print_config()"
+sudo -u greenstack /opt/greenstack/venv/bin/python -c "from config import print_config; print_config()"
 ```
 
 ### High Memory Usage
@@ -518,16 +518,16 @@ ps aux | grep python
 
 # Reduce workers
 # Edit .env: API_WORKERS=2
-sudo systemctl restart iodd-manager
+sudo systemctl restart greenstack
 ```
 
 ### Database Locked
 
 ```bash
 # Check for stale locks
-sudo -u iodd-manager rm /opt/iodd-manager/data/iodd_manager.db-shm
-sudo -u iodd-manager rm /opt/iodd-manager/data/iodd_manager.db-wal
-sudo systemctl restart iodd-manager
+sudo -u greenstack rm /opt/greenstack/data/greenstack.db-shm
+sudo -u greenstack rm /opt/greenstack/data/greenstack.db-wal
+sudo systemctl restart greenstack
 ```
 
 ## Next Steps

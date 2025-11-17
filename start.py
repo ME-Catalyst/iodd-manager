@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-IODD Manager - Startup Script
+Greenstack - Startup Script
 ==============================
 Launches both the backend API and frontend web interface
 """
@@ -22,10 +22,10 @@ logging.basicConfig(
     level=getattr(logging, config.LOG_LEVEL),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
-logger = logging.getLogger('IODD-Manager')
+logger = logging.getLogger('Greenstack')
 
 class IODDManagerLauncher:
-    """Manages the startup and shutdown of IODD Manager components"""
+    """Manages the startup and shutdown of Greenstack components"""
     
     def __init__(self):
         self.processes = []
@@ -57,10 +57,10 @@ class IODDManagerLauncher:
             ])
         
         # Check if database exists, create if not
-        db_path = self.project_root / 'iodd_manager.db'
+        db_path = self.project_root / 'greenstack.db'
         if not db_path.exists():
             logger.info("Initializing database...")
-            from iodd_manager import StorageManager
+            from greenstack import StorageManager
             StorageManager()
             logger.info("Database initialized successfully")
         
@@ -176,7 +176,7 @@ class IODDManagerLauncher:
         
         if sys.platform == 'win32':
             # Windows shortcut
-            shortcut_path = desktop / 'IODD Manager.bat'
+            shortcut_path = desktop / 'Greenstack.bat'
             with open(shortcut_path, 'w') as f:
                 f.write(f'@echo off\n')
                 f.write(f'cd /d "{self.project_root}"\n')
@@ -197,7 +197,7 @@ class IODDManagerLauncher:
     
     def shutdown(self, signum=None, frame=None):
         """Gracefully shutdown all processes"""
-        logger.info("\n🛑 Shutting down IODD Manager...")
+        logger.info("\n🛑 Shutting down Greenstack...")
         
         for process in self.processes:
             if process.poll() is None:  # Process is still running
@@ -258,7 +258,7 @@ class IODDManagerLauncher:
             
             # Print status
             print("\n" + "="*60)
-            print("🚀 IODD Manager is running!")
+            print("🚀 Greenstack is running!")
             print("="*60)
             
             if not args.frontend_only:
@@ -294,7 +294,7 @@ class IODDManagerLauncher:
 def main():
     """Entry point with argument parsing"""
     parser = argparse.ArgumentParser(
-        description='IODD Manager - Industrial Device Management System'
+        description='Greenstack - Industrial Device Management System'
     )
     
     parser.add_argument(

@@ -1,6 +1,6 @@
 # API Overview
 
-Complete reference for the IODD Manager REST API.
+Complete reference for the Greenstack REST API.
 
 ## Base Information
 

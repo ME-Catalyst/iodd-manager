@@ -1,6 +1,6 @@
 # Docker Deployment Guide
 
-Run IODD Manager in Docker containers for easy deployment and isolation.
+Run Greenstack in Docker containers for easy deployment and isolation.
 
 ## Prerequisites
 
@@ -22,8 +22,8 @@ docker-compose --version
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/ME-Catalyst/iodd-manager.git
-cd iodd-manager
+git clone https://github.com/ME-Catalyst/greenstack.git
+cd greenstack
 ```
 
 ### 2. Start with Docker Compose
@@ -33,7 +33,7 @@ cd iodd-manager
 docker-compose up -d
 
 # View logs
-docker-compose logs -f iodd-manager
+docker-compose logs -f greenstack
 ```
 
 ### 3. Access Application
@@ -77,15 +77,15 @@ FROM python:3.10-slim
 ### Image Structure
 
 ```
-iodd-manager:latest
+greenstack:latest
 ├── /app                    # Application code
 │   ├── api.py             # FastAPI application
-│   ├── iodd_manager.py    # Core parser
+│   ├── greenstack.py    # Core parser
 │   ├── config.py          # Configuration
 │   ├── alembic/           # Database migrations
 │   └── frontend/dist/     # Built React app
 ├── /data                   # Persistent data (volume)
-│   ├── iodd_manager.db    # SQLite database
+│   ├── greenstack.db    # SQLite database
 │   ├── storage/           # Uploaded IODD files
 │   ├── generated/         # Generated adapters
 │   └── logs/              # Application logs
@@ -100,13 +100,13 @@ Configure via `docker-compose.yml`:
 
 ```yaml
 services:
-  iodd-manager:
+  greenstack:
     environment:
       - ENVIRONMENT=production
       - DEBUG=false
       - API_HOST=0.0.0.0
       - API_PORT=8000
-      - IODD_DATABASE_URL=sqlite:////data/iodd_manager.db
+      - IODD_DATABASE_URL=sqlite:////data/greenstack.db
       - IODD_STORAGE_DIR=/data/storage
       - GENERATED_OUTPUT_DIR=/data/generated
       - LOG_TO_FILE=true
@@ -122,7 +122,7 @@ Mount a custom `.env` file:
 
 ```yaml
 services:
-  iodd-manager:
+  greenstack:
     volumes:
       - ./.env:/app/.env:ro  # Read-only
 ```
@@ -153,7 +153,7 @@ volumes:
 
 ```
 data/
-├── iodd_manager.db         # Database
+├── greenstack.db         # Database
 ├── storage/                # IODD files
 │   └── vendor_12345/
 │       └── device_67890.xml
@@ -170,7 +170,7 @@ data/
 docker-compose down
 
 # Backup data directory
-tar -czf iodd-manager-backup-$(date +%Y%m%d).tar.gz data/
+tar -czf greenstack-backup-$(date +%Y%m%d).tar.gz data/
 
 # Restart container
 docker-compose up -d
@@ -183,7 +183,7 @@ docker-compose up -d
 docker-compose down
 
 # Restore from backup
-tar -xzf iodd-manager-backup-20250111.tar.gz
+tar -xzf greenstack-backup-20250111.tar.gz
 
 # Restart container
 docker-compose up -d
@@ -195,14 +195,14 @@ docker-compose up -d
 
 ```bash
 # Build image
-docker build -t iodd-manager:custom .
+docker build -t greenstack:custom .
 
 # Run container
 docker run -d \
-  --name iodd-manager \
+  --name greenstack \
   -p 8000:8000 \
   -v $(pwd)/data:/data \
-  iodd-manager:custom
+  greenstack:custom
 ```
 
 ### Build Arguments
@@ -211,12 +211,12 @@ docker run -d \
 # Custom Python version
 docker build \
   --build-arg PYTHON_VERSION=3.11 \
-  -t iodd-manager:py311 .
+  -t greenstack:py311 .
 
 # Custom Node version
 docker build \
   --build-arg NODE_VERSION=20 \
-  -t iodd-manager:node20 .
+  -t greenstack:node20 .
 ```
 
 ### Multi-Platform Builds
@@ -225,7 +225,7 @@ docker build \
 # Build for multiple architectures
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
-  -t iodd-manager:multi \
+  -t greenstack:multi \
   --push .
 ```
 
@@ -239,7 +239,7 @@ Uncomment the nginx service in `docker-compose.yml`:
 services:
   nginx:
     image: nginx:alpine
-    container_name: iodd-manager-nginx
+    container_name: greenstack-nginx
     restart: unless-stopped
     ports:
       - "80:80"
@@ -248,7 +248,7 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/nginx/ssl:ro
     depends_on:
-      - iodd-manager
+      - greenstack
     networks:
       - iodd-network
 ```
@@ -262,7 +262,7 @@ events {
 
 http {
     upstream iodd_backend {
-        server iodd-manager:8000;
+        server greenstack:8000;
     }
 
     server {
@@ -345,7 +345,7 @@ Check health status:
 docker ps
 # STATUS shows "healthy" or "unhealthy"
 
-docker inspect --format='{{.State.Health.Status}}' iodd-manager
+docker inspect --format='{{.State.Health.Status}}' greenstack
 ```
 
 ### Docker Compose Health Check
@@ -365,37 +365,37 @@ healthcheck:
 
 ```bash
 # Follow logs
-docker-compose logs -f iodd-manager
+docker-compose logs -f greenstack
 
 # Last 100 lines
-docker-compose logs --tail=100 iodd-manager
+docker-compose logs --tail=100 greenstack
 
 # Since specific time
-docker-compose logs --since 2025-01-11T10:00:00 iodd-manager
+docker-compose logs --since 2025-01-11T10:00:00 greenstack
 ```
 
 ### Container Stats
 
 ```bash
 # Real-time stats
-docker stats iodd-manager
+docker stats greenstack
 
 # Output:
 # CONTAINER ID   NAME           CPU %     MEM USAGE / LIMIT     MEM %
-# abc123         iodd-manager   2.5%      150MiB / 2GiB         7.5%
+# abc123         greenstack   2.5%      150MiB / 2GiB         7.5%
 ```
 
 ### Execute Commands in Container
 
 ```bash
 # Open shell
-docker exec -it iodd-manager sh
+docker exec -it greenstack sh
 
 # Run Python command
-docker exec iodd-manager python -c "from config import print_config; print_config()"
+docker exec greenstack python -c "from config import print_config; print_config()"
 
 # Check database
-docker exec iodd-manager ls -lh /data/iodd_manager.db
+docker exec greenstack ls -lh /data/greenstack.db
 ```
 
 ## Troubleshooting
@@ -405,7 +405,7 @@ docker exec iodd-manager ls -lh /data/iodd_manager.db
 Check logs:
 
 ```bash
-docker-compose logs iodd-manager
+docker-compose logs greenstack
 ```
 
 Common issues:
@@ -433,8 +433,8 @@ chown -R 1000:1000 data/
 docker-compose down
 
 # Remove database lock file
-rm data/iodd_manager.db-shm
-rm data/iodd_manager.db-wal
+rm data/greenstack.db-shm
+rm data/greenstack.db-wal
 
 # Restart
 docker-compose up -d
@@ -445,14 +445,14 @@ docker-compose up -d
 Check health:
 
 ```bash
-docker inspect --format='{{json .State.Health}}' iodd-manager | jq
+docker inspect --format='{{json .State.Health}}' greenstack | jq
 ```
 
 Disable health check temporarily:
 
 ```yaml
 services:
-  iodd-manager:
+  greenstack:
     healthcheck:
       disable: true
 ```
@@ -463,7 +463,7 @@ Limit memory:
 
 ```yaml
 services:
-  iodd-manager:
+  greenstack:
     deploy:
       resources:
         limits:
@@ -486,7 +486,7 @@ environment:
 Extend the base image:
 
 ```dockerfile
-FROM iodd-manager:latest
+FROM greenstack:latest
 
 # Install additional packages
 USER root
@@ -503,7 +503,7 @@ CMD ["python", "custom_start.py"]
 Build:
 
 ```bash
-docker build -f Dockerfile.custom -t iodd-manager:custom .
+docker build -f Dockerfile.custom -t greenstack:custom .
 ```
 
 ### Docker Swarm Deployment
@@ -514,8 +514,8 @@ Create stack file `docker-stack.yml`:
 version: '3.8'
 
 services:
-  iodd-manager:
-    image: iodd-manager:latest
+  greenstack:
+    image: greenstack:latest
     deploy:
       replicas: 3
       update_config:
@@ -545,20 +545,20 @@ Create `k8s-deployment.yml`:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: iodd-manager
+  name: greenstack
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: iodd-manager
+      app: greenstack
   template:
     metadata:
       labels:
-        app: iodd-manager
+        app: greenstack
     spec:
       containers:
-      - name: iodd-manager
-        image: iodd-manager:latest
+      - name: greenstack
+        image: greenstack:latest
         ports:
         - containerPort: 8000
         env:
@@ -570,7 +570,7 @@ spec:
       volumes:
       - name: data
         persistentVolumeClaim:
-          claimName: iodd-manager-pvc
+          claimName: greenstack-pvc
 ```
 
 Deploy:

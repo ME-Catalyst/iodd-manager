@@ -32,7 +32,7 @@ db_path = None
 def get_db_path():
     """Get database path from manager"""
     if db_path is None:
-        return "iodd_manager.db"
+        return "greenstack.db"
     return db_path
 
 

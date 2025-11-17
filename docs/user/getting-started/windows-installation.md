@@ -1,12 +1,12 @@
 # Windows Installation Guide
 
-Complete guide for installing and running IODD Manager on Windows 10/11.
+Complete guide for installing and running Greenstack on Windows 10/11.
 
 ---
 
 ## =€ Quick Start (Recommended for Windows Users)
 
-The **fastest way** to get IODD Manager running on Windows is using the automated setup script.
+The **fastest way** to get Greenstack running on Windows is using the automated setup script.
 
 ### Prerequisites
 
@@ -19,20 +19,20 @@ The **fastest way** to get IODD Manager running on Windows is using the automate
 
 ### Step-by-Step Installation
 
-#### Step 1: Download IODD Manager
+#### Step 1: Download Greenstack
 
 **Option A: Download ZIP (Easiest)**
 
-1. Visit https://github.com/ME-Catalyst/iodd-manager
+1. Visit https://github.com/ME-Catalyst/greenstack
 2. Click the green **"Code"** button
 3. Select **"Download ZIP"**
-4. Extract the ZIP file to your desired location (e.g., `C:\Projects\iodd-manager`)
+4. Extract the ZIP file to your desired location (e.g., `C:\Projects\greenstack`)
 
 **Option B: Clone with Git**
 
 ```cmd
-git clone https://github.com/ME-Catalyst/iodd-manager.git
-cd iodd-manager
+git clone https://github.com/ME-Catalyst/greenstack.git
+cd greenstack
 ```
 
 ---
@@ -57,7 +57,7 @@ Expected output: `Python 3.10.x` or higher
 
 #### Step 3: Run the Setup Script
 
-1. Open File Explorer and navigate to the `iodd-manager` folder
+1. Open File Explorer and navigate to the `greenstack` folder
 2. **Double-click** `setup.bat`
 
 The setup script will:
@@ -75,7 +75,7 @@ ZPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP]
 Would you like to create a desktop shortcut? (y/n): y
   Desktop shortcut created!
 
- Launching IODD Manager...
+ Launching Greenstack...
 
 PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
   The application will start in a moment...
@@ -90,7 +90,7 @@ Press Ctrl+C to stop the application
 3. When prompted, press **`y`** to create a desktop shortcut (recommended)
 4. Wait for the browser to open automatically
 
-** Done!** IODD Manager is now running.
+** Done!** Greenstack is now running.
 
 ---
 
@@ -105,7 +105,7 @@ The setup script will automatically:
 - Manually navigate to http://localhost:5173
 
 **You should see:**
-- IODD Manager dashboard with device library
+- Greenstack dashboard with device library
 - Navigation menu on the left
 - Device import button
 
@@ -124,8 +124,8 @@ For developers or users who want more control over the installation process.
 ### Step 1: Clone or Download
 
 ```cmd
-git clone https://github.com/ME-Catalyst/iodd-manager.git
-cd iodd-manager
+git clone https://github.com/ME-Catalyst/greenstack.git
+cd greenstack
 ```
 
 ### Step 2: Create Configuration
@@ -173,14 +173,14 @@ python start.py
 
 ## =Í Desktop Shortcut
 
-If you created a desktop shortcut during setup, you can start IODD Manager by:
+If you created a desktop shortcut during setup, you can start Greenstack by:
 
-1. Double-clicking the **"IODD Manager"** shortcut on your desktop
+1. Double-clicking the **"Greenstack"** shortcut on your desktop
 2. The application launches automatically
 
 **Shortcut Details:**
 - Target: `python.exe start.py`
-- Start in: `C:\Path\To\iodd-manager`
+- Start in: `C:\Path\To\greenstack`
 - Icon: Python icon (or custom if configured)
 
 **To manually create a shortcut:**
@@ -189,7 +189,7 @@ If you created a desktop shortcut during setup, you can start IODD Manager by:
 3. Move shortcut to Desktop
 4. Right-click shortcut ’ **Properties**
 5. In "Target" field, prefix with: `python.exe ` (with space)
-   - Example: `python.exe "C:\Projects\iodd-manager\start.py"`
+   - Example: `python.exe "C:\Projects\greenstack\start.py"`
 
 ---
 
@@ -197,13 +197,13 @@ If you created a desktop shortcut during setup, you can start IODD Manager by:
 
 ### From Command Prompt Window
 
-Press **`Ctrl+C`** in the terminal window where IODD Manager is running.
+Press **`Ctrl+C`** in the terminal window where Greenstack is running.
 
 ### From Task Manager
 
 1. Press **`Ctrl+Shift+Esc`** to open Task Manager
 2. Find processes:
-   - `python.exe` (IODD Manager backend)
+   - `python.exe` (Greenstack backend)
    - `node.exe` (Frontend dev server, if running)
 3. Right-click ’ **End Task**
 
@@ -313,7 +313,7 @@ PermissionError: [WinError 5] Access is denied
 **A. Run Command Prompt as Administrator:**
 1. Search for "cmd" or "Command Prompt"
 2. Right-click ’ **Run as administrator**
-3. Navigate to iodd-manager directory
+3. Navigate to greenstack directory
 4. Run setup.bat or python start.py
 
 **B. Install to user directory:**
@@ -323,7 +323,7 @@ pip install --user -r requirements.txt
 
 **C. Check antivirus/firewall:**
 - Temporarily disable antivirus
-- Add iodd-manager folder to exclusions
+- Add greenstack folder to exclusions
 
 ---
 
@@ -354,21 +354,21 @@ sqlite3.OperationalError: database is locked
 
 **Solutions:**
 
-**A. Close all IODD Manager instances:**
+**A. Close all Greenstack instances:**
 ```cmd
 taskkill /F /IM python.exe
 ```
 
 **B. Delete database and recreate:**
 ```cmd
-del iodd_manager.db
+del greenstack.db
 python -m alembic upgrade head
 ```
 
 **C. Check for lingering processes:**
 - Open Task Manager
 - End all `python.exe` processes
-- Restart IODD Manager
+- Restart Greenstack
 
 ---
 
@@ -444,7 +444,7 @@ Create a batch file `start-iodd-background.bat`:
 ```batch
 @echo off
 start /B python start.py
-echo IODD Manager started in background
+echo Greenstack started in background
 echo Visit http://localhost:5173
 pause
 ```
@@ -452,20 +452,20 @@ pause
 ### Create Start Menu Shortcut
 
 1. Press `Win+R`, type `shell:programs`
-2. Create new folder "IODD Manager"
+2. Create new folder "Greenstack"
 3. Copy desktop shortcut into this folder
-4. IODD Manager now appears in Start Menu
+4. Greenstack now appears in Start Menu
 
 ### Run on Startup
 
 1. Press `Win+R`, type `shell:startup`
 2. Create shortcut to `setup.bat`
-3. IODD Manager starts automatically on login
+3. Greenstack starts automatically on login
 
 **Recommended startup batch file** (`startup-iodd.bat`):
 ```batch
 @echo off
-cd /d "C:\Path\To\iodd-manager"
+cd /d "C:\Path\To\greenstack"
 start /MIN python start.py
 ```
 
@@ -482,13 +482,13 @@ Use forward slashes or escaped backslashes:
 ```env
 # Good
 IODD_STORAGE_PATH=./iodd_storage
-IODD_STORAGE_PATH=C:/Projects/iodd-manager/storage
+IODD_STORAGE_PATH=C:/Projects/greenstack/storage
 
 # Also works
-IODD_STORAGE_PATH=C:\\Projects\\iodd-manager\\storage
+IODD_STORAGE_PATH=C:\\Projects\\greenstack\\storage
 
 # Avoid
-IODD_STORAGE_PATH=C:\Projects\iodd-manager\storage
+IODD_STORAGE_PATH=C:\Projects\greenstack\storage
 ```
 
 ### Recommended Windows .env Settings
@@ -506,7 +506,7 @@ FRONTEND_PORT=5173
 AUTO_OPEN_BROWSER=true
 
 # Use absolute Windows paths
-IODD_STORAGE_PATH=C:/Projects/iodd-manager/iodd_storage
+IODD_STORAGE_PATH=C:/Projects/greenstack/iodd_storage
 LOG_TO_FILE=true
 
 # Windows-friendly logging
@@ -522,7 +522,7 @@ LOG_LEVEL=INFO
 Move database to SSD for better performance:
 
 ```env
-DATABASE_URL=sqlite:///D:/FastDrive/iodd_manager.db
+DATABASE_URL=sqlite:///D:/FastDrive/greenstack.db
 ```
 
 ### Increase Worker Processes
@@ -552,8 +552,8 @@ If you have [Chocolatey](https://chocolatey.org/) installed:
 choco install python nodejs git
 
 # Clone and setup
-git clone https://github.com/ME-Catalyst/iodd-manager.git
-cd iodd-manager
+git clone https://github.com/ME-Catalyst/greenstack.git
+cd greenstack
 setup.bat
 ```
 
@@ -566,8 +566,8 @@ If you have [Scoop](https://scoop.sh/) installed:
 scoop install python nodejs git
 
 # Clone and setup
-git clone https://github.com/ME-Catalyst/iodd-manager.git
-cd iodd-manager
+git clone https://github.com/ME-Catalyst/greenstack.git
+cd greenstack
 setup.bat
 ```
 
@@ -589,7 +589,7 @@ After successful installation:
 **Still having issues?**
 
 1. Check [Troubleshooting Guide](../../troubleshooting/TROUBLESHOOTING.md)
-2. Search [GitHub Issues](https://github.com/ME-Catalyst/iodd-manager/issues)
+2. Search [GitHub Issues](https://github.com/ME-Catalyst/greenstack/issues)
 3. Create new issue with:
    - Windows version
    - Python version (`python --version`)
@@ -602,7 +602,7 @@ After successful installation:
 
 - [ ] Python 3.10+ installed
 - [ ] Python added to PATH
-- [ ] Downloaded/cloned IODD Manager
+- [ ] Downloaded/cloned Greenstack
 - [ ] Ran `setup.bat`
 - [ ] Application started successfully
 - [ ] Browser opened to http://localhost:5173

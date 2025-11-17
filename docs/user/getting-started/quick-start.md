@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Get up and running with IODD Manager in 5 minutes!
+Get up and running with Greenstack in 5 minutes!
 
 ## Prerequisites Check
 
@@ -18,8 +18,8 @@ git --version     # Should be 2.0+
 
 ```bash
 # Clone the repository
-git clone https://github.com/ME-Catalyst/iodd-manager.git
-cd iodd-manager
+git clone https://github.com/ME-Catalyst/greenstack.git
+cd greenstack
 
 # Copy configuration
 cp .env.example .env
@@ -180,7 +180,7 @@ curl "http://localhost:8000/api/devices/12345/67890/parameters"
 
 ## Next Steps
 
-Now that you have IODD Manager running:
+Now that you have Greenstack running:
 
 ### Explore Features
 
@@ -228,14 +228,14 @@ LOG_LEVEL=DEBUG
 
 ```bash
 # SQLite database location
-cp iodd_manager.db iodd_manager_backup.db
+cp greenstack.db greenstack_backup.db
 ```
 
 ### Clear All Data
 
 ```bash
 # Delete database
-rm iodd_manager.db
+rm greenstack.db
 
 # Run migrations to recreate
 alembic upgrade head
@@ -284,12 +284,12 @@ Check that your IODD file:
 
 - **[Full Documentation](../user-guide/web-interface.md)** - Comprehensive guides
 - **[API Reference](../../developer/api/endpoints.md)** - Complete API documentation
-- **[GitHub Issues](https://github.com/ME-Catalyst/iodd-manager/issues)** - Report bugs
+- **[GitHub Issues](https://github.com/ME-Catalyst/greenstack/issues)** - Report bugs
 - **[Contributing](/CONTRIBUTING.md)** - Get involved
 
 ## What's Next?
 
-You're now ready to use IODD Manager! Here are some recommended next steps:
+You're now ready to use Greenstack! Here are some recommended next steps:
 
 1. **Import your own IODD files** - Try with real device files
 2. **Explore the API** - Visit http://localhost:8000/docs for interactive API docs

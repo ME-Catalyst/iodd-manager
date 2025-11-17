@@ -4,7 +4,7 @@ Managing database schema changes with Alembic.
 
 ## Overview
 
-IODD Manager uses [Alembic](https://alembic.sqlalchemy.org/) for database migrations.
+Greenstack uses [Alembic](https://alembic.sqlalchemy.org/) for database migrations.
 
 **Benefits:**
 
@@ -318,7 +318,7 @@ alembic merge -m "Merge feature branches" rev1 rev2
 
 ```bash
 # 1. Backup database
-cp iodd_manager.db iodd_manager_backup_$(date +%Y%m%d_%H%M%S).db
+cp greenstack.db greenstack_backup_$(date +%Y%m%d_%H%M%S).db
 
 # 2. Check current version
 alembic current
@@ -335,7 +335,7 @@ alembic current
 # Should show latest revision
 
 # 6. Test application
-python -c "from iodd_manager import IODDManager; IODDManager('iodd_manager.db')"
+python -c "from greenstack import IODDManager; IODDManager('greenstack.db')"
 ```
 
 ### Rollback on Failure
@@ -344,8 +344,8 @@ If migration fails:
 
 ```bash
 # Restore backup
-mv iodd_manager.db iodd_manager_failed.db
-cp iodd_manager_backup_20250111_100000.db iodd_manager.db
+mv greenstack.db greenstack_failed.db
+cp greenstack_backup_20250111_100000.db greenstack.db
 
 # Or downgrade (if database still usable)
 alembic downgrade -1
@@ -364,7 +364,7 @@ prepend_sys_path = .
 version_path_separator = os
 
 # SQLite database URL
-sqlalchemy.url = sqlite:///./iodd_manager.db
+sqlalchemy.url = sqlite:///./greenstack.db
 
 # Output formatting
 truncate_slug_length = 40
@@ -447,7 +447,7 @@ alembic merge -m "Merge conflicting migrations" head1 head2
 # ⚠️ WARNING: Only for development!
 
 # Delete all tables
-rm iodd_manager.db
+rm greenstack.db
 
 # Remove migration history
 rm alembic/versions/*.py

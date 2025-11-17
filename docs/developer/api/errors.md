@@ -279,7 +279,7 @@ python api.py
 tail -f logs/app.log
 
 # View uvicorn logs
-journalctl -u iodd-manager -f
+journalctl -u greenstack -f
 ```
 
 ### Validate Input
@@ -345,7 +345,7 @@ curl http://localhost:8000/api/devices > response.json
 from prometheus_client import Counter
 
 api_errors = Counter(
-    'iodd_manager_errors_total',
+    'greenstack_errors_total',
     'Total API errors',
     ['error_code', 'endpoint']
 )
@@ -359,7 +359,7 @@ api_errors.labels(error_code='FILE_TOO_LARGE', endpoint='/api/iodd/upload').inc(
 ```yaml
 # Prometheus alert
 - alert: HighErrorRate
-  expr: rate(iodd_manager_errors_total[5m]) > 0.1
+  expr: rate(greenstack_errors_total[5m]) > 0.1
   for: 5m
   labels:
     severity: warning
@@ -372,7 +372,7 @@ api_errors.labels(error_code='FILE_TOO_LARGE', endpoint='/api/iodd/upload').inc(
 If you encounter persistent errors:
 
 1. **Check Documentation**: Review [API docs](overview.md)
-2. **Search Issues**: [GitHub Issues](https://github.com/ME-Catalyst/iodd-manager/issues)
+2. **Search Issues**: [GitHub Issues](https://github.com/ME-Catalyst/greenstack/issues)
 3. **Enable Debug Logging**: Set `LOG_LEVEL=DEBUG`
 4. **Report Bug**: Create issue with error details and logs
 

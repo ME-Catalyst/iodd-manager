@@ -4,7 +4,7 @@
 
 **Intelligent device management platform with a complete Industrial IoT foundation**
 
-[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-blue)](https://github.com/ME-Catalyst/iodd-manager/actions)
+[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-blue)](https://github.com/ME-Catalyst/greenstack/actions)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE.md)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![React](https://img.shields.io/badge/react-18.2-61dafb)](https://reactjs.org/)
@@ -140,7 +140,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 ## Support
 
 - 📖 **Documentation**: [Complete Docs](docs/INDEX.md)
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/ME-Catalyst/iodd-manager/issues)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/ME-Catalyst/greenstack/issues)
 
 ## License
 

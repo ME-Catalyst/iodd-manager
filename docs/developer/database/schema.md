@@ -1,12 +1,12 @@
 # Database Schema
 
-Understanding the IODD Manager database structure.
+Understanding the Greenstack database structure.
 
 ## Overview
 
-IODD Manager uses SQLite for local storage with SQLAlchemy ORM. The schema is managed through Alembic migrations.
+Greenstack uses SQLite for local storage with SQLAlchemy ORM. The schema is managed through Alembic migrations.
 
-**Database File**: `iodd_manager.db` (configurable via `IODD_DATABASE_URL`)
+**Database File**: `greenstack.db` (configurable via `IODD_DATABASE_URL`)
 
 ## Entity Relationship Diagram
 
@@ -301,33 +301,33 @@ Supported IO-Link data types:
 
 ```bash
 # Create backup
-cp iodd_manager.db iodd_manager_backup_$(date +%Y%m%d).db
+cp greenstack.db greenstack_backup_$(date +%Y%m%d).db
 
 # Or use SQLite dump
-sqlite3 iodd_manager.db .dump > backup.sql
+sqlite3 greenstack.db .dump > backup.sql
 ```
 
 ### Restore Database
 
 ```bash
 # From file
-cp iodd_manager_backup_20250111.db iodd_manager.db
+cp greenstack_backup_20250111.db greenstack.db
 
 # From SQL dump
-sqlite3 iodd_manager.db < backup.sql
+sqlite3 greenstack.db < backup.sql
 ```
 
 ### Vacuum Database
 
 ```bash
 # Reclaim space and defragment
-sqlite3 iodd_manager.db "VACUUM;"
+sqlite3 greenstack.db "VACUUM;"
 ```
 
 ### Check Integrity
 
 ```bash
-sqlite3 iodd_manager.db "PRAGMA integrity_check;"
+sqlite3 greenstack.db "PRAGMA integrity_check;"
 ```
 
 ## Performance Optimization

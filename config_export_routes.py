@@ -15,7 +15,7 @@ import tempfile
 
 router = APIRouter(prefix="/api/config-export", tags=["Configuration Export"])
 
-DB_PATH = "iodd_manager.db"
+DB_PATH = "greenstack.db"
 
 
 @router.get("/iodd/{device_id}/json")

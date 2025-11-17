@@ -1,5 +1,5 @@
 """
-Pytest configuration and shared fixtures for IODD Manager tests.
+Pytest configuration and shared fixtures for Greenstack tests.
 
 This module provides common test fixtures and setup/teardown logic
 that can be used across all test modules.
@@ -17,7 +17,7 @@ from fastapi.testclient import TestClient
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from iodd_manager import IODDManager, StorageManager
+from greenstack import IODDManager, StorageManager
 from api import app
 
 
@@ -93,7 +93,7 @@ def storage_manager(temp_db_path: Path) -> StorageManager:
 
 
 @pytest.fixture
-def iodd_manager(storage_manager: StorageManager) -> IODDManager:
+def greenstack(storage_manager: StorageManager) -> IODDManager:
     """
     Create an IODDManager instance with a temporary database.
 

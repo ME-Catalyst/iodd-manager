@@ -130,7 +130,7 @@ This is the complete documentation for GreenStack, an intelligent device managem
 
 ### I want to...
 
-**Install and run IODD Manager**
+**Install and run Greenstack**
 → [Quick Start Guide](user/getting-started/quick-start.md)
 
 **Import my first IODD file**
@@ -167,7 +167,7 @@ This documentation follows these principles:
 
 ## 🆘 Getting Help
 
-**Found an issue?** [Report it on GitHub](https://github.com/ME-Catalyst/iodd-manager/issues)
+**Found an issue?** [Report it on GitHub](https://github.com/ME-Catalyst/greenstack/issues)
 
 **Have a question?** Check the [Troubleshooting Guide](troubleshooting/TROUBLESHOOTING.md)
 

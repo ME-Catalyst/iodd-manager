@@ -1245,7 +1245,7 @@ const SettingsPage = ({ API_BASE, toast, onDevicesChange, recentDevices, setRece
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold text-foreground">Settings</h2>
-        <p className="text-muted-foreground mt-1">Manage your IODD Manager configuration</p>
+        <p className="text-muted-foreground mt-1">Manage your Greenstack configuration</p>
       </div>
 
       {/* System Management */}
@@ -5261,7 +5261,7 @@ const IODDManager = () => {
       diagnostics: selectedEds.diagnostics_details || null,
       export_metadata: {
         exported_at: new Date().toISOString(),
-        exported_from: 'IODD Manager',
+        exported_from: 'Greenstack',
         eds_id: selectedEds.id
       }
     };

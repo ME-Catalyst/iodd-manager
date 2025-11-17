@@ -1,6 +1,6 @@
 # Test Data Directory
 
-This directory contains sample files for testing the IODD Manager application.
+This directory contains sample files for testing the Greenstack application.
 
 ## Directory Structure
 

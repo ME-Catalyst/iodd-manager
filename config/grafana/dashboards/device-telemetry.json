@@ -287,7 +287,7 @@
   "refresh": "5s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["iodd-manager", "devices", "telemetry"],
+  "tags": ["greenstack", "devices", "telemetry"],
   "templating": {
     "list": []
   },

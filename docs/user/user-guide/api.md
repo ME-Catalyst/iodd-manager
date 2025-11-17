@@ -1,6 +1,6 @@
 # API Usage Guide
 
-Access IODD Manager programmatically using the REST API.
+Access Greenstack programmatically using the REST API.
 
 ## API Overview
 
@@ -8,7 +8,7 @@ Access IODD Manager programmatically using the REST API.
 
 **Interactive Documentation**: `http://localhost:8000/docs`
 
-The IODD Manager API provides RESTful endpoints for:
+The Greenstack API provides RESTful endpoints for:
 
 - Uploading and managing IODD files
 - Querying device information

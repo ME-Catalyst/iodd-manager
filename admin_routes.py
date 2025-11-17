@@ -15,7 +15,7 @@ import json
 
 router = APIRouter(prefix="/api/admin", tags=["Admin Console"])
 
-DB_PATH = "iodd_manager.db"
+DB_PATH = "greenstack.db"
 
 
 @router.get("/stats/overview")
@@ -272,7 +272,7 @@ async def backup_database():
     """Create a backup of the database"""
     try:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        backup_name = f"iodd_manager_backup_{timestamp}.db"
+        backup_name = f"greenstack_backup_{timestamp}.db"
         backup_path = Path("backups") / backup_name
 
         # Create backups directory
@@ -308,7 +308,7 @@ async def download_backup():
         return FileResponse(
             path=temp_backup.name,
             media_type="application/x-sqlite3",
-            filename=f"iodd_manager_backup_{timestamp}.db"
+            filename=f"greenstack_backup_{timestamp}.db"
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to download backup: {str(e)}")

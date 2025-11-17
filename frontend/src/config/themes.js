@@ -411,14 +411,14 @@ export function applyTheme(theme) {
     root.style.setProperty(key, value);
   });
 
-  // CSS structure: :root has dark mode, .light class has light mode
-  // So for dark mode, remove .light class; for light mode, add .light class
+  // Apply Tailwind dark mode class
+  // Tailwind's dark mode uses the 'dark' class on the root element
   if (theme.mode === 'light') {
     root.classList.add('light');
     root.classList.remove('dark');
   } else {
+    root.classList.add('dark');
     root.classList.remove('light');
-    root.classList.remove('dark');
   }
 
 }

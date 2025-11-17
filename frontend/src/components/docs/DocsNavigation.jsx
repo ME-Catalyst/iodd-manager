@@ -38,9 +38,8 @@ const navigationStructure = [
     icon: BookOpen,
     children: [
       { id: 'user-guide/web-interface', title: 'Web Interface', icon: Layout },
-      { id: 'user-guide/device-management', title: 'Device Management', icon: Server },
       { id: 'user-guide/configuration', title: 'Configuration', icon: Settings },
-      { id: 'user-guide/features', title: 'Features', icon: Sparkles },
+      { id: 'user-guide/troubleshooting', title: 'Troubleshooting', icon: AlertCircle },
     ]
   },
   {

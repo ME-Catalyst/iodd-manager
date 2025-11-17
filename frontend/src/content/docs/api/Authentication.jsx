@@ -141,29 +141,41 @@ docker run -e CORS_ORIGINS="http://localhost:5173,https://your-domain.com" ...`}
       {/* Rate Limiting */}
       <DocsSection title="Rate Limiting">
         <DocsParagraph>
-          Greenstack includes rate limiting to prevent abuse and ensure fair resource usage:
+          By default, Greenstack does not include built-in rate limiting. For development and testing,
+          this allows unrestricted API access. For production deployments, you should implement rate
+          limiting at the reverse proxy or API gateway level.
         </DocsParagraph>
 
+        <DocsCallout type="warning" title="Production Deployments">
+          <DocsParagraph>
+            Always implement rate limiting in production to prevent abuse and ensure fair resource usage.
+            Configure limits based on your specific use case and expected traffic patterns.
+          </DocsParagraph>
+        </DocsCallout>
+
         <Card className="my-6">
-          <CardContent className="pt-6">
+          <CardHeader>
+            <CardTitle className="text-base">Recommended Rate Limits</CardTitle>
+          </CardHeader>
+          <CardContent>
             <div className="space-y-4">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge>Default</Badge>
+                  <Badge variant="outline">Upload Endpoints</Badge>
                   <code className="px-2 py-1 bg-surface-active rounded text-sm font-mono">10 requests per minute</code>
                 </div>
                 <p className="text-sm text-muted-foreground ml-6">
-                  Applied to upload endpoints (IODD/EDS file uploads)
+                  For IODD/EDS file uploads to prevent resource exhaustion
                 </p>
               </div>
 
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge>Global</Badge>
-                  <code className="px-2 py-1 bg-surface-active rounded text-sm font-mono">100 requests per minute</code>
+                  <Badge variant="outline">General Endpoints</Badge>
+                  <code className="px-2 py-1 bg-surface-active rounded text-sm font-mono">100-1000 requests per minute</code>
                 </div>
                 <p className="text-sm text-muted-foreground ml-6">
-                  Applied to general API endpoints (GET, POST, DELETE)
+                  For GET, POST, DELETE operations based on your capacity
                 </p>
               </div>
             </div>
@@ -171,15 +183,66 @@ docker run -e CORS_ORIGINS="http://localhost:5173,https://your-domain.com" ...`}
         </Card>
 
         <DocsParagraph>
-          Rate limits are tracked per IP address. If exceeded, you'll receive a <code>429 Too Many Requests</code> response.
+          <strong>Implementation Options:</strong>
         </DocsParagraph>
 
-        <DocsCodeBlock language="json">
-{`// 429 Response
-{
-  "detail": "Rate limit exceeded: 10 per 1 minute"
+        <div className="space-y-4 my-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Nginx Rate Limiting</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DocsCodeBlock language="nginx">
+{`# nginx.conf
+http {
+    limit_req_zone $binary_remote_addr zone=api_limit:10m rate=100r/m;
+    limit_req_zone $binary_remote_addr zone=upload_limit:10m rate=10r/m;
+
+    server {
+        location /api/iodds/upload {
+            limit_req zone=upload_limit burst=5;
+            proxy_pass http://localhost:8000;
+        }
+
+        location /api/ {
+            limit_req zone=api_limit burst=20;
+            proxy_pass http://localhost:8000;
+        }
+    }
 }`}
-        </DocsCodeBlock>
+              </DocsCodeBlock>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Traefik Rate Limiting</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DocsCodeBlock language="yaml">
+{`# traefik.yml
+http:
+  middlewares:
+    api-ratelimit:
+      rateLimit:
+        average: 100
+        period: 1m
+        burst: 20
+
+    upload-ratelimit:
+      rateLimit:
+        average: 10
+        period: 1m
+        burst: 5
+
+  routers:
+    greenstack-api:
+      middlewares:
+        - api-ratelimit`}
+              </DocsCodeBlock>
+            </CardContent>
+          </Card>
+        </div>
       </DocsSection>
 
       {/* Security Best Practices */}

@@ -52,7 +52,7 @@ COPY --chown=iodd:iodd requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY --chown=iodd:iodd api.py iodd_manager.py start.py config.py ./
+COPY --chown=iodd:iodd src/ ./src/
 COPY --chown=iodd:iodd alembic.ini ./
 COPY --chown=iodd:iodd alembic/ ./alembic/
 COPY --chown=iodd:iodd .env.example ./.env.example
@@ -84,4 +84,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD python -c "import requests; requests.get('http://localhost:8000/api/health')" || exit 1
 
 # Run database migrations and start application
-CMD ["sh", "-c", "alembic upgrade head && python api.py"]
+CMD ["sh", "-c", "alembic upgrade head && python -m src.api"]

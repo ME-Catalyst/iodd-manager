@@ -10,7 +10,7 @@ import hashlib
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 from datetime import datetime
-from eds_parser import parse_eds_file
+from src.parsers.eds_parser import parse_eds_file
 
 
 class EDSPackageParser:

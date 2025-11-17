@@ -8,7 +8,7 @@ into structured DeviceProfile objects.
 import pytest
 from pathlib import Path
 
-from greenstack import (
+from src.greenstack import (
     IODDParser,
     IODDDataType,
     AccessRights,

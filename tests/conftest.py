@@ -17,8 +17,8 @@ from fastapi.testclient import TestClient
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from greenstack import IODDManager, StorageManager
-from api import app
+from src.greenstack import IODDManager, StorageManager
+from src.api import app
 
 
 # ============================================================================
@@ -125,7 +125,7 @@ def api_client_with_temp_db(temp_db_path: Path) -> Generator[TestClient, None, N
 
     This fixture temporarily replaces the app's database with a test database.
     """
-    from api import manager as api_manager
+    from src.api import manager as api_manager
 
     # Store original storage
     original_storage = api_manager.storage

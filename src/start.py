@@ -15,7 +15,7 @@ from pathlib import Path
 import logging
 import signal
 
-import config
+from src import config
 
 # Configure logging
 logging.basicConfig(
@@ -60,7 +60,7 @@ class IODDManagerLauncher:
         db_path = self.project_root / 'greenstack.db'
         if not db_path.exists():
             logger.info("Initializing database...")
-            from greenstack import StorageManager
+            from src.greenstack import StorageManager
             StorageManager()
             logger.info("Database initialized successfully")
         

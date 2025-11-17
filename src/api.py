@@ -18,12 +18,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import uvicorn
 
-from greenstack import (
+from src.greenstack import (
     IODDManager, DeviceProfile, Parameter,
     IODDDataType, AccessRights
 )
-import config
-from eds_parser import parse_eds_file
+from src import config
+from src.parsers.eds_parser import parse_eds_file
 
 # ============================================================================
 # API Models
@@ -261,39 +261,39 @@ app.add_middleware(
 manager = IODDManager()
 
 # Include EDS routes
-import eds_routes
+from src.routes import eds_routes
 eds_routes.db_path = manager.storage.db_path
 app.include_router(eds_routes.router)
 
 # Include Ticket routes
-import ticket_routes
+from src.routes import ticket_routes
 app.include_router(ticket_routes.router)
 
 # Include Search routes
-import search_routes
+from src.routes import search_routes
 app.include_router(search_routes.router)
 
 # Include Configuration Export routes
-import config_export_routes
+from src.routes import config_export_routes
 app.include_router(config_export_routes.router)
 
 # Include Admin Console routes
-import admin_routes
+from src.routes import admin_routes
 app.include_router(admin_routes.router)
 
 # Include MQTT Broker Management routes
-import mqtt_routes
+from src.routes import mqtt_routes
 app.include_router(mqtt_routes.router, prefix="/api/mqtt", tags=["MQTT"])
 
 # Include WebSocket for MQTT
 app.add_websocket_route("/ws/mqtt", mqtt_routes.websocket_endpoint)
 
 # Include Service Management routes
-import service_routes
+from src.routes import service_routes
 app.include_router(service_routes.router, tags=["Services"])
 
 # Include Theme Management routes
-import theme_routes
+from src.routes import theme_routes
 theme_routes.db_path = manager.storage.db_path
 app.include_router(theme_routes.router)
 
@@ -1589,7 +1589,7 @@ async def generate_adapter(request: GenerateRequest):
     try:
         # For demonstration, we'll create a simple mock profile
         # In production, this would be properly deserialized from the database
-        from greenstack import (
+        from src.greenstack import (
             DeviceProfile, VendorInfo, DeviceInfo as DeviceInfoModel,
             ProcessDataCollection
         )

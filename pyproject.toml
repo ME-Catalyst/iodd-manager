@@ -82,12 +82,11 @@ Issues = "https://github.com/ME-Catalyst/iodd-manager/issues"
 Changelog = "https://github.com/ME-Catalyst/iodd-manager/blob/main/CHANGELOG.md"
 
 [project.scripts]
-iodd-manager = "iodd_manager:main"
-iodd-api = "api:main"
+greenstack = "src.greenstack:main"
+greenstack-api = "src.api:main"
 
 [tool.setuptools]
-py-modules = ["iodd_manager", "api", "config", "start"]
-packages = ["alembic", "alembic.versions"]
+packages = ["src", "src.routes", "src.parsers", "src.utils", "alembic", "alembic.versions"]
 include-package-data = true
 
 [tool.setuptools.package-data]
@@ -237,7 +236,7 @@ ignore = [
 "__init__.py" = ["F401"]  # Allow unused imports in __init__.py
 
 [tool.ruff.lint.isort]
-known-first-party = ["iodd_manager"]
+known-first-party = ["src"]
 
 # ============================================================================
 # Bandit - Security Linter

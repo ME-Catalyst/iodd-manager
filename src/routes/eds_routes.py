@@ -16,9 +16,9 @@ import zipfile
 import re
 import json
 
-from eds_parser import parse_eds_file, parse_eds_file_legacy
-from eds_package_parser import EDSPackageParser
-from eds_diagnostics import Severity
+from src.parsers.eds_parser import parse_eds_file, parse_eds_file_legacy
+from src.parsers.eds_package_parser import EDSPackageParser
+from src.parsers.eds_diagnostics import Severity
 
 # Set up logger
 logger = logging.getLogger(__name__)

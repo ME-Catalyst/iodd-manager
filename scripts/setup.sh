@@ -30,7 +30,7 @@ echo ""
 read -p "Would you like to create a desktop shortcut? (y/n) " -n 1 -r
 echo ""
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-    $PYTHON_CMD start.py --create-shortcut
+    $PYTHON_CMD -m src.start --create-shortcut
     echo "  Desktop shortcut created!"
 fi
 echo ""
@@ -47,4 +47,4 @@ echo "════════════════════════�
 echo ""
 
 # Start the application
-$PYTHON_CMD start.py
+$PYTHON_CMD -m src.start

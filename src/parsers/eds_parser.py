@@ -9,7 +9,7 @@ import json
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Any
 import hashlib
-from eds_diagnostics import DiagnosticCollector, validate_eds_data
+from src.parsers.eds_diagnostics import DiagnosticCollector, validate_eds_data
 
 
 class EDSParser:

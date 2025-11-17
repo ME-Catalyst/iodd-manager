@@ -46,4 +46,4 @@ echo Press Ctrl+C to stop the application
 echo.
 
 :: Start the application
-python start.py --frontend-port 5173
+python -m src.start --frontend-port 5173

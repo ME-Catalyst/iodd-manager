@@ -67,7 +67,9 @@
       "Bash(for file in GrafanaManager.jsx NodeRedManager.jsx ComparisonView.jsx MqttManager.jsx PortsSection.jsx)",
       "Bash(do echo \"File: $file\")",
       "Bash(done)",
-      "Bash(powershell.exe -ExecutionPolicy Bypass -File \"F:\\github\\iodd-manager\\fix-all-colors.ps1\")"
+      "Bash(powershell.exe -ExecutionPolicy Bypass -File \"F:\\github\\iodd-manager\\fix-all-colors.ps1\")",
+      "Bash(git mv:*)",
+      "Bash(test:*)"
     ],
     "deny": [],
     "ask": []

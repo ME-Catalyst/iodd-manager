@@ -9,7 +9,7 @@ import pytest
 from pathlib import Path
 import sqlite3
 
-from greenstack import StorageManager
+from src.greenstack import StorageManager
 
 
 class TestStorageManagerInitialization:

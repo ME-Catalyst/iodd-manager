@@ -21,6 +21,7 @@ const AdminConsole = ({ API_BASE, toast, onNavigate }) => {
   const [dbHealth, setDbHealth] = useState(null);
   const [systemInfo, setSystemInfo] = useState(null);
   const [edsDiagnostics, setEdsDiagnostics] = useState(null);
+  const [ioddDiagnostics, setIoddDiagnostics] = useState(null);
   const [vendorStats, setVendorStats] = useState(null);
   const [activeTab, setActiveTab] = useState('hub');
   const [readme, setReadme] = useState('');
@@ -33,18 +34,20 @@ const AdminConsole = ({ API_BASE, toast, onNavigate }) => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [overviewRes, healthRes, systemRes, diagRes, vendorRes] = await Promise.all([
+      const [overviewRes, healthRes, systemRes, edsDiagRes, ioddDiagRes, vendorRes] = await Promise.all([
         axios.get(`${API_BASE}/api/admin/stats/overview`),
         axios.get(`${API_BASE}/api/admin/stats/database-health`),
         axios.get(`${API_BASE}/api/admin/system/info`),
         axios.get(`${API_BASE}/api/admin/diagnostics/eds-summary`),
+        axios.get(`${API_BASE}/api/admin/diagnostics/iodd-summary`),
         axios.get(`${API_BASE}/api/admin/stats/devices-by-vendor`)
       ]);
 
       setOverview(overviewRes.data);
       setDbHealth(healthRes.data);
       setSystemInfo(systemRes.data);
-      setEdsDiagnostics(diagRes.data);
+      setEdsDiagnostics(edsDiagRes.data);
+      setIoddDiagnostics(ioddDiagRes.data);
       setVendorStats(vendorRes.data);
     } catch (error) {
       console.error('Failed to load admin data:', error);
@@ -114,7 +117,7 @@ const AdminConsole = ({ API_BASE, toast, onNavigate }) => {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `iodd_manager_backup_${new Date().toISOString().split('T')[0]}.db`);
+      link.setAttribute('download', `greenstack_backup_${new Date().toISOString().split('T')[0]}.db`);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -309,7 +312,11 @@ const AdminConsole = ({ API_BASE, toast, onNavigate }) => {
       )}
 
       {activeTab === 'diagnostics' && (
-        <DiagnosticsTab edsDiagnostics={edsDiagnostics} vendorStats={vendorStats} />
+        <DiagnosticsTab
+          edsDiagnostics={edsDiagnostics}
+          ioddDiagnostics={ioddDiagnostics}
+          vendorStats={vendorStats}
+        />
       )}
 
       {activeTab === 'system' && (
@@ -389,19 +396,19 @@ const HubTab = ({ overview, onNavigate }) => {
       title: 'Documentation',
       icon: BookOpen,
       items: [
-        { label: 'User Manual', href: 'https://github.com/ME-Catalyst/iodd-manager/blob/main/docs/user/USER_MANUAL.md' },
-        { label: 'API Reference', href: 'https://github.com/ME-Catalyst/iodd-manager/blob/main/docs/developer/API_SPECIFICATION.md' },
-        { label: 'Configuration Guide', href: 'https://github.com/ME-Catalyst/iodd-manager/blob/main/docs/user/CONFIGURATION.md' },
-        { label: 'Troubleshooting', href: 'https://github.com/ME-Catalyst/iodd-manager/blob/main/docs/troubleshooting/TROUBLESHOOTING.md' }
+        { label: 'User Manual', href: 'https://github.com/ME-Catalyst/greenstack/blob/main/docs/user/USER_MANUAL.md' },
+        { label: 'API Reference', href: 'https://github.com/ME-Catalyst/greenstack/blob/main/docs/developer/API_SPECIFICATION.md' },
+        { label: 'Configuration Guide', href: 'https://github.com/ME-Catalyst/greenstack/blob/main/docs/user/CONFIGURATION.md' },
+        { label: 'Troubleshooting', href: 'https://github.com/ME-Catalyst/greenstack/blob/main/docs/troubleshooting/TROUBLESHOOTING.md' }
       ]
     },
     {
       title: 'Development',
       icon: Terminal,
       items: [
-        { label: 'Architecture', href: 'https://github.com/ME-Catalyst/iodd-manager/blob/main/docs/architecture/ARCHITECTURE.md' },
-        { label: 'Developer Reference', href: 'https://github.com/ME-Catalyst/iodd-manager/blob/main/docs/developer/DEVELOPER_REFERENCE.md' },
-        { label: 'Contributing Guide', href: 'https://github.com/ME-Catalyst/iodd-manager/blob/main/CONTRIBUTING.md' },
+        { label: 'Architecture', href: 'https://github.com/ME-Catalyst/greenstack/blob/main/docs/architecture/ARCHITECTURE.md' },
+        { label: 'Developer Reference', href: 'https://github.com/ME-Catalyst/greenstack/blob/main/docs/developer/DEVELOPER_REFERENCE.md' },
+        { label: 'Contributing Guide', href: 'https://github.com/ME-Catalyst/greenstack/blob/main/CONTRIBUTING.md' },
         { label: 'API Docs (Swagger)', href: '/docs', external: true }
       ]
     },
@@ -409,10 +416,10 @@ const HubTab = ({ overview, onNavigate }) => {
       title: 'Community',
       icon: Github,
       items: [
-        { label: 'GitHub Repository', href: 'https://github.com/ME-Catalyst/iodd-manager' },
-        { label: 'Report Issues', href: 'https://github.com/ME-Catalyst/iodd-manager/issues' },
-        { label: 'View Changelog', href: 'https://github.com/ME-Catalyst/iodd-manager/blob/main/CHANGELOG.md' },
-        { label: 'License (MIT)', href: 'https://github.com/ME-Catalyst/iodd-manager/blob/main/LICENSE.md' }
+        { label: 'GitHub Repository', href: 'https://github.com/ME-Catalyst/greenstack' },
+        { label: 'Report Issues', href: 'https://github.com/ME-Catalyst/greenstack/issues' },
+        { label: 'View Changelog', href: 'https://github.com/ME-Catalyst/greenstack/blob/main/CHANGELOG.md' },
+        { label: 'License (MIT)', href: 'https://github.com/ME-Catalyst/greenstack/blob/main/LICENSE.md' }
       ]
     }
   ];
@@ -428,7 +435,7 @@ const HubTab = ({ overview, onNavigate }) => {
             </div>
             <div className="flex-1">
               <h2 className="text-2xl font-bold text-foreground mb-2">
-                Welcome to IODD Manager
+                Welcome to Greenstack
               </h2>
               <p className="text-foreground mb-4">
                 A comprehensive tool for managing IO-Link Device Descriptions and EtherNet/IP Electronic Data Sheets.
@@ -1015,75 +1022,223 @@ const DatabaseTab = ({ overview, dbHealth, handleVacuum, handleBackup, handleDow
 /**
  * Diagnostics Tab
  */
-const DiagnosticsTab = ({ edsDiagnostics, vendorStats }) => {
+const DiagnosticsTab = ({ edsDiagnostics, ioddDiagnostics, vendorStats }) => {
+  const getQualityColor = (score) => {
+    if (score >= 90) return 'text-green-500';
+    if (score >= 70) return 'text-yellow-500';
+    return 'text-red-500';
+  };
+
+  const getQualityBgColor = (score) => {
+    if (score >= 90) return 'bg-green-500/20 border-green-500/50';
+    if (score >= 70) return 'bg-yellow-500/20 border-yellow-500/50';
+    return 'bg-red-500/20 border-red-500/50';
+  };
+
+  const ProgressBar = ({ value, label }) => (
+    <div className="space-y-1">
+      <div className="flex justify-between text-sm">
+        <span className="text-muted-foreground">{label}</span>
+        <span className={value >= 90 ? 'text-green-400' : value >= 70 ? 'text-yellow-400' : 'text-red-400'}>
+          {value.toFixed(1)}%
+        </span>
+      </div>
+      <div className="w-full bg-secondary/30 rounded-full h-2">
+        <div
+          className={`h-2 rounded-full transition-all ${value >= 90 ? 'bg-green-500' : value >= 70 ? 'bg-yellow-500' : 'bg-red-500'}`}
+          style={{ width: `${value}%` }}
+        />
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-6">
-      {/* EDS Diagnostics Summary */}
-      <Card className="bg-card border-border">
-        <CardHeader>
-          <CardTitle className="text-foreground flex items-center gap-2">
-            <Activity className="w-5 h-5 text-orange-500" />
-            EDS Parsing Diagnostics
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            {edsDiagnostics?.by_severity?.map((item, idx) => {
-              const colors = {
-                INFO: 'text-blue-400',
-                WARN: 'text-yellow-400',
-                ERROR: 'text-orange-400',
-                FATAL: 'text-red-400'
-              };
-              return (
-                <div key={idx} className="p-4 bg-secondary/50 rounded-lg border border-border">
-                  <p className="text-sm text-muted-foreground mb-1">{item.severity}</p>
-                  <p className={`text-2xl font-bold ${colors[item.severity]}`}>
-                    {item.count}
-                  </p>
+      {/* Quality Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* EDS Quality Score */}
+        <Card className={`bg-card border ${getQualityBgColor(edsDiagnostics?.quality_score || 0)}`}>
+          <CardHeader>
+            <CardTitle className="text-foreground flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-orange-500" />
+                EDS Parsing Quality
+              </span>
+              <span className={`text-3xl font-bold ${getQualityColor(edsDiagnostics?.quality_score || 0)}`}>
+                {edsDiagnostics?.quality_score || 0}
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div className="p-3 bg-secondary/30 rounded-lg">
+                  <p className="text-2xl font-bold text-green-400">{edsDiagnostics?.total_files || 0}</p>
+                  <p className="text-xs text-muted-foreground">Total Files</p>
                 </div>
-              );
-            })}
-          </div>
+                <div className="p-3 bg-secondary/30 rounded-lg">
+                  <p className="text-2xl font-bold text-red-400">{edsDiagnostics?.total_files_with_issues || 0}</p>
+                  <p className="text-xs text-muted-foreground">With Issues</p>
+                </div>
+              </div>
+              {edsDiagnostics?.completeness && (
+                <div className="space-y-3">
+                  <h4 className="text-sm font-semibold text-foreground">Data Completeness</h4>
+                  <ProgressBar value={edsDiagnostics.completeness.product_name_pct} label="Product Names" />
+                  <ProgressBar value={edsDiagnostics.completeness.vendor_name_pct} label="Vendor Names" />
+                  <ProgressBar value={edsDiagnostics.completeness.description_pct} label="Descriptions" />
+                  <ProgressBar value={edsDiagnostics.completeness.icon_pct} label="Icons" />
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
-          {edsDiagnostics?.files_with_issues?.length > 0 && (
-            <div className="space-y-2">
-              <h4 className="text-sm font-semibold text-foreground mb-3">
-                Files with Issues ({edsDiagnostics.files_with_issues.length})
-              </h4>
-              <div className="max-h-96 overflow-y-auto space-y-2">
-                {edsDiagnostics.files_with_issues.slice(0, 20).map((file, idx) => (
-                  <div key={idx} className="p-3 bg-secondary/30 rounded border border-border/50">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <p className="text-foreground font-medium">{file.product_name}</p>
-                        <p className="text-sm text-muted-foreground">{file.vendor_name}</p>
-                      </div>
-                      <div className="flex gap-2 text-xs">
-                        {file.fatal > 0 && (
-                          <Badge className="bg-red-900/30 text-red-300 border-red-700/50">
-                            {file.fatal} fatal
-                          </Badge>
-                        )}
-                        {file.errors > 0 && (
-                          <Badge className="bg-orange-900/30 text-orange-300 border-orange-700/50">
-                            {file.errors} errors
-                          </Badge>
-                        )}
-                        {file.warnings > 0 && (
-                          <Badge className="bg-yellow-900/30 text-yellow-300 border-yellow-700/50">
-                            {file.warnings} warnings
-                          </Badge>
-                        )}
-                      </div>
+        {/* IODD Quality Score */}
+        <Card className={`bg-card border ${getQualityBgColor(ioddDiagnostics?.quality_score || 0)}`}>
+          <CardHeader>
+            <CardTitle className="text-foreground flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-500" />
+                IODD Parsing Quality
+              </span>
+              <span className={`text-3xl font-bold ${getQualityColor(ioddDiagnostics?.quality_score || 0)}`}>
+                {ioddDiagnostics?.quality_score || 0}
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div className="p-3 bg-secondary/30 rounded-lg">
+                  <p className="text-2xl font-bold text-green-400">{ioddDiagnostics?.total_files || 0}</p>
+                  <p className="text-xs text-muted-foreground">Total Files</p>
+                </div>
+                <div className="p-3 bg-secondary/30 rounded-lg">
+                  <p className="text-2xl font-bold text-red-400">{ioddDiagnostics?.total_files_with_issues || 0}</p>
+                  <p className="text-xs text-muted-foreground">With Issues</p>
+                </div>
+              </div>
+              {ioddDiagnostics?.completeness && (
+                <div className="space-y-3">
+                  <h4 className="text-sm font-semibold text-foreground">Data Completeness</h4>
+                  <ProgressBar value={ioddDiagnostics.completeness.product_name_pct} label="Product Names" />
+                  <ProgressBar value={ioddDiagnostics.completeness.manufacturer_pct} label="Manufacturers" />
+                  <ProgressBar value={ioddDiagnostics.completeness.vendor_id_pct} label="Vendor IDs" />
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* EDS Diagnostic Details */}
+      {edsDiagnostics?.by_severity?.length > 0 && (
+        <Card className="bg-card border-border">
+          <CardHeader>
+            <CardTitle className="text-foreground flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-orange-500" />
+              EDS Diagnostic Issues by Severity
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {edsDiagnostics.by_severity.map((item, idx) => {
+                const colors = {
+                  INFO: { text: 'text-blue-400', bg: 'bg-blue-500/20' },
+                  WARN: { text: 'text-yellow-400', bg: 'bg-yellow-500/20' },
+                  ERROR: { text: 'text-orange-400', bg: 'bg-orange-500/20' },
+                  FATAL: { text: 'text-red-400', bg: 'bg-red-500/20' }
+                };
+                return (
+                  <div key={idx} className={`p-4 ${colors[item.severity].bg} rounded-lg border border-border`}>
+                    <p className="text-sm text-muted-foreground mb-1">{item.severity}</p>
+                    <p className={`text-3xl font-bold ${colors[item.severity].text}`}>
+                      {item.count}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Files with Issues */}
+      {edsDiagnostics?.files_with_issues?.length > 0 && (
+        <Card className="bg-card border-border">
+          <CardHeader>
+            <CardTitle className="text-foreground flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-red-500" />
+              EDS Files with Parsing Issues ({edsDiagnostics.files_with_issues.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="max-h-96 overflow-y-auto space-y-2">
+              {edsDiagnostics.files_with_issues.map((file, idx) => (
+                <div key={idx} className="p-3 bg-secondary/30 rounded border border-border/50">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <p className="text-foreground font-medium">{file.product_name}</p>
+                      <p className="text-sm text-muted-foreground">{file.vendor_name}</p>
+                    </div>
+                    <div className="flex gap-2 text-xs">
+                      {file.fatal > 0 && (
+                        <Badge className="bg-red-900/30 text-red-300 border-red-700/50">
+                          {file.fatal} fatal
+                        </Badge>
+                      )}
+                      {file.errors > 0 && (
+                        <Badge className="bg-orange-900/30 text-orange-300 border-orange-700/50">
+                          {file.errors} errors
+                        </Badge>
+                      )}
+                      {file.warnings > 0 && (
+                        <Badge className="bg-yellow-900/30 text-yellow-300 border-yellow-700/50">
+                          {file.warnings} warnings
+                        </Badge>
+                      )}
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* IODD Files with Issues */}
+      {ioddDiagnostics?.files_with_issues?.length > 0 && (
+        <Card className="bg-card border-border">
+          <CardHeader>
+            <CardTitle className="text-foreground flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-red-500" />
+              IODD Files with Issues ({ioddDiagnostics.files_with_issues.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="max-h-96 overflow-y-auto space-y-2">
+              {ioddDiagnostics.files_with_issues.map((file, idx) => (
+                <div key={idx} className="p-3 bg-secondary/30 rounded border border-border/50">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <p className="text-foreground font-medium">{file.product_name}</p>
+                      <p className="text-sm text-muted-foreground">{file.manufacturer}</p>
+                    </div>
+                    <div className="flex flex-wrap gap-1 text-xs">
+                      {file.issues.map((issue, i) => (
+                        <Badge key={i} className="bg-orange-900/30 text-orange-300 border-orange-700/50">
+                          {issue}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Common Diagnostic Codes */}
       {edsDiagnostics?.common_codes?.length > 0 && (
@@ -1091,7 +1246,7 @@ const DiagnosticsTab = ({ edsDiagnostics, vendorStats }) => {
           <CardHeader>
             <CardTitle className="text-foreground flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-yellow-500" />
-              Most Common Issues
+              Most Common EDS Diagnostic Codes
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -1112,6 +1267,23 @@ const DiagnosticsTab = ({ edsDiagnostics, vendorStats }) => {
                   <span className="text-muted-foreground">{code.count} occurrences</span>
                 </div>
               ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Success Message when no issues */}
+      {edsDiagnostics?.total_files_with_issues === 0 && ioddDiagnostics?.total_files_with_issues === 0 && (
+        <Card className="bg-green-500/10 border-green-500/50">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3 text-green-400">
+              <CheckCircle2 className="w-6 h-6" />
+              <div>
+                <p className="font-semibold">Excellent Parsing Quality!</p>
+                <p className="text-sm text-muted-foreground">
+                  All {(edsDiagnostics?.total_files || 0) + (ioddDiagnostics?.total_files || 0)} files parsed successfully with no issues detected.
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>

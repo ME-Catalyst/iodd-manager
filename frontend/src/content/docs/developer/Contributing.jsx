@@ -545,7 +545,7 @@ pre-commit run`}
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>• New features require tests</li>
                 <li>• Bug fixes should have regression tests</li>
-                <li>• Aim for >70% code coverage</li>
+                <li>• Aim for &gt;70% code coverage</li>
                 <li>• Tests must pass before merging</li>
               </ul>
             </CardContent>

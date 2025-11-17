@@ -423,15 +423,18 @@ async def download_backup():
     try:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         temp_backup = tempfile.NamedTemporaryFile(delete=False, suffix='.db')
+        tmp_path = temp_backup.name
 
         # Copy database to temp file
-        shutil.copy2(get_db_path(), temp_backup.name)
+        shutil.copy2(get_db_path(), tmp_path)
         temp_backup.close()
 
+        # Return file with background task to clean up temp file after response
         return FileResponse(
-            path=temp_backup.name,
+            path=tmp_path,
             media_type="application/x-sqlite3",
-            filename=f"greenstack_backup_{timestamp}.db"
+            filename=f"greenstack_backup_{timestamp}.db",
+            background=lambda: os.unlink(tmp_path) if os.path.exists(tmp_path) else None
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to download backup: {str(e)}")

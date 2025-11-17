@@ -1036,6 +1036,7 @@ async def upload_eds_package(file: UploadFile = File(...)):
             detail="Invalid file format. Only .zip package files are supported"
         )
 
+    tmp_path = None
     try:
         # Save uploaded file to temporary location
         with tempfile.NamedTemporaryFile(delete=False, suffix='.zip') as tmp_file:
@@ -1314,8 +1315,13 @@ async def upload_eds_package(file: UploadFile = File(...)):
         conn.commit()
         conn.close()
 
-        # Clean up temp file
-        os.unlink(tmp_path)
+        # Clean up temp file immediately after successful import
+        if tmp_path and os.path.exists(tmp_path):
+            try:
+                os.unlink(tmp_path)
+                logger.info(f"Cleaned up temp file: {tmp_path}")
+            except Exception as cleanup_error:
+                logger.warning(f"Failed to clean up temp file {tmp_path}: {cleanup_error}")
 
         return {
             "package_id": package_id,
@@ -1331,12 +1337,23 @@ async def upload_eds_package(file: UploadFile = File(...)):
         }
 
     except HTTPException:
+        # Clean up temp file on HTTP exception
+        if tmp_path and os.path.exists(tmp_path):
+            try:
+                os.unlink(tmp_path)
+                logger.info(f"Cleaned up temp file after error: {tmp_path}")
+            except Exception:
+                pass
         # Re-raise HTTP exceptions (like 409 Conflict) without modification
         raise
     except Exception as e:
-        # Clean up temp file on error
-        if 'tmp_path' in locals() and os.path.exists(tmp_path):
-            os.unlink(tmp_path)
+        # Clean up temp file on any error
+        if tmp_path and os.path.exists(tmp_path):
+            try:
+                os.unlink(tmp_path)
+                logger.info(f"Cleaned up temp file after error: {tmp_path}")
+            except Exception:
+                pass
         logger.error(f"Failed to parse EDS package {file.filename}: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=500,

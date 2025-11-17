@@ -110,10 +110,12 @@ async def export_iodd_config_json(device_id: int):
 
     safe_name = device_info.get('product_name', 'device').replace(' ', '_')
 
+    # Return file with background task to clean up temp file after response
     return FileResponse(
         path=tmp_path,
         media_type="application/json",
-        filename=f"{safe_name}_config.json"
+        filename=f"{safe_name}_config.json",
+        background=lambda: os.unlink(tmp_path) if os.path.exists(tmp_path) else None
     )
 
 
@@ -266,10 +268,12 @@ async def export_eds_config_json(eds_id: int):
 
     safe_name = eds_info.get('product_name', 'device').replace(' ', '_')
 
+    # Return file with background task to clean up temp file after response
     return FileResponse(
         path=tmp_path,
         media_type="application/json",
-        filename=f"{safe_name}_config.json"
+        filename=f"{safe_name}_config.json",
+        background=lambda: os.unlink(tmp_path) if os.path.exists(tmp_path) else None
     )
 
 
@@ -431,8 +435,10 @@ async def export_batch_configs_json(
         json.dump(batch_export, tmp_file, indent=2)
         tmp_path = tmp_file.name
 
+    # Return file with background task to clean up temp file after response
     return FileResponse(
         path=tmp_path,
         media_type="application/json",
-        filename=f"batch_export_{device_type.lower()}_{len(configs)}_devices.json"
+        filename=f"batch_export_{device_type.lower()}_{len(configs)}_devices.json",
+        background=lambda: os.unlink(tmp_path) if os.path.exists(tmp_path) else None
     )

@@ -5,6 +5,7 @@ Handles ticket CRUD operations, comments, and CSV export
 
 import csv
 import io
+import logging
 import os
 import shutil
 import sqlite3
@@ -16,6 +17,8 @@ from typing import List, Optional
 from fastapi import APIRouter, File, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/tickets", tags=["Tickets"])
 
@@ -334,21 +337,69 @@ async def update_ticket(ticket_id: int, update: TicketUpdate):
 
 @router.delete("/{ticket_id}")
 async def delete_ticket(ticket_id: int):
-    """Delete a ticket"""
+    """
+    Delete a ticket and ALL associated data
+
+    Removes:
+    - Ticket record
+    - All comments
+    - All attachment records
+    - All attachment files from disk
+    - Ticket directory if empty
+    """
     conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA foreign_keys = ON")
     cursor = conn.cursor()
 
-    cursor.execute("DELETE FROM tickets WHERE id = ?", (ticket_id,))
-
-    if cursor.rowcount == 0:
+    # Check if ticket exists
+    cursor.execute("SELECT id FROM tickets WHERE id = ?", (ticket_id,))
+    if not cursor.fetchone():
         conn.close()
         raise HTTPException(status_code=404, detail="Ticket not found")
+
+    # Get all attachment file paths before deleting from database
+    cursor.execute("""
+        SELECT file_path FROM ticket_attachments
+        WHERE ticket_id = ?
+    """, (ticket_id,))
+    attachment_paths = [row[0] for row in cursor.fetchall()]
+
+    # Delete all associated data (foreign keys should cascade, but explicit for safety)
+    cursor.execute("DELETE FROM ticket_attachments WHERE ticket_id = ?", (ticket_id,))
+    cursor.execute("DELETE FROM ticket_comments WHERE ticket_id = ?", (ticket_id,))
+    cursor.execute("DELETE FROM tickets WHERE id = ?", (ticket_id,))
 
     conn.commit()
     conn.close()
 
-    return {"message": "Ticket deleted successfully"}
+    # Delete attachment files from disk
+    files_deleted = 0
+    files_failed = 0
+    for file_path in attachment_paths:
+        try:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                files_deleted += 1
+                logger.info(f"Deleted attachment file: {file_path}")
+        except Exception as e:
+            files_failed += 1
+            logger.warning(f"Failed to delete file {file_path}: {e}")
+
+    # Clean up empty ticket directory
+    ticket_dir = ATTACHMENTS_DIR / str(ticket_id)
+    if ticket_dir.exists():
+        try:
+            if not any(ticket_dir.iterdir()):  # Check if directory is empty
+                ticket_dir.rmdir()
+                logger.info(f"Deleted empty ticket directory: {ticket_dir}")
+        except Exception as e:
+            logger.warning(f"Failed to delete ticket directory {ticket_dir}: {e}")
+
+    return {
+        "message": "Ticket and all associated data deleted successfully",
+        "files_deleted": files_deleted,
+        "files_failed": files_failed
+    }
 
 
 @router.post("/{ticket_id}/comments")

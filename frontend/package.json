@@ -31,6 +31,7 @@
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^10.16.0",
+    "jszip": "^3.10.1",
     "lucide-react": "^0.290.0",
     "mermaid": "^11.12.1",
     "react": "^18.2.0",

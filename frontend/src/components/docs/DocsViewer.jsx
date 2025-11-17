@@ -6,6 +6,7 @@ import DocsContent from './DocsContent';
 import DocsTableOfContents from './DocsTableOfContents';
 import DocsSearch from './DocsSearch';
 import DocsBreadcrumb from './DocsBreadcrumb';
+import DocsExportButton from './DocsExportButton';
 import { docsRegistry } from '../../content/docs/index';
 
 /**
@@ -78,6 +79,9 @@ const DocsViewer = ({ onClose }) => {
           <span className="font-semibold text-foreground">Documentation</span>
         </div>
         <div className="flex items-center gap-2">
+          <div className="hidden sm:block">
+            <DocsExportButton />
+          </div>
           <button
             onClick={() => setShowSearch(true)}
             className="p-2 hover:bg-surface-hover rounded-lg text-muted-foreground"
@@ -115,18 +119,21 @@ const DocsViewer = ({ onClose }) => {
       <main className="flex-1 flex flex-col min-w-0 pt-16 lg:pt-0">
         {/* Breadcrumb */}
         <div className="hidden lg:block border-b border-border bg-surface">
-          <div className="max-w-5xl mx-auto px-8 py-3 flex items-center gap-4">
-            {onClose && (
-              <button
-                onClick={onClose}
-                className="flex items-center gap-2 px-3 py-1.5 hover:bg-surface-hover rounded-lg text-muted-foreground hover:text-foreground transition-colors"
-                title="Back to app"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span className="text-sm font-medium">Back</span>
-              </button>
-            )}
-            <DocsBreadcrumb activePage={activePage} />
+          <div className="max-w-5xl mx-auto px-8 py-3 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              {onClose && (
+                <button
+                  onClick={onClose}
+                  className="flex items-center gap-2 px-3 py-1.5 hover:bg-surface-hover rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+                  title="Back to app"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span className="text-sm font-medium">Back</span>
+                </button>
+              )}
+              <DocsBreadcrumb activePage={activePage} />
+            </div>
+            <DocsExportButton />
           </div>
         </div>
 

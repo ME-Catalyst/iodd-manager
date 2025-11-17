@@ -189,17 +189,124 @@ async def get_devices_by_vendor():
 
 @router.get("/stats/database-health")
 async def get_database_health():
-    """Check database integrity and health"""
+    """
+    Comprehensive database health check with actionable diagnostics
+
+    Returns detailed issue detection and resolution recommendations
+    """
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
-    # Integrity check
+    issues = []
+    recommendations = []
+
+    # 1. Integrity check
     cursor.execute("PRAGMA integrity_check")
     integrity = cursor.fetchone()[0]
 
-    # Foreign key check
+    if integrity != "ok":
+        issues.append({
+            "type": "corruption",
+            "severity": "critical",
+            "title": "Database Corruption Detected",
+            "description": f"Integrity check failed: {integrity}",
+            "action": "backup",
+            "action_label": "Create Backup Now"
+        })
+        recommendations.append("Immediately create a backup before attempting any repairs")
+
+    # 2. Foreign key violations
     cursor.execute("PRAGMA foreign_key_check")
     fk_violations = cursor.fetchall()
+
+    if len(fk_violations) > 0:
+        issues.append({
+            "type": "foreign_keys",
+            "severity": "high",
+            "title": f"{len(fk_violations)} Foreign Key Violations",
+            "description": "Orphaned records found that reference non-existent parent records",
+            "action": "vacuum",
+            "action_label": "Run Database Optimization"
+        })
+        recommendations.append("Run VACUUM to clean up orphaned records")
+
+    # 3. Check for database bloat
+    db_size = os.path.getsize(DB_PATH)
+    cursor.execute("PRAGMA page_count")
+    page_count = cursor.fetchone()[0]
+    cursor.execute("PRAGMA freelist_count")
+    freelist_count = cursor.fetchone()[0]
+
+    if freelist_count > 0:
+        bloat_pct = (freelist_count / page_count * 100) if page_count > 0 else 0
+        if bloat_pct > 10:
+            issues.append({
+                "type": "bloat",
+                "severity": "medium",
+                "title": f"Database Bloat Detected ({bloat_pct:.1f}%)",
+                "description": f"{freelist_count} unused pages wasting space",
+                "action": "vacuum",
+                "action_label": "Optimize Database (VACUUM)"
+            })
+            recommendations.append(f"Run VACUUM to reclaim ~{bloat_pct:.1f}% of database space")
+
+    # 4. Check for missing recommended indexes
+    expected_indexes = {
+        "eds_files": ["vendor_name", "product_code"],
+        "iodd_files": ["vendor_id", "device_id"],
+        "parameters": ["eds_file_id", "iodd_file_id"],
+        "tickets": ["status", "priority", "created_at"]
+    }
+
+    cursor.execute("""
+        SELECT tbl_name, name
+        FROM sqlite_master
+        WHERE type='index' AND name NOT LIKE 'sqlite_%'
+    """)
+    existing_indexes = {}
+    for tbl, idx in cursor.fetchall():
+        if tbl not in existing_indexes:
+            existing_indexes[tbl] = []
+        existing_indexes[tbl].append(idx)
+
+    missing_indexes = []
+    for table, columns in expected_indexes.items():
+        # Check if table exists
+        cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table,))
+        if cursor.fetchone():
+            for col in columns:
+                # Simple check - in production you'd verify actual index coverage
+                has_index = any(col in idx.lower() for idx in existing_indexes.get(table, []))
+                if not has_index:
+                    missing_indexes.append(f"{table}.{col}")
+
+    if missing_indexes:
+        issues.append({
+            "type": "performance",
+            "severity": "low",
+            "title": f"{len(missing_indexes)} Recommended Indexes Missing",
+            "description": f"Adding indexes could improve query performance: {', '.join(missing_indexes[:3])}",
+            "action": "info",
+            "action_label": "View Documentation"
+        })
+
+    # 5. Check for orphaned IODD assets
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM iodd_assets
+        WHERE iodd_file_id NOT IN (SELECT id FROM iodd_files)
+    """)
+    orphaned_assets = cursor.fetchone()[0]
+
+    if orphaned_assets > 0:
+        issues.append({
+            "type": "orphaned_data",
+            "severity": "medium",
+            "title": f"{orphaned_assets} Orphaned IODD Assets",
+            "description": "Asset files exist but their parent IODD files have been deleted",
+            "action": "vacuum",
+            "action_label": "Clean Up Orphaned Data"
+        })
 
     # Get index list
     cursor.execute("""
@@ -231,11 +338,26 @@ async def get_database_health():
 
     conn.close()
 
+    # Determine overall health status
+    critical_issues = [i for i in issues if i["severity"] == "critical"]
+    high_issues = [i for i in issues if i["severity"] == "high"]
+
+    health_status = "healthy"
+    if critical_issues:
+        health_status = "critical"
+    elif high_issues:
+        health_status = "warning"
+    elif issues:
+        health_status = "needs_attention"
+
     return {
         "integrity": integrity,
-        "healthy": integrity == "ok" and len(fk_violations) == 0,
+        "healthy": len(issues) == 0,
+        "health_status": health_status,
         "foreign_key_violations": len(fk_violations),
         "index_count": len(indexes),
+        "issues": issues,
+        "recommendations": recommendations,
         "tables": tables,
         "timestamp": datetime.now().isoformat()
     }

@@ -2,6 +2,9 @@
 setlocal enabledelayedexpansion
 title IODD Manager - Quick Setup
 
+:: Change to project root directory
+cd /d "%~dp0\.."
+
 echo ╔══════════════════════════════════════════════════════════════╗
 echo ║                 IODD MANAGER - QUICK SETUP                  ║
 echo ╚══════════════════════════════════════════════════════════════╝
@@ -28,6 +31,11 @@ if %errorlevel% equ 0 (
 ) else (
     echo   Installing dependencies with output...
     python -m pip install -r requirements.txt
+    if %errorlevel% neq 0 (
+        echo X Failed to install dependencies!
+        pause
+        exit /b 1
+    )
 )
 echo.
 
@@ -47,3 +55,9 @@ echo.
 
 :: Start the application
 python -m src.start --frontend-port 5173
+if %errorlevel% neq 0 (
+    echo.
+    echo X Application failed to start! See errors above.
+    pause
+    exit /b 1
+)

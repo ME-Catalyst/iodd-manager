@@ -404,15 +404,21 @@ export function generateCSSVariables(theme) {
  */
 export function applyTheme(theme) {
   const root = document.documentElement;
-  const variables = generateCSSVariables(theme);
 
-  Object.entries(variables).forEach(([key, value]) => {
-    root.style.setProperty(key, value);
-  });
+  console.log('[applyTheme] Applying theme:', theme.name, 'mode:', theme.mode);
+  console.log('[applyTheme] Before - classList:', root.className);
 
-  // Also set the mode class (dark/light)
-  root.classList.remove('dark', 'light');
-  root.classList.add(theme.mode || 'dark');
+  // CSS structure: :root has dark mode, .light class has light mode
+  // So for dark mode, remove .light class; for light mode, add .light class
+  if (theme.mode === 'light') {
+    root.classList.add('light');
+    root.classList.remove('dark');
+  } else {
+    root.classList.remove('light');
+    root.classList.remove('dark');
+  }
+
+  console.log('[applyTheme] After - classList:', root.className);
 }
 
 export default {

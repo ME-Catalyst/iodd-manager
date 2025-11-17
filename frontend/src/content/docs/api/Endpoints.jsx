@@ -130,7 +130,8 @@ export default function ApiEndpoints() {
 ]`}
                 </DocsCodeBlock>
               </div>
-            </DocsAccordionItem>
+            </div>
+          </DocsAccordionItem>
 
           <DocsAccordionItem title="POST /api/eds/upload - Upload EDS File">
             <div className="space-y-4">
@@ -166,7 +167,8 @@ export default function ApiEndpoints() {
                   Maximum file size is 50MB for individual EDS files and 100MB for ZIP packages.
                 </DocsParagraph>
               </DocsCallout>
-            </DocsAccordionItem>
+            </div>
+          </DocsAccordionItem>
 
           <DocsAccordionItem title="GET /api/eds/{id} - Get EDS Details">
             <div className="space-y-4">
@@ -195,7 +197,8 @@ export default function ApiEndpoints() {
 }`}
                 </DocsCodeBlock>
               </div>
-            </DocsAccordionItem>
+            </div>
+          </DocsAccordionItem>
 
           <DocsAccordionItem title="DELETE /api/eds/{id} - Delete EDS File">
             <div className="space-y-4">
@@ -220,7 +223,8 @@ export default function ApiEndpoints() {
 }`}
                 </DocsCodeBlock>
               </div>
-            </DocsAccordionItem>
+            </div>
+          </DocsAccordionItem>
         </DocsAccordion>
       </DocsSection>
 

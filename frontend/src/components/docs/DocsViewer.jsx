@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Book, Search, Menu, X } from 'lucide-react';
+import { Book, Search, Menu, X, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DocsNavigation from './DocsNavigation';
 import DocsContent from './DocsContent';
@@ -19,7 +19,7 @@ import { docsRegistry } from '../../content/docs/index';
  * - Breadcrumb navigation
  * - Theme-aware styling
  */
-const DocsViewer = () => {
+const DocsViewer = ({ onClose }) => {
   const [activePage, setActivePage] = useState('getting-started/quick-start');
   const [showSearch, setShowSearch] = useState(false);
   const [showNav, setShowNav] = useState(false); // Mobile nav toggle
@@ -65,6 +65,15 @@ const DocsViewer = () => {
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-surface border-b border-border flex items-center justify-between px-4 z-40">
         <div className="flex items-center gap-2">
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-surface-hover rounded-lg text-muted-foreground"
+              title="Back to app"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          )}
           <Book className="w-5 h-5 text-brand-green" />
           <span className="font-semibold text-foreground">Documentation</span>
         </div>
@@ -106,7 +115,17 @@ const DocsViewer = () => {
       <main className="flex-1 flex flex-col min-w-0 pt-16 lg:pt-0">
         {/* Breadcrumb */}
         <div className="hidden lg:block border-b border-border bg-surface">
-          <div className="max-w-5xl mx-auto px-8 py-3">
+          <div className="max-w-5xl mx-auto px-8 py-3 flex items-center gap-4">
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="flex items-center gap-2 px-3 py-1.5 hover:bg-surface-hover rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+                title="Back to app"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span className="text-sm font-medium">Back</span>
+              </button>
+            )}
             <DocsBreadcrumb activePage={activePage} />
           </div>
         </div>

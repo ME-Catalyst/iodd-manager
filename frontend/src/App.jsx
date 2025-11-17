@@ -17,7 +17,7 @@ import {
   Wifi, Menu, ChevronDown, Info, Type, Hash, ToggleLeft, Command, RotateCcw,
   AlertCircle, Network, Server, Gauge, Cable, Clock, Tag, Layers, GitBranch,
   ArrowUpRight, ArrowDownRight, Users, HardDrive, CheckCircle, XCircle, AlertOctagon, FolderOpen, Bug,
-  Workflow, LineChart, Book
+  Workflow, LineChart, Book, Palette
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
@@ -37,6 +37,7 @@ import NodeRedManager from './components/NodeRedManager';
 import GrafanaManager from './components/GrafanaManager';
 import ServicesAdmin from './components/ServicesAdmin';
 import ThemeToggle from './components/ThemeToggle';
+import ThemeManager from './components/ThemeManager';
 import KeyboardShortcutsHelp from './components/KeyboardShortcutsHelp';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import DocsViewer from './components/docs/DocsViewer';
@@ -1287,6 +1288,9 @@ const SettingsPage = ({ API_BASE, toast, onDevicesChange, recentDevices, setRece
           </div>
         </CardContent>
       </Card>
+
+      {/* Theme Management */}
+      <ThemeManager API_BASE={API_BASE} toast={toast} />
 
       {/* Danger Zone */}
       <Card className="bg-card border-error/30">
@@ -5045,56 +5049,102 @@ const IODDManager = () => {
     setLoading(true);
     let successCount = 0;
     let failCount = 0;
+    const failedFiles = [];
     const totalFiles = files.length;
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+    // Helper function to upload a single file with retry logic
+    const uploadFileWithRetry = async (file, retries = 4) => {
       const formData = new FormData();
       formData.append('file', file);
 
-      try {
-        setUploadProgress(Math.round(((i + 1) / totalFiles) * 100));
+      for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+          const response = await axios.post(
+            `${API_BASE}/api/iodd/upload`,
+            formData,
+            {
+              headers: { 'Content-Type': 'multipart/form-data' },
+              timeout: 60000 // 60 second timeout
+            }
+          );
 
-        const response = await axios.post(
-          `${API_BASE}/api/iodd/upload`,
-          formData,
-          {
-            headers: { 'Content-Type': 'multipart/form-data' }
+          // Handle both single and multi-device responses
+          const devicesImported = response.data.devices
+            ? response.data.total_count
+            : 1;
+
+          return { success: true, count: devicesImported };
+        } catch (error) {
+          const errorMsg = error.response?.data?.detail || error.response?.data?.error || error.message;
+
+          // Check if it's a database locked error and we have retries left
+          if (errorMsg.includes('database is locked') && attempt < retries) {
+            console.log(`Database locked for ${file.name}, retrying (attempt ${attempt}/${retries})...`);
+            // Wait before retry with exponential backoff (2s, 4s, 6s, 8s)
+            await new Promise(resolve => setTimeout(resolve, 2000 * attempt));
+            continue;
           }
-        );
 
-        // Handle both single and multi-device responses
-        if (response.data.devices) {
-          successCount += response.data.total_count;
-        } else {
-          successCount += 1;
+          // If we've exhausted retries or it's a different error
+          console.error(`Failed to upload ${file.name} after ${attempt} attempt(s):`, errorMsg);
+          return { success: false, error: errorMsg };
         }
-      } catch (error) {
-        console.error(`Failed to upload ${file.name}:`, error);
+      }
+    };
+
+    // Process files one by one with progress updates
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const progress = Math.round(((i) / totalFiles) * 100);
+      setUploadProgress(progress);
+
+      // Show current file being processed
+      toast({
+        title: 'Processing files...',
+        description: `${i + 1}/${totalFiles}: ${file.name}`,
+        duration: 1000,
+      });
+
+      const result = await uploadFileWithRetry(file);
+
+      if (result.success) {
+        successCount += result.count;
+      } else {
         failCount += 1;
+        failedFiles.push({ name: file.name, error: result.error });
+      }
+
+      // Small delay between uploads to prevent database lock
+      if (i < files.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
     }
 
     setLoading(false);
     setUploadProgress(0);
 
-    // Show summary toast
+    // Show detailed summary toast
     if (successCount > 0 && failCount === 0) {
       toast({
-        title: 'All imports successful',
+        title: 'All imports successful! ✓',
         description: `Successfully imported ${successCount} device(s) from ${totalFiles} file(s)`,
+        duration: 5000,
       });
     } else if (successCount > 0 && failCount > 0) {
+      const failedList = failedFiles.map(f => `• ${f.name}: ${f.error}`).join('\n');
       toast({
         title: 'Partial success',
-        description: `Imported ${successCount} device(s), ${failCount} file(s) failed`,
+        description: `Imported ${successCount} device(s), ${failCount} file(s) failed:\n${failedList}`,
         variant: 'warning',
+        duration: 10000,
       });
     } else {
+      const failedList = failedFiles.map(f => `• ${f.name}: ${f.error}`).join('\n');
       toast({
         title: 'Import failed',
-        description: `Failed to import ${failCount} file(s)`,
+        description: `Failed to import ${failCount} file(s):\n${failedList}`,
         variant: 'destructive',
+        duration: 10000,
       });
     }
 
@@ -5113,79 +5163,119 @@ const IODDManager = () => {
     let successCount = 0;
     let failCount = 0;
     let totalEdsImported = 0;
+    const failedFiles = [];
     const totalFiles = files.length;
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      console.log(`Processing file ${i + 1}/${totalFiles}: ${file.name}`);
+    // Helper function to upload a single EDS file with retry logic
+    const uploadEdsFileWithRetry = async (file, retries = 4) => {
       const formData = new FormData();
       formData.append('file', file);
 
-      try {
-        setUploadProgress(Math.round(((i + 1) / totalFiles) * 100));
+      // Determine endpoint based on file extension
+      const isZipFile = file.name.toLowerCase().endsWith('.zip');
+      const endpoint = isZipFile
+        ? `${API_BASE}/api/eds/upload-package`
+        : `${API_BASE}/api/eds/upload`;
 
-        // Determine endpoint based on file extension
-        const isZipFile = file.name.toLowerCase().endsWith('.zip');
-        const endpoint = isZipFile
-          ? `${API_BASE}/api/eds/upload-package`
-          : `${API_BASE}/api/eds/upload`;
+      for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+          const response = await axios.post(
+            endpoint,
+            formData,
+            {
+              headers: { 'Content-Type': 'multipart/form-data' },
+              timeout: 60000 // 60 second timeout
+            }
+          );
 
-        console.log(`Uploading to: ${endpoint}`);
+          // Handle package response (multiple EDS files)
+          const edsCount = response.data.total_eds_files || 1;
+          return { success: true, count: edsCount, isDuplicate: false };
 
-        const response = await axios.post(
-          endpoint,
-          formData,
-          {
-            headers: { 'Content-Type': 'multipart/form-data' }
+        } catch (error) {
+          const errorMsg = error.response?.data?.detail || error.response?.data?.error || error.message;
+
+          // Handle duplicate packages (409 Conflict) - don't count as failure
+          if (error.response?.status === 409) {
+            console.log(`Package ${file.name} already exists, skipping`);
+            return { success: true, count: 0, isDuplicate: true };
           }
-        );
 
-        console.log(`Upload response for ${file.name}:`, response.data);
+          // Check if it's a database locked error and we have retries left
+          if (errorMsg.includes('database is locked') && attempt < retries) {
+            console.log(`Database locked for ${file.name}, retrying (attempt ${attempt}/${retries})...`);
+            // Wait before retry with exponential backoff (2s, 4s, 6s, 8s)
+            await new Promise(resolve => setTimeout(resolve, 2000 * attempt));
+            continue;
+          }
 
-        // Handle package response (multiple EDS files)
-        if (response.data.total_eds_files) {
-          totalEdsImported += response.data.total_eds_files;
-          successCount += 1;
-        } else {
-          // Single EDS file
-          totalEdsImported += 1;
+          // If we've exhausted retries or it's a different error
+          console.error(`Failed to upload ${file.name} after ${attempt} attempt(s):`, errorMsg);
+          return { success: false, error: errorMsg };
+        }
+      }
+    };
+
+    // Process files one by one with progress updates
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const progress = Math.round(((i) / totalFiles) * 100);
+      setUploadProgress(progress);
+
+      console.log(`Processing file ${i + 1}/${totalFiles}: ${file.name}`);
+
+      // Show current file being processed
+      toast({
+        title: 'Processing EDS files...',
+        description: `${i + 1}/${totalFiles}: ${file.name}`,
+        duration: 1000,
+      });
+
+      const result = await uploadEdsFileWithRetry(file);
+
+      if (result.success) {
+        if (!result.isDuplicate) {
+          totalEdsImported += result.count;
           successCount += 1;
         }
-      } catch (error) {
-        console.error(`Failed to upload ${file.name}:`, error);
-        console.error('Error response:', error.response?.data);
-        console.error('Error status:', error.response?.status);
+      } else {
+        failCount += 1;
+        failedFiles.push({ name: file.name, error: result.error });
+      }
 
-        // Handle duplicate packages (409 Conflict) - don't count as failure
-        if (error.response?.status === 409) {
-          console.log(`Package ${file.name} already exists, skipping`);
-          // Don't increment failCount for duplicates
-        } else {
-          failCount += 1;
-        }
+      // Small delay between uploads to prevent database lock
+      if (i < files.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
     }
 
     setLoading(false);
     setUploadProgress(0);
 
-    // Show summary toast
+    // Show detailed summary toast
     if (successCount > 0 && failCount === 0) {
       toast({
-        title: 'All imports successful',
+        title: 'All EDS imports successful! ✓',
         description: `Successfully imported ${totalEdsImported} EDS file(s) from ${successCount} package(s)`,
+        duration: 5000,
       });
     } else if (successCount > 0 && failCount > 0) {
+      const failedList = failedFiles.slice(0, 5).map(f => `• ${f.name}`).join('\n');
+      const moreMsg = failedFiles.length > 5 ? `\n...and ${failedFiles.length - 5} more` : '';
       toast({
         title: 'Partial success',
-        description: `Imported ${totalEdsImported} EDS file(s) from ${successCount} package(s), ${failCount} file(s) failed`,
+        description: `Imported ${totalEdsImported} EDS file(s) from ${successCount} package(s). ${failCount} failed:\n${failedList}${moreMsg}`,
         variant: 'warning',
+        duration: 10000,
       });
     } else {
+      const failedList = failedFiles.slice(0, 5).map(f => `• ${f.name}`).join('\n');
+      const moreMsg = failedFiles.length > 5 ? `\n...and ${failedFiles.length - 5} more` : '';
       toast({
-        title: 'Import failed',
-        description: `Failed to import ${failCount} file(s)`,
+        title: 'EDS import failed',
+        description: `Failed to import ${failCount} file(s):\n${failedList}${moreMsg}`,
         variant: 'destructive',
+        duration: 10000,
       });
     }
 
@@ -5361,19 +5451,22 @@ const IODDManager = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar
-        activeView={activeView}
-        setActiveView={setActiveView}
-        devices={devices}
-        edsFiles={edsFiles}
-        onDeviceSelect={handleDeviceSelect}
-        onEdsSelect={handleEdsSelect}
-        recentDevices={recentDevices}
-        recentEdsFiles={recentEdsFiles}
-      />
+      {/* Hide sidebar when in documentation view */}
+      {activeView !== 'documentation' && (
+        <Sidebar
+          activeView={activeView}
+          setActiveView={setActiveView}
+          devices={devices}
+          edsFiles={edsFiles}
+          onDeviceSelect={handleDeviceSelect}
+          onEdsSelect={handleEdsSelect}
+          recentDevices={recentDevices}
+          recentEdsFiles={recentEdsFiles}
+        />
+      )}
 
-      <div className="ml-64 min-h-screen">
-        <div className="p-8">
+      <div className={activeView === 'documentation' ? 'min-h-screen' : 'ml-64 min-h-screen'}>
+        <div className={activeView === 'documentation' ? '' : 'p-8'}>
           <AnimatePresence mode="wait">
             {activeView === 'overview' && (
               <motion.div
@@ -5626,7 +5719,7 @@ const IODDManager = () => {
                 transition={{ duration: 0.2 }}
                 className="fixed inset-0 z-50"
               >
-                <DocsViewer />
+                <DocsViewer onClose={() => setActiveView('overview')} />
               </motion.div>
             )}
           </AnimatePresence>

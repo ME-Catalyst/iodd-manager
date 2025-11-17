@@ -29,7 +29,7 @@ class IODDManagerLauncher:
     
     def __init__(self):
         self.processes = []
-        self.project_root = Path(__file__).parent
+        self.project_root = Path(__file__).parent.parent
         self.frontend_dir = self.project_root / 'frontend'
         self.api_port = config.API_PORT
         self.frontend_port = config.FRONTEND_PORT
@@ -71,7 +71,7 @@ class IODDManagerLauncher:
         logger.info(f"Starting API server on port {self.api_port}...")
 
         api_process = subprocess.Popen(
-            [sys.executable, 'api.py'],
+            [sys.executable, '-m', 'src.api'],
             cwd=self.project_root
         )
 

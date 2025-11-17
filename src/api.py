@@ -1798,7 +1798,7 @@ async def general_exception_handler(request, exc):
 def main():
     """Run the API server"""
     uvicorn.run(
-        "api:app",
+        "src.api:app",
         host=config.API_HOST,
         port=config.API_PORT,
         reload=config.API_RELOAD and config.ENVIRONMENT == 'development',

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Rocket, Server, Lock, FileCheck, AlertCircle } from 'lucide-react';
+import { Rocket, Server, Lock, FileCheck, AlertCircle, Shield } from 'lucide-react';
 import DocsPage from '../../../components/docs/DocsPage';
 import DocsHero from '../../../components/docs/DocsHero';
 import DocsSection from '../../../components/docs/DocsSection';

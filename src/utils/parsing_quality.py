@@ -6,8 +6,7 @@ Comprehensive diagnostics and quality scoring for EDS and IODD files
 import json
 import logging
 import sqlite3
-from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

@@ -316,7 +316,7 @@ export function createCustomTheme(basePresetId, customColors = {}) {
     colors: {
       ...baseTheme.colors,
       ...customColors,
-      // Always enforce brand color
+      // Always enforce immutable brand color
       brand: BRAND_GREEN
     }
   };
@@ -333,9 +333,6 @@ export function createCustomTheme(basePresetId, customColors = {}) {
 // CSS VARIABLE GENERATION
 // ===========================
 
-/**
- * Convert hex color to RGB values for CSS variables
- */
 function hexToRgb(hex) {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
@@ -343,57 +340,45 @@ function hexToRgb(hex) {
     : '0 0 0';
 }
 
-/**
- * Generate CSS variables from a theme
- */
 export function generateCSSVariables(theme) {
   const colors = theme.colors;
 
   return {
-    // Brand color (immutable)
     '--brand-green': colors.brand,
     '--brand-green-rgb': hexToRgb(colors.brand),
 
-    // Primary colors
     '--primary': colors.primary,
     '--primary-hover': colors.primaryHover,
     '--primary-active': colors.primaryActive,
 
-    // Secondary colors
     '--secondary': colors.secondary,
     '--secondary-hover': colors.secondaryHover,
     '--secondary-active': colors.secondaryActive,
 
-    // Accent colors
     '--accent': colors.accent,
     '--accent-hover': colors.accentHover,
     '--accent-active': colors.accentActive,
 
-    // State colors
     '--success': colors.success,
     '--warning': colors.warning,
     '--error': colors.error,
     '--info': colors.info,
 
-    // Surface colors
     '--background': colors.background,
     '--background-secondary': colors.backgroundSecondary,
     '--surface': colors.surface,
     '--surface-hover': colors.surfaceHover,
     '--surface-active': colors.surfaceActive,
 
-    // Border colors
     '--border': colors.border,
     '--border-subtle': colors.borderSubtle,
     '--border-strong': colors.borderStrong,
 
-    // Text colors
     '--foreground': colors.foreground,
     '--foreground-secondary': colors.foregroundSecondary,
     '--foreground-muted': colors.foregroundMuted,
     '--foreground-inverse': colors.foregroundInverse,
 
-    // Overlay
     '--overlay': colors.overlay,
     '--overlay-light': colors.overlayLight,
   };
@@ -406,31 +391,17 @@ export function applyTheme(theme) {
   const root = document.documentElement;
   const variables = generateCSSVariables(theme);
 
-  console.log('[applyTheme] Applying theme:', {
-    name: theme.name,
-    mode: theme.mode,
-    id: theme.id
-  });
-
-  // Apply CSS variables to root element
   Object.entries(variables).forEach(([key, value]) => {
     root.style.setProperty(key, value);
   });
 
-  // Apply Tailwind dark mode class
-  // Tailwind's dark mode uses the 'dark' class on the root element
   if (theme.mode === 'light') {
-    console.log('[applyTheme] Setting LIGHT mode - adding "light" class, removing "dark" class');
     root.classList.add('light');
     root.classList.remove('dark');
   } else {
-    console.log('[applyTheme] Setting DARK mode - adding "dark" class, removing "light" class');
     root.classList.add('dark');
     root.classList.remove('light');
   }
-
-  console.log('[applyTheme] Final HTML classes:', root.className);
-
 }
 
 export default {

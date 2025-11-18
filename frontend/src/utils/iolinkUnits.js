@@ -237,29 +237,3 @@ export function formatValueWithUnit(value, unitCode, decimals = 2) {
  * @param {string} category - Category name
  * @returns {array} Array of unit objects in that category
  */
-export function getUnitsByCategory(category) {
-  return Object.entries(IOLINK_UNIT_CODES)
-    .filter(([_, unit]) => unit.category === category)
-    .map(([code, unit]) => ({ code: parseInt(code), ...unit }));
-}
-
-/**
- * Get all unique categories
- * @returns {array} Array of category names
- */
-export function getAllCategories() {
-  const categories = new Set();
-  Object.values(IOLINK_UNIT_CODES).forEach(unit => categories.add(unit.category));
-  return Array.from(categories).sort();
-}
-
-export default {
-  IOLINK_UNIT_CODES,
-  getUnitSymbol,
-  getUnitName,
-  getUnitCategory,
-  getUnitInfo,
-  formatValueWithUnit,
-  getUnitsByCategory,
-  getAllCategories
-};

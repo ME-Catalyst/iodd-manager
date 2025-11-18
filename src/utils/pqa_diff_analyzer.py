@@ -6,8 +6,6 @@ Provides detailed diff reports with severity categorization.
 """
 
 import logging
-import hashlib
-import sqlite3
 from typing import Dict, List, Optional, Tuple
 from xml.etree import ElementTree as ET
 from dataclasses import dataclass

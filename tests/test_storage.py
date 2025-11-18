@@ -6,7 +6,6 @@ for storing and retrieving IODD device information.
 """
 
 import pytest
-from pathlib import Path
 import sqlite3
 
 from src.greenstack import StorageManager

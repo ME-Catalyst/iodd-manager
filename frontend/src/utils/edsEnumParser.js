@@ -244,7 +244,6 @@ export function parseRangeConstraints(param) {
     ? parseFloat(String(param.default_value).replace(/[^\d.-]/g, ''))
     : null;
 
-  // Validate that default is within range
   let isDefaultValid = true;
   if (defaultVal !== null && !isNaN(defaultVal)) {
     if (min !== null && !isNaN(min) && defaultVal < min) {
@@ -273,10 +272,8 @@ export function parseRangeConstraints(param) {
 export function extractUnits(param) {
   if (!param) return null;
 
-  // Check description field first
   if (param.description && param.description.trim()) {
     const desc = param.description.trim();
-    // Common unit patterns
     const commonUnits = [
       'Microsecond', 'Millisecond', 'Second', 'Minute', 'Hour',
       'Byte', 'Kilobyte', 'Megabyte',
@@ -294,13 +291,11 @@ export function extractUnits(param) {
       }
     }
 
-    // If description is short and looks like a unit, return it
     if (desc.length < 20 && !/[.!?]/.test(desc)) {
       return desc;
     }
   }
 
-  // Check help_string_1 (often contains units)
   if (param.help_string_1 && param.help_string_1.trim()) {
     const help1 = param.help_string_1.trim();
     if (help1.length < 20 && !/[.!?]/.test(help1)) {
@@ -308,7 +303,6 @@ export function extractUnits(param) {
     }
   }
 
-  // Look for units in parentheses in param name
   const nameMatch = param.param_name?.match(/\(([^)]+)\)/);
   if (nameMatch && nameMatch[1].length < 15) {
     return nameMatch[1];
@@ -318,9 +312,7 @@ export function extractUnits(param) {
 }
 
 /**
- * Get full parameter description from all help string fields
- * @param {Object} param - Parameter object
- * @returns {string} Combined description or empty string
+ * Get full parameter description from help string fields
  */
 export function getParameterDescription(param) {
   if (!param) return '';
@@ -331,7 +323,6 @@ export function getParameterDescription(param) {
     param.help_string_1
   ].filter(Boolean).map(s => s.trim()).filter(s => s.length > 0);
 
-  // Remove duplicates
   const unique = [...new Set(parts)];
 
   return unique.join(' ');

@@ -3,7 +3,6 @@ Admin Console API Routes
 Provides system administration, monitoring, and management endpoints
 """
 
-import json
 import logging
 import os
 import shutil
@@ -15,7 +14,7 @@ from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 
-from src.database import get_connection, get_db_path
+from src.database import get_db_path
 
 # Configure logger
 logger = logging.getLogger(__name__)

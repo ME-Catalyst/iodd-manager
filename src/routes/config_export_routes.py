@@ -8,8 +8,6 @@ import io
 import json
 import sqlite3
 import tempfile
-from pathlib import Path
-from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import FileResponse, StreamingResponse

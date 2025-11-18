@@ -275,49 +275,42 @@ export function getCategoryStatistics(parameters) {
 
 /**
  * Get badge color classes for a category
- * @param {string} colorName - Category color name
- * @returns {string} Tailwind CSS classes for badge
  */
 export function getCategoryBadgeColor(colorName) {
   const colorMap = {
-    'blue': 'bg-info/20 text-info border-info',
-    'green': 'bg-success/20 text-success border-success',
-    'purple': 'bg-secondary/20 text-secondary border-secondary',
-    'orange': 'bg-warning/20 text-warning border-warning',
-    'cyan': 'bg-cyan-900/50 text-cyan-300 border-cyan-700',
-    'yellow': 'bg-warning/20 text-warning border-warning',
-    'red': 'bg-error/20 text-error border-error',
-    'gray': 'bg-muted/20 text-muted-foreground border-border'
+    blue: 'bg-info/20 text-info border-info',
+    green: 'bg-success/20 text-success border-success',
+    purple: 'bg-secondary/20 text-secondary border-secondary',
+    orange: 'bg-warning/20 text-warning border-warning',
+    cyan: 'bg-cyan-900/50 text-cyan-300 border-cyan-700',
+    yellow: 'bg-warning/20 text-warning border-warning',
+    red: 'bg-error/20 text-error border-error',
+    gray: 'bg-muted/20 text-muted-foreground border-border'
   };
 
-  return colorMap[colorName] || colorMap['gray'];
+  return colorMap[colorName] || colorMap.gray;
 }
 
 /**
  * Get icon color classes for a category
- * @param {string} colorName - Category color name
- * @returns {string} Tailwind CSS classes for icon
  */
 export function getCategoryIconColor(colorName) {
   const colorMap = {
-    'blue': 'text-info',
-    'green': 'text-success',
-    'purple': 'text-secondary',
-    'orange': 'text-warning',
-    'cyan': 'text-cyan-400',
-    'yellow': 'text-warning',
-    'red': 'text-error',
-    'gray': 'text-muted-foreground'
+    blue: 'text-info',
+    green: 'text-success',
+    purple: 'text-secondary',
+    orange: 'text-warning',
+    cyan: 'text-cyan-400',
+    yellow: 'text-warning',
+    red: 'text-error',
+    gray: 'text-muted-foreground'
   };
 
-  return colorMap[colorName] || colorMap['gray'];
+  return colorMap[colorName] || colorMap.gray;
 }
 
 /**
  * Filter parameters by multiple criteria
- * @param {Array} parameters - Array of parameter objects
- * @param {Object} filters - Filter criteria
- * @returns {Array} Filtered parameters
  */
 export function filterParameters(parameters, filters = {}) {
   if (!parameters || !Array.isArray(parameters)) {
@@ -326,7 +319,6 @@ export function filterParameters(parameters, filters = {}) {
 
   let filtered = [...parameters];
 
-  // Search term filter
   if (filters.searchTerm) {
     const term = filters.searchTerm.toLowerCase();
     filtered = filtered.filter(param =>
@@ -336,7 +328,6 @@ export function filterParameters(parameters, filters = {}) {
     );
   }
 
-  // Category filter
   if (filters.categories && filters.categories.length > 0) {
     const grouped = groupParametersByCategory(filtered);
     filtered = [];
@@ -347,19 +338,10 @@ export function filterParameters(parameters, filters = {}) {
     });
   }
 
-  // Data type filter
   if (filters.dataTypes && filters.dataTypes.length > 0) {
-    filtered = filtered.filter(param =>
-      filters.dataTypes.includes(param.data_type)
-    );
+    filtered = filtered.filter(param => filters.dataTypes.includes(param.data_type));
   }
 
-  // Used in connections filter
-  if (filters.usedInConnections) {
-    // This would require connection data to be passed in
-    // For now, just return filtered as-is
-    // TODO: Implement connection usage filtering
-  }
-
+  // Placeholder for future filters (connection usage, etc.)
   return filtered;
 }

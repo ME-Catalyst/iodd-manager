@@ -12,15 +12,14 @@ import sqlite3
 import tempfile
 import zipfile
 from datetime import datetime
-from typing import List
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 
-from src.database import get_connection, get_db_path
+from src.database import get_db_path
 from src.parsers.eds_diagnostics import Severity
 from src.parsers.eds_package_parser import EDSPackageParser
-from src.parsers.eds_parser import parse_eds_file, parse_eds_file_legacy
+from src.parsers.eds_parser import parse_eds_file
 
 # Set up logger
 logger = logging.getLogger(__name__)

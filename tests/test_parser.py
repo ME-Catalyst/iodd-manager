@@ -6,7 +6,6 @@ into structured DeviceProfile objects.
 """
 
 import pytest
-from pathlib import Path
 
 from src.greenstack import (
     IODDParser,

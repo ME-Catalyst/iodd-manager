@@ -6,10 +6,7 @@ adapter generation, and system health checks.
 """
 
 import pytest
-from fastapi.testclient import TestClient
-from io import BytesIO
 
-from api import app
 
 
 class TestHealthEndpoints:

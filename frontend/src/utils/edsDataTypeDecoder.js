@@ -391,14 +391,3 @@ export function formatValueByType(value, dataTypeInfo, units = '') {
  * @param {Array} parameters - Array of parameter objects
  * @returns {Array} Array of unique category names
  */
-export function getUniqueDataTypeCategories(parameters) {
-  if (!parameters || !Array.isArray(parameters)) return [];
-
-  const categories = new Set();
-  parameters.forEach(param => {
-    const typeInfo = getDataTypeInfo(param.data_type);
-    categories.add(typeInfo.category);
-  });
-
-  return Array.from(categories).sort();
-}

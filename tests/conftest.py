@@ -5,7 +5,6 @@ This module provides common test fixtures and setup/teardown logic
 that can be used across all test modules.
 """
 
-import os
 import tempfile
 from pathlib import Path
 from typing import Generator

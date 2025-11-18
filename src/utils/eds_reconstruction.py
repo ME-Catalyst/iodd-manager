@@ -7,8 +7,7 @@ EDS files use INI-style format for EtherNet/IP devices per ODVA specifications.
 
 import logging
 import sqlite3
-from typing import Dict, List, Optional, Tuple
-from datetime import datetime
+from typing import List, Optional
 
 logger = logging.getLogger(__name__)
 

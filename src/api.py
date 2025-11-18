@@ -26,8 +26,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 from src import config
-from src.greenstack import AccessRights, DeviceProfile, IODDDataType, IODDManager, Parameter
-from src.parsers.eds_parser import parse_eds_file
+from src.greenstack import DeviceProfile, IODDManager
 
 # ============================================================================
 # API Models

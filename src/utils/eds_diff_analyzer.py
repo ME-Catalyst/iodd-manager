@@ -7,7 +7,6 @@ Handles INI-format specific comparison logic.
 
 import logging
 import configparser
-from io import StringIO
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum

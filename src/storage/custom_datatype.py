@@ -57,7 +57,7 @@ class CustomDatatypeSaver(BaseSaver):
         )
 
         self._execute(query, params)
-        return self._fetch_one()[0]
+        return self._get_lastrowid()
 
     def _save_single_values(self, datatype_db_id: int, datatype):
         """Save single values for a custom datatype"""

@@ -54,7 +54,7 @@ class MenuSaver(BaseSaver):
             getattr(menu, 'name', None),
         )
         self._execute(query, params)
-        return self._fetch_one()[0]
+        return self._get_lastrowid()
 
     def _save_menu_items(self, menu_db_id: int, items: list):
         """Save menu items for a menu"""
@@ -85,7 +85,7 @@ class MenuSaver(BaseSaver):
                 getattr(item, 'offset', None),
             )
             self._execute(query, params)
-            menu_item_db_id = self._fetch_one()[0]
+            menu_item_db_id = self._get_lastrowid()
 
             # Save buttons for this menu item
             if hasattr(item, 'buttons') and item.buttons:

@@ -53,7 +53,7 @@ class TestConfigSaver(BaseSaver):
         )
 
         self._execute(query, params)
-        return self._fetch_one()[0]
+        return self._get_lastrowid()
 
     def _save_event_triggers(self, test_config_db_id: int, test_config):
         """Save event triggers for a test configuration"""

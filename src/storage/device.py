@@ -63,7 +63,7 @@ class DeviceSaver(BaseSaver):
         )
 
         self._execute(query, params)
-        db_device_id = self._fetch_one()[0]
+        db_device_id = self._get_lastrowid()
 
         logger.info(f"Saved device: {getattr(profile.device_info, 'product_name', 'Unknown')} (ID: {db_device_id})")
         return db_device_id

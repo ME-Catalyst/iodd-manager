@@ -91,6 +91,10 @@ class BaseSaver(ABC):
         """Fetch all results from cursor"""
         return self.cursor.fetchall()
 
+    def _get_lastrowid(self):
+        """Get the last inserted row ID"""
+        return self.cursor.lastrowid
+
     def _delete_existing(self, table: str, device_id: int):
         """
         Delete existing records for a device

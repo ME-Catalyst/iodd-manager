@@ -91,7 +91,7 @@ class ProcessDataSaver(BaseSaver):
         )
 
         self._execute(query, params)
-        return self._fetch_one()[0]
+        return self._get_lastrowid()
 
     def _save_record_items(self, pd_db_id: int, pd):
         """Save process data record items and their single values"""
@@ -118,7 +118,7 @@ class ProcessDataSaver(BaseSaver):
             )
 
             self._execute(query, params)
-            item_db_id = self._fetch_one()[0]
+            item_db_id = self._get_lastrowid()
 
             # Save single values for this record item
             if hasattr(item, 'single_values') and item.single_values:

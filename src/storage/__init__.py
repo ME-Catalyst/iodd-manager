@@ -9,6 +9,7 @@ a clean orchestrator pattern using single-responsibility saver classes.
 
 import logging
 import sqlite3
+import hashlib
 from typing import Optional
 
 from .device import DeviceSaver
@@ -79,20 +80,24 @@ class StorageManager:
             test_config_saver = TestConfigSaver(cursor)
 
             # Save core device info (may return existing device ID)
+            # The save method returns existing ID if device already exists
             device_id = device_saver.save(None, profile)
 
-            # If device already existed, skip saving everything else
-            if device_id:
-                cursor.execute(
-                    "SELECT checksum FROM devices WHERE id = ?",
-                    (device_id,)
-                )
-                existing_checksum = cursor.fetchone()
-                if existing_checksum and existing_checksum[0]:
-                    # Device already exists - just return ID
-                    logger.info(f"Device {device_id} already exists, skipping data save")
-                    conn.close()
-                    return device_id
+            # Check if this was an existing device (by checking if it returned early)
+            # If device already existed, DeviceSaver.save() would have returned early
+            # We can detect this by checking if the device was just created
+            cursor.execute(
+                "SELECT id FROM devices WHERE vendor_id = ? AND device_id = ? AND checksum = ?",
+                (profile.device_info.vendor_id, profile.device_info.device_id,
+                 hashlib.sha256(profile.raw_xml.encode()).hexdigest())
+            )
+            device_just_created = cursor.fetchone()
+
+            if not device_just_created:
+                # Device already existed, skip saving data
+                logger.info(f"Device {device_id} already exists, skipping data save")
+                conn.close()
+                return device_id
 
             # Save all related data in logical order
             iodd_file_saver.save(device_id, profile)

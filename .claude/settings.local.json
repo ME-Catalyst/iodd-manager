@@ -74,7 +74,9 @@
       "Bash(chmod:*)",
       "Bash(/tmp/storage_manager_section.py)",
       "Bash(/tmp/ingester_section.py)",
-      "Bash(/tmp/manager_cli_section.py)"
+      "Bash(/tmp/manager_cli_section.py)",
+      "Bash(echo:*)",
+      "Bash(FINAL_EXTRACTION_SUMMARY.md)"
     ],
     "deny": [],
     "ask": []

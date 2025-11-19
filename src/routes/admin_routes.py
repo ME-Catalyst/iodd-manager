@@ -22,6 +22,30 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/admin", tags=["Admin Console"])
 
 
+def _get_existing_tables(cursor) -> set:
+    """Return set of existing tables for defensive operations."""
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+    return {row[0] for row in cursor.fetchall()}
+
+
+def _count_rows(cursor, tables: set, table_name: str) -> int:
+    """Return count(*) for table if it exists, otherwise zero."""
+    if table_name in tables:
+        cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+        value = cursor.fetchone()
+        return value[0] if value else 0
+    logger.debug("Skipping row count for missing table '%s'", table_name)
+    return 0
+
+
+def _delete_all_rows(cursor, tables: set, table_name: str):
+    """Delete all rows from table if it exists."""
+    if table_name in tables:
+        cursor.execute(f"DELETE FROM {table_name}")
+    else:
+        logger.debug("Skipping delete for missing table '%s'", table_name)
+
+
 @router.get("/stats/overview")
 async def get_system_overview():
     """
@@ -744,35 +768,34 @@ async def delete_all_iodd_devices():
     cursor = conn.cursor()
 
     try:
+        tables = _get_existing_tables(cursor)
         # Get counts before deletion
-        cursor.execute("SELECT COUNT(*) FROM iodd_files")
-        iodd_file_count = cursor.fetchone()[0]
-
-        cursor.execute("SELECT COUNT(*) FROM parameters")
-        param_count = cursor.fetchone()[0]
-
-        cursor.execute("SELECT COUNT(*) FROM iodd_assets")
-        asset_count = cursor.fetchone()[0]
+        iodd_file_count = _count_rows(cursor, tables, "iodd_files")
+        param_count = _count_rows(cursor, tables, "parameters")
+        asset_count = _count_rows(cursor, tables, "iodd_assets")
 
         # Delete ALL IODD-related data in correct order (respecting foreign keys)
         # Child tables first, parent tables last
-        cursor.execute("DELETE FROM parameter_single_values")
-        cursor.execute("DELETE FROM parameters")
-        cursor.execute("DELETE FROM process_data_record_items")
-        cursor.execute("DELETE FROM process_data_single_values")
-        cursor.execute("DELETE FROM process_data")
-        cursor.execute("DELETE FROM error_types")
-        cursor.execute("DELETE FROM events")
-        cursor.execute("DELETE FROM communication_profile")
-        cursor.execute("DELETE FROM device_features")
-        cursor.execute("DELETE FROM document_info")
-        cursor.execute("DELETE FROM ui_menu_items")
-        cursor.execute("DELETE FROM ui_menu_roles")
-        cursor.execute("DELETE FROM ui_menus")
-        cursor.execute("DELETE FROM generated_adapters")
-        cursor.execute("DELETE FROM iodd_assets")
-        cursor.execute("DELETE FROM devices")  # Legacy table
-        cursor.execute("DELETE FROM iodd_files")  # Main IODD files table
+        for table in [
+            "parameter_single_values",
+            "parameters",
+            "process_data_record_items",
+            "process_data_single_values",
+            "process_data",
+            "error_types",
+            "events",
+            "communication_profile",
+            "device_features",
+            "document_info",
+            "ui_menu_items",
+            "ui_menu_roles",
+            "ui_menus",
+            "generated_adapters",
+            "iodd_assets",
+            "devices",
+            "iodd_files",
+        ]:
+            _delete_all_rows(cursor, tables, table)
 
         conn.commit()
 
@@ -800,30 +823,29 @@ async def delete_all_eds_files():
     cursor = conn.cursor()
 
     try:
+        tables = _get_existing_tables(cursor)
         # Get count before deletion
-        cursor.execute("SELECT COUNT(*) FROM eds_files")
-        file_count = cursor.fetchone()[0]
-
-        cursor.execute("SELECT COUNT(*) FROM eds_parameters")
-        param_count = cursor.fetchone()[0]
-
-        cursor.execute("SELECT COUNT(*) FROM eds_packages")
-        package_count = cursor.fetchone()[0]
+        file_count = _count_rows(cursor, tables, "eds_files")
+        param_count = _count_rows(cursor, tables, "eds_parameters")
+        package_count = _count_rows(cursor, tables, "eds_packages")
 
         # Delete related data first (cascading) - child to parent
-        cursor.execute("DELETE FROM eds_connections")
-        cursor.execute("DELETE FROM eds_ports")
-        cursor.execute("DELETE FROM eds_variable_assemblies")
-        cursor.execute("DELETE FROM eds_modules")
-        cursor.execute("DELETE FROM eds_assemblies")
-        cursor.execute("DELETE FROM eds_parameters")
-        cursor.execute("DELETE FROM eds_diagnostics")
-        cursor.execute("DELETE FROM eds_groups")
-        cursor.execute("DELETE FROM eds_tspecs")
-        cursor.execute("DELETE FROM eds_capacity")
-        cursor.execute("DELETE FROM eds_package_metadata")
-        cursor.execute("DELETE FROM eds_files")
-        cursor.execute("DELETE FROM eds_packages")
+        for table in [
+            "eds_connections",
+            "eds_ports",
+            "eds_variable_assemblies",
+            "eds_modules",
+            "eds_assemblies",
+            "eds_parameters",
+            "eds_diagnostics",
+            "eds_groups",
+            "eds_tspecs",
+            "eds_capacity",
+            "eds_package_metadata",
+            "eds_files",
+            "eds_packages",
+        ]:
+            _delete_all_rows(cursor, tables, table)
 
         conn.commit()
 
@@ -851,20 +873,15 @@ async def delete_all_tickets():
     cursor = conn.cursor()
 
     try:
+        tables = _get_existing_tables(cursor)
         # Get count before deletion
-        cursor.execute("SELECT COUNT(*) FROM tickets")
-        ticket_count = cursor.fetchone()[0]
-
-        cursor.execute("SELECT COUNT(*) FROM ticket_attachments")
-        attachment_count = cursor.fetchone()[0]
-
-        cursor.execute("SELECT COUNT(*) FROM ticket_comments")
-        comment_count = cursor.fetchone()[0]
+        ticket_count = _count_rows(cursor, tables, "tickets")
+        attachment_count = _count_rows(cursor, tables, "ticket_attachments")
+        comment_count = _count_rows(cursor, tables, "ticket_comments")
 
         # Delete in correct order (foreign key constraints)
-        cursor.execute("DELETE FROM ticket_attachments")
-        cursor.execute("DELETE FROM ticket_comments")
-        cursor.execute("DELETE FROM tickets")
+        for table in ["ticket_attachments", "ticket_comments", "tickets"]:
+            _delete_all_rows(cursor, tables, table)
 
         conn.commit()
 
@@ -899,55 +916,56 @@ async def delete_all_data():
     cursor = conn.cursor()
 
     try:
+        tables = _get_existing_tables(cursor)
         # Get counts before deletion
-        cursor.execute("SELECT COUNT(*) FROM iodd_files")
-        iodd_count = cursor.fetchone()[0]
-
-        cursor.execute("SELECT COUNT(*) FROM eds_files")
-        eds_count = cursor.fetchone()[0]
-
-        cursor.execute("SELECT COUNT(*) FROM tickets")
-        ticket_count = cursor.fetchone()[0]
+        iodd_count = _count_rows(cursor, tables, "iodd_files")
+        eds_count = _count_rows(cursor, tables, "eds_files")
+        ticket_count = _count_rows(cursor, tables, "tickets")
 
         # Delete all data in correct order to respect foreign keys
         # Tickets and attachments
-        cursor.execute("DELETE FROM ticket_attachments")
-        cursor.execute("DELETE FROM ticket_comments")
-        cursor.execute("DELETE FROM tickets")
+        for table in ["ticket_attachments", "ticket_comments", "tickets"]:
+            _delete_all_rows(cursor, tables, table)
 
         # EDS data (child to parent)
-        cursor.execute("DELETE FROM eds_connections")
-        cursor.execute("DELETE FROM eds_ports")
-        cursor.execute("DELETE FROM eds_variable_assemblies")
-        cursor.execute("DELETE FROM eds_modules")
-        cursor.execute("DELETE FROM eds_assemblies")
-        cursor.execute("DELETE FROM eds_parameters")
-        cursor.execute("DELETE FROM eds_diagnostics")
-        cursor.execute("DELETE FROM eds_groups")
-        cursor.execute("DELETE FROM eds_tspecs")
-        cursor.execute("DELETE FROM eds_capacity")
-        cursor.execute("DELETE FROM eds_package_metadata")
-        cursor.execute("DELETE FROM eds_files")
-        cursor.execute("DELETE FROM eds_packages")
+        for table in [
+            "eds_connections",
+            "eds_ports",
+            "eds_variable_assemblies",
+            "eds_modules",
+            "eds_assemblies",
+            "eds_parameters",
+            "eds_diagnostics",
+            "eds_groups",
+            "eds_tspecs",
+            "eds_capacity",
+            "eds_package_metadata",
+            "eds_files",
+            "eds_packages",
+        ]:
+            _delete_all_rows(cursor, tables, table)
 
         # IODD data (child to parent)
-        cursor.execute("DELETE FROM parameter_single_values")
-        cursor.execute("DELETE FROM parameters")
-        cursor.execute("DELETE FROM process_data_record_items")
-        cursor.execute("DELETE FROM process_data_single_values")
-        cursor.execute("DELETE FROM process_data")
-        cursor.execute("DELETE FROM error_types")
-        cursor.execute("DELETE FROM events")
-        cursor.execute("DELETE FROM communication_profile")
-        cursor.execute("DELETE FROM device_features")
-        cursor.execute("DELETE FROM document_info")
-        cursor.execute("DELETE FROM ui_menu_items")
-        cursor.execute("DELETE FROM ui_menu_roles")
-        cursor.execute("DELETE FROM ui_menus")
-        cursor.execute("DELETE FROM generated_adapters")
-        cursor.execute("DELETE FROM iodd_assets")
-        cursor.execute("DELETE FROM devices")  # Legacy table
-        cursor.execute("DELETE FROM iodd_files")  # Main IODD files table
+        for table in [
+            "parameter_single_values",
+            "parameters",
+            "process_data_record_items",
+            "process_data_single_values",
+            "process_data",
+            "error_types",
+            "events",
+            "communication_profile",
+            "device_features",
+            "document_info",
+            "ui_menu_items",
+            "ui_menu_roles",
+            "ui_menus",
+            "generated_adapters",
+            "iodd_assets",
+            "devices",
+            "iodd_files",
+        ]:
+            _delete_all_rows(cursor, tables, table)
 
         conn.commit()
 

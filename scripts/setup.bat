@@ -43,31 +43,38 @@ echo.
 echo √ Ensuring Redis (localhost:6379) is running...
 set "REDIS_READY=0"
 call :check_redis_ready
-if %errorlevel% equ 0 (
-    echo   Redis already running.
-    set "REDIS_READY=1"
-    goto :after_redis_check
-)
+if %errorlevel% equ 0 goto :redis_already_running
 
 call :ensure_docker_ready
-if %errorlevel% neq 0 (
-    echo   Warning: Docker Desktop is not available. Redis will not be started automatically.
-    goto :after_redis_check
-)
+if %errorlevel% neq 0 goto :redis_unavailable
 
 call :start_redis_with_docker
-if %errorlevel% equ 0 (
-    set "REDIS_READY=1"
-) else (
-    echo   Warning: Unable to launch Redis container (see messages above).
-)
+if %errorlevel% equ 0 goto :redis_started
+echo   Warning: Unable to launch Redis container (see messages above).
+goto :after_redis_check
+
+:redis_already_running
+echo   Redis already running.
+set "REDIS_READY=1"
+goto :after_redis_check
+
+:redis_started
+set "REDIS_READY=1"
+goto :after_redis_check
+
+:redis_unavailable
+echo   Warning: Docker Desktop is not available. Redis will not be started automatically.
+goto :after_redis_check
 
 :after_redis_check
-if "%REDIS_READY%"=="1" (
-    echo   Redis is ready.
-) else (
-    echo   Continuing without Redis (caching/rate-limits will use in-memory mode).
-)
+if "%REDIS_READY%"=="1" goto :redis_ready_message
+echo   Continuing without Redis (caching/rate-limits will use in-memory mode).
+goto :redis_message_end
+
+:redis_ready_message
+echo   Redis is ready.
+
+:redis_message_end
 echo.
 
 :: Launch the application

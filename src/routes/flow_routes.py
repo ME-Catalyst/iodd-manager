@@ -15,7 +15,7 @@ import json
 import logging
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, HTTPException, Response, Query, Path
+from fastapi import APIRouter, Depends, HTTPException, Response, Query, Path
 from pydantic import BaseModel, Field
 
 from src.generation import generate_monitoring_flow, generate_control_flow, NodeREDFlowGenerator
@@ -24,6 +24,11 @@ from src.storage import StorageManager
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/flows", tags=["Node-RED Flows"])
+
+
+def get_storage_manager() -> StorageManager:
+    """Factory dependency for StorageManager instances."""
+    return StorageManager()
 
 
 # ============================================================================
@@ -211,7 +216,7 @@ async def generate_flow(
         pattern="^(monitoring|control|custom)$",
         example="monitoring"
     ),
-    storage: StorageManager = None
+    storage: StorageManager = Depends(get_storage_manager)
 ):
     """
     Generate a Node-RED flow for a specific device
@@ -231,10 +236,6 @@ async def generate_flow(
         HTTPException: 404 if device not found, 400 if profile unavailable, 500 on error
     """
     try:
-        # Initialize storage if not provided (dependency injection in production)
-        if storage is None:
-            storage = StorageManager()
-
         # Get device profile from database
         device = storage.get_device(device_id)
         if not device:
@@ -314,7 +315,7 @@ async def export_flow(
         pattern="^(monitoring|control|custom)$",
         example="monitoring"
     ),
-    storage: StorageManager = None
+    storage: StorageManager = Depends(get_storage_manager)
 ):
     """
     Export a Node-RED flow as a downloadable JSON file
@@ -334,10 +335,6 @@ async def export_flow(
         HTTPException: 404 if device not found, 400 if profile unavailable, 500 on error
     """
     try:
-        # Initialize storage if not provided
-        if storage is None:
-            storage = StorageManager()
-
         # Get device info
         device = storage.get_device(device_id)
         if not device:
@@ -491,7 +488,7 @@ async def list_flow_types():
 )
 async def batch_generate_flows(
     request: BatchFlowRequest,
-    storage: StorageManager = None
+    storage: StorageManager = Depends(get_storage_manager)
 ):
     """
     Generate flows for multiple devices
@@ -512,9 +509,6 @@ async def batch_generate_flows(
     device_ids = request.device_ids
     flow_type = request.flow_type
     try:
-        if storage is None:
-            storage = StorageManager()
-
         all_flows = []
         successful = []
         failed = []

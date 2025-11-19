@@ -1,0 +1,40 @@
+# Prometheus Configuration for GreenStack
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'greenstack'
+    environment: 'production'
+
+# Scrape configurations
+scrape_configs:
+  # GreenStack API metrics
+  - job_name: 'greenstack-api'
+    static_configs:
+      - targets: ['host.docker.internal:8000']
+        labels:
+          service: 'api'
+
+  # MQTT Bridge service metrics (if exposed)
+  - job_name: 'mqtt-bridge'
+    static_configs:
+      - targets: ['mqtt-bridge:8080']
+        labels:
+          service: 'mqtt-bridge'
+
+  # InfluxDB Ingestion service metrics (if exposed)
+  - job_name: 'influx-ingestion'
+    static_configs:
+      - targets: ['influx-ingestion:8080']
+        labels:
+          service: 'influx-ingestion'
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Node exporter (system metrics) - optional
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']

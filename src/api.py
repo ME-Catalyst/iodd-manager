@@ -5,6 +5,7 @@ FastAPI-based REST API for intelligent device management
 Currently supports IO-Link (IODD) and EtherNet/IP (EDS) device configurations
 """
 
+import asyncio
 import json
 import logging
 import os
@@ -484,6 +485,41 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["content-disposition", "X-Request-ID"],  # Allow frontend to read headers
 )
+
+# ============================================================================
+# Request Timeout Middleware
+# ============================================================================
+
+# Configurable timeout (default: 30 seconds)
+REQUEST_TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "30"))
+
+@app.middleware("http")
+async def timeout_middleware(request: Request, call_next):
+    """
+    Automatically timeout requests that exceed the configured duration.
+    Prevents long-running requests from tying up workers and resources.
+    """
+    try:
+        # Create a timeout task
+        return await asyncio.wait_for(
+            call_next(request),
+            timeout=REQUEST_TIMEOUT
+        )
+    except asyncio.TimeoutError:
+        logger.warning(
+            f"Request timeout after {REQUEST_TIMEOUT}s: {request.method} {request.url.path}"
+        )
+        return JSONResponse(
+            status_code=504,
+            content={
+                "detail": f"Request timeout after {REQUEST_TIMEOUT} seconds",
+                "error": "Gateway Timeout",
+                "path": str(request.url.path),
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error in timeout middleware: {e}")
+        raise
 
 # Initialize Greenstack
 manager = IODDManager()

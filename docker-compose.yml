@@ -31,6 +31,14 @@ services:
       - LOG_LEVEL=INFO
       - ENABLE_DOCS=true
       - AUTO_MIGRATE=true
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
     healthcheck:
       test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/api/health')"]
       interval: 30s
@@ -55,6 +63,14 @@ services:
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
     volumes:
       - redis-data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
     networks:
       - iodd-network
     healthcheck:
@@ -83,6 +99,14 @@ services:
       - IODD_STORAGE_DIR=/data/storage
       - GENERATED_OUTPUT_DIR=/data/generated
       - LOG_LEVEL=INFO
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 256M
     depends_on:
       redis:
         condition: service_healthy
@@ -107,6 +131,14 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - FLOWER_USER=admin
       - FLOWER_PASSWORD=admin
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
     depends_on:
       redis:
         condition: service_healthy

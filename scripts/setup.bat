@@ -165,6 +165,5 @@ set "POWERSHELL_EXE=%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe"
 if not exist "%POWERSHELL_EXE%" (
     set "POWERSHELL_EXE=powershell"
 )
-"%POWERSHELL_EXE%" -NoLogo -NoProfile -Command ^
-  "try { $client = New-Object Net.Sockets.TcpClient('localhost',6379); $client.Close(); exit 0 } catch { exit 1 }" >nul 2>&1
+"%POWERSHELL_EXE%" -NoLogo -NoProfile -Command "try { $client = New-Object Net.Sockets.TcpClient('localhost',6379); $client.Close(); exit 0 } catch { exit 1 }" >nul 2>&1
 exit /b %errorlevel%

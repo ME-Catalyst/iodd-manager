@@ -3,6 +3,7 @@ InfluxDB Ingestion Service
 Subscribes to MQTT telemetry topics and writes to InfluxDB
 """
 import os
+import sys
 import json
 import logging
 import time
@@ -11,6 +12,11 @@ from typing import Dict, Any
 import paho.mqtt.client as mqtt
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
+from influxdb_client.rest import ApiException
+
+# Add common module to path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from common.circuit_breaker import get_circuit_breaker, CircuitBreakerOpenException
 
 # Configuration
 MQTT_BROKER = os.getenv('MQTT_BROKER', 'localhost:1883')
@@ -32,6 +38,14 @@ logger = logging.getLogger(__name__)
 # InfluxDB client
 influx_client = None
 write_api = None
+
+# Initialize circuit breaker for InfluxDB writes
+influxdb_breaker = get_circuit_breaker(
+    name="influxdb",
+    failure_threshold=3,
+    timeout=30.0,
+    expected_exception=ApiException
+)
 
 def init_influxdb():
     """Initialize InfluxDB client"""
@@ -172,10 +186,18 @@ def write_to_influxdb(device_id: str, data: Dict[str, Any]):
 
                     points.append(point)
 
-        # Write points to InfluxDB
+        # Write points to InfluxDB with circuit breaker protection
         if points:
-            write_api.write(bucket=INFLUXDB_BUCKET, org=INFLUXDB_ORG, record=points)
-            logger.info(f"Wrote {len(points)} points to InfluxDB for device {device_id}")
+            try:
+                influxdb_breaker.call(
+                    lambda: write_api.write(bucket=INFLUXDB_BUCKET, org=INFLUXDB_ORG, record=points)
+                )
+                logger.info(f"Wrote {len(points)} points to InfluxDB for device {device_id}")
+
+            except CircuitBreakerOpenException as e:
+                logger.warning(f"InfluxDB circuit breaker open, skipping write for {device_id}: {e}")
+            except ApiException as e:
+                logger.error(f"InfluxDB API error for device {device_id}: {e}")
 
     except Exception as e:
         logger.error(f"Error writing to InfluxDB for device {device_id}: {e}", exc_info=True)

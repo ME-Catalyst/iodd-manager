@@ -1,0 +1,2 @@
+# Common dependencies for IoT services
+# No external dependencies - uses only Python stdlib

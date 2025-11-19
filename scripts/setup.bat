@@ -39,6 +39,30 @@ if %errorlevel% equ 0 (
 )
 echo.
 
+:: Ensure Redis is running (for rate limiting + caching)
+echo √ Ensuring Redis (localhost:6379) is running...
+set "REDIS_READY=0"
+call :check_redis_ready
+if %errorlevel% equ 0 (
+    echo   Redis already running.
+    set "REDIS_READY=1"
+) else (
+    call :ensure_docker_ready
+    if %errorlevel% equ 0 (
+        call :start_redis_with_docker
+        if %errorlevel% equ 0 (
+            set "REDIS_READY=1"
+        ) else (
+            echo   Warning: Unable to launch Redis container (see messages above).
+        )
+    ) else (
+        echo   Warning: Docker Desktop is not available. Redis will not be started automatically.
+    )
+)
+if "%REDIS_READY%"=="0" (
+    echo   Continuing without Redis (caching/rate-limits will use in-memory mode).
+)
+echo.
 
 :: Launch the application
 echo √ Launching GreenStack...
@@ -62,3 +86,77 @@ if %errorlevel% neq 0 (
     pause
     exit /b 1
 )
+
+goto :eof
+
+:ensure_docker_ready
+where docker >nul 2>&1
+if %errorlevel% neq 0 (
+    echo   Docker CLI not found on PATH.
+    exit /b 1
+)
+docker info >nul 2>&1
+if %errorlevel% equ 0 (
+    exit /b 0
+)
+echo   Docker Desktop is not running. Attempting to start it...
+set "DOCKER_APP=%ProgramFiles%\Docker\Docker\Docker Desktop.exe"
+if not exist "%DOCKER_APP%" (
+    set "DOCKER_APP=%ProgramFiles% (x86)%\Docker\Docker\Docker Desktop.exe"
+)
+if exist "%DOCKER_APP%" (
+    start "" "%DOCKER_APP%"
+) else (
+    echo   Unable to locate Docker Desktop executable. Please start Docker manually.
+    exit /b 1
+)
+echo   Waiting for Docker daemon to be ready...
+for /l %%i in (1,1,60) do (
+    timeout /t 2 >nul
+    docker info >nul 2>&1
+    if !errorlevel! equ 0 (
+        echo   Docker is ready.
+        exit /b 0
+    )
+)
+echo   Docker daemon did not become ready in time.
+exit /b 1
+
+:start_redis_with_docker
+set "DOCKER_COMPOSE_CMD=docker compose"
+docker compose version >nul 2>&1
+if ERRORLEVEL 1 (
+    where docker-compose >nul 2>&1
+    if %errorlevel% equ 0 (
+        set "DOCKER_COMPOSE_CMD=docker-compose"
+    ) else (
+        echo   docker compose command not available.
+        exit /b 1
+    )
+)
+echo   Starting Redis container using %DOCKER_COMPOSE_CMD%...
+%DOCKER_COMPOSE_CMD% -f docker-compose.yml up -d redis
+if %errorlevel% neq 0 (
+    echo   Failed to run Redis container.
+    exit /b 1
+)
+echo   Waiting for Redis service to become ready...
+for /l %%i in (1,1,30) do (
+    timeout /t 1 >nul
+    call :check_redis_ready
+    if !errorlevel! equ 0 (
+        echo   Redis container is online!
+        exit /b 0
+    )
+)
+echo   Redis container failed to respond in time.
+exit /b 1
+
+:check_redis_ready
+set "POWERSHELL_EXE=%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe"
+if not exist "%POWERSHELL_EXE%" (
+    set "POWERSHELL_EXE=powershell"
+)
+"%POWERSHELL_EXE%" -NoLogo -NoProfile -Command ^
+  "try { $client = New-Object Net.Sockets.TcpClient('localhost',6379); $client.Close(); exit 0 } catch { exit 1 }" >nul 2>&1
+exit /b %errorlevel%

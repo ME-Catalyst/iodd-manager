@@ -42,6 +42,7 @@ from pydantic import BaseModel, Field
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
+from limits.strategies import STRATEGIES
 
 from src import config
 from src.config import validate_production_security
@@ -120,6 +121,21 @@ class ErrorResponse(BaseModel):
     """Error response model"""
     error: str
     detail: Optional[str] = None
+
+
+def _get_existing_tables(cursor) -> set:
+    """Return set of tables in current SQLite database."""
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+    return {row[0] for row in cursor.fetchall()}
+
+
+def _delete_tables(cursor, tables: set, table_names):
+    """Delete from tables that exist; skip silently otherwise."""
+    for name in table_names:
+        if name in tables:
+            cursor.execute(f"DELETE FROM {name}")
+        else:
+            logger.debug("Skipping delete for missing table '%s'", name)
 
 class AssetInfo(BaseModel):
     """Asset information model"""
@@ -458,18 +474,44 @@ logger.info("Prometheus metrics endpoint enabled at /metrics")
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 DEFAULT_RATE_LIMIT = os.getenv("RATE_LIMIT", "100/minute")
 
+# Determine limiter strategy with compatibility fallback
+configured_strategy = os.getenv("RATE_LIMIT_STRATEGY", "fixed-window-elastic-expiry")
+if configured_strategy not in STRATEGIES:
+    logger.warning(
+        "Rate limiting strategy '%s' not supported by limits %s – falling back to 'fixed-window'",
+        configured_strategy,
+        sorted(STRATEGIES.keys()),
+    )
+    configured_strategy = "fixed-window"
+
+# Pick storage backend, falling back to in-memory limiter if Redis unavailable
+limiter_storage_uri = "memory://"
+if REDIS_URL:
+    try:
+        import redis  # Optional dependency
+
+        redis.from_url(REDIS_URL).ping()
+        limiter_storage_uri = REDIS_URL
+        logger.info("Using Redis for rate-limiter storage at %s", REDIS_URL)
+    except Exception as redis_error:
+        logger.warning(
+            "Redis unavailable for rate limiting (%s); using in-memory limits instead",
+            redis_error,
+        )
+
 # Create limiter with Redis storage backend
 limiter = Limiter(
     key_func=get_remote_address,
     default_limits=[DEFAULT_RATE_LIMIT],
-    storage_uri=REDIS_URL,
-    strategy="fixed-window-elastic-expiry",
+    storage_uri=limiter_storage_uri,
+    strategy=configured_strategy,
     headers_enabled=True  # Include rate limit info in response headers
 )
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-logger.info(f"Rate limiting initialized: {DEFAULT_RATE_LIMIT} with Redis storage")
+backend_label = "Redis" if limiter_storage_uri != "memory://" else "in-memory"
+logger.info("Rate limiting initialized: %s using %s backend", DEFAULT_RATE_LIMIT, backend_label)
 
 # Request ID tracking middleware
 @app.middleware("http")
@@ -486,13 +528,25 @@ async def add_request_id(request, call_next):
 
 
 # Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=config.CORS_ORIGINS,
-    allow_credentials=config.CORS_CREDENTIALS,
-    allow_methods=config.CORS_METHODS,
-    allow_headers=["*"],
-    expose_headers=["content-disposition", "X-Request-ID"],  # Allow frontend to read headers
+cors_options = {
+    "allow_methods": config.CORS_METHODS,
+    "allow_headers": ["*"],
+    "expose_headers": ["content-disposition", "X-Request-ID"],
+}
+
+if getattr(config, "CORS_ALLOW_ALL", False):
+    cors_options["allow_origins"] = ["*"]
+    cors_options["allow_credentials"] = False
+else:
+    cors_options["allow_origins"] = config.CORS_ORIGINS
+    cors_options["allow_credentials"] = config.CORS_CREDENTIALS
+
+app.add_middleware(CORSMiddleware, **cors_options)
+
+logger.info(
+    "CORS configured (allow_all=%s, origins=%s)",
+    getattr(config, "CORS_ALLOW_ALL", False),
+    "*" if getattr(config, "CORS_ALLOW_ALL", False) else config.CORS_ORIGINS,
 )
 
 # ============================================================================
@@ -1406,24 +1460,28 @@ async def reset_database():
     cursor.execute("SELECT COUNT(*) FROM devices")
     device_count = cursor.fetchone()[0]
 
+    tables = _get_existing_tables(cursor)
+
     # Delete all data from all tables (in correct order to respect foreign keys)
-    cursor.execute("DELETE FROM ui_menu_roles")
-    cursor.execute("DELETE FROM ui_menu_items")
-    cursor.execute("DELETE FROM ui_menus")
-    cursor.execute("DELETE FROM communication_profile")
-    cursor.execute("DELETE FROM device_features")
-    cursor.execute("DELETE FROM document_info")
-    cursor.execute("DELETE FROM process_data_single_values")
-    cursor.execute("DELETE FROM parameter_single_values")
-    cursor.execute("DELETE FROM process_data_record_items")
-    cursor.execute("DELETE FROM process_data")
-    cursor.execute("DELETE FROM error_types")
-    cursor.execute("DELETE FROM events")
-    cursor.execute("DELETE FROM parameters")
-    cursor.execute("DELETE FROM iodd_files")
-    cursor.execute("DELETE FROM iodd_assets")
-    cursor.execute("DELETE FROM generated_adapters")
-    cursor.execute("DELETE FROM devices")
+    _delete_tables(cursor, tables, [
+        "ui_menu_roles",
+        "ui_menu_items",
+        "ui_menus",
+        "communication_profile",
+        "device_features",
+        "document_info",
+        "process_data_single_values",
+        "parameter_single_values",
+        "process_data_record_items",
+        "process_data",
+        "error_types",
+        "events",
+        "parameters",
+        "iodd_files",
+        "iodd_assets",
+        "generated_adapters",
+        "devices",
+    ])
 
     conn.commit()
     conn.close()
@@ -1447,24 +1505,28 @@ async def reset_iodd_database():
     cursor.execute("SELECT COUNT(*) FROM devices")
     device_count = cursor.fetchone()[0]
 
+    tables = _get_existing_tables(cursor)
+
     # Delete all IODD data from all tables (in correct order to respect foreign keys)
-    cursor.execute("DELETE FROM ui_menu_roles")
-    cursor.execute("DELETE FROM ui_menu_items")
-    cursor.execute("DELETE FROM ui_menus")
-    cursor.execute("DELETE FROM communication_profile")
-    cursor.execute("DELETE FROM device_features")
-    cursor.execute("DELETE FROM document_info")
-    cursor.execute("DELETE FROM process_data_single_values")
-    cursor.execute("DELETE FROM parameter_single_values")
-    cursor.execute("DELETE FROM process_data_record_items")
-    cursor.execute("DELETE FROM process_data")
-    cursor.execute("DELETE FROM error_types")
-    cursor.execute("DELETE FROM events")
-    cursor.execute("DELETE FROM parameters")
-    cursor.execute("DELETE FROM iodd_files")
-    cursor.execute("DELETE FROM iodd_assets")
-    cursor.execute("DELETE FROM generated_adapters")
-    cursor.execute("DELETE FROM devices")
+    _delete_tables(cursor, tables, [
+        "ui_menu_roles",
+        "ui_menu_items",
+        "ui_menus",
+        "communication_profile",
+        "device_features",
+        "document_info",
+        "process_data_single_values",
+        "parameter_single_values",
+        "process_data_record_items",
+        "process_data",
+        "error_types",
+        "events",
+        "parameters",
+        "iodd_files",
+        "iodd_assets",
+        "generated_adapters",
+        "devices",
+    ])
 
     conn.commit()
     conn.close()
@@ -1490,20 +1552,24 @@ async def reset_eds_database():
     cursor.execute("SELECT COUNT(*) FROM eds_packages")
     package_count = cursor.fetchone()[0]
 
+    tables = _get_existing_tables(cursor)
+
     # Delete all EDS data from all tables (in correct order to respect foreign keys)
-    cursor.execute("DELETE FROM eds_diagnostics")
-    cursor.execute("DELETE FROM eds_tspecs")
-    cursor.execute("DELETE FROM eds_capacity")
-    cursor.execute("DELETE FROM eds_groups")
-    cursor.execute("DELETE FROM eds_ports")
-    cursor.execute("DELETE FROM eds_modules")
-    cursor.execute("DELETE FROM eds_variable_assemblies")
-    cursor.execute("DELETE FROM eds_assemblies")
-    cursor.execute("DELETE FROM eds_connections")
-    cursor.execute("DELETE FROM eds_parameters")
-    cursor.execute("DELETE FROM eds_package_metadata")
-    cursor.execute("DELETE FROM eds_files")
-    cursor.execute("DELETE FROM eds_packages")
+    _delete_tables(cursor, tables, [
+        "eds_diagnostics",
+        "eds_tspecs",
+        "eds_capacity",
+        "eds_groups",
+        "eds_ports",
+        "eds_modules",
+        "eds_variable_assemblies",
+        "eds_assemblies",
+        "eds_connections",
+        "eds_parameters",
+        "eds_package_metadata",
+        "eds_files",
+        "eds_packages",
+    ])
 
     conn.commit()
     conn.close()
@@ -1532,39 +1598,45 @@ async def delete_all_data():
     cursor.execute("SELECT COUNT(*) FROM eds_packages")
     package_count = cursor.fetchone()[0]
 
+    tables = _get_existing_tables(cursor)
+
     # Delete all IODD data
-    cursor.execute("DELETE FROM ui_menu_roles")
-    cursor.execute("DELETE FROM ui_menu_items")
-    cursor.execute("DELETE FROM ui_menus")
-    cursor.execute("DELETE FROM communication_profile")
-    cursor.execute("DELETE FROM device_features")
-    cursor.execute("DELETE FROM document_info")
-    cursor.execute("DELETE FROM process_data_single_values")
-    cursor.execute("DELETE FROM parameter_single_values")
-    cursor.execute("DELETE FROM process_data_record_items")
-    cursor.execute("DELETE FROM process_data")
-    cursor.execute("DELETE FROM error_types")
-    cursor.execute("DELETE FROM events")
-    cursor.execute("DELETE FROM parameters")
-    cursor.execute("DELETE FROM iodd_files")
-    cursor.execute("DELETE FROM iodd_assets")
-    cursor.execute("DELETE FROM generated_adapters")
-    cursor.execute("DELETE FROM devices")
+    _delete_tables(cursor, tables, [
+        "ui_menu_roles",
+        "ui_menu_items",
+        "ui_menus",
+        "communication_profile",
+        "device_features",
+        "document_info",
+        "process_data_single_values",
+        "parameter_single_values",
+        "process_data_record_items",
+        "process_data",
+        "error_types",
+        "events",
+        "parameters",
+        "iodd_files",
+        "iodd_assets",
+        "generated_adapters",
+        "devices",
+    ])
 
     # Delete all EDS data
-    cursor.execute("DELETE FROM eds_diagnostics")
-    cursor.execute("DELETE FROM eds_tspecs")
-    cursor.execute("DELETE FROM eds_capacity")
-    cursor.execute("DELETE FROM eds_groups")
-    cursor.execute("DELETE FROM eds_ports")
-    cursor.execute("DELETE FROM eds_modules")
-    cursor.execute("DELETE FROM eds_variable_assemblies")
-    cursor.execute("DELETE FROM eds_assemblies")
-    cursor.execute("DELETE FROM eds_connections")
-    cursor.execute("DELETE FROM eds_parameters")
-    cursor.execute("DELETE FROM eds_package_metadata")
-    cursor.execute("DELETE FROM eds_files")
-    cursor.execute("DELETE FROM eds_packages")
+    _delete_tables(cursor, tables, [
+        "eds_diagnostics",
+        "eds_tspecs",
+        "eds_capacity",
+        "eds_groups",
+        "eds_ports",
+        "eds_modules",
+        "eds_variable_assemblies",
+        "eds_assemblies",
+        "eds_connections",
+        "eds_parameters",
+        "eds_package_metadata",
+        "eds_files",
+        "eds_packages",
+    ])
 
     conn.commit()
     conn.close()

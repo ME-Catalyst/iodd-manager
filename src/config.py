@@ -65,11 +65,25 @@ GENERATED_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 # Security Settings
 # ============================================================================
 
-CORS_ORIGINS_STR = os.getenv(
-    'CORS_ORIGINS',
-    'http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174'
-)
-CORS_ORIGINS: List[str] = [origin.strip() for origin in CORS_ORIGINS_STR.split(',')]
+DEFAULT_CORS_ORIGINS = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:5174',
+    'http://127.0.0.1:5174',
+]
+
+_raw_cors_origins = os.getenv('CORS_ORIGINS', '').strip()
+if not _raw_cors_origins:
+    CORS_ORIGINS: List[str] = DEFAULT_CORS_ORIGINS
+else:
+    CORS_ORIGINS = [origin.strip() for origin in _raw_cors_origins.split(',') if origin.strip()]
+    if not CORS_ORIGINS:
+        CORS_ORIGINS = DEFAULT_CORS_ORIGINS
+
+_cors_allow_all_default = 'false' if ENVIRONMENT.lower() == 'production' else 'true'
+CORS_ALLOW_ALL = os.getenv('CORS_ALLOW_ALL', _cors_allow_all_default).lower() == 'true'
 
 CORS_METHODS_STR = os.getenv('CORS_METHODS', 'GET,POST,PUT,PATCH,DELETE,OPTIONS')
 CORS_METHODS: List[str] = [method.strip() for method in CORS_METHODS_STR.split(',')]

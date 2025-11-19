@@ -2,6 +2,7 @@
 Cached Storage Layer
 Wraps StorageManager with Redis caching for frequently accessed queries
 """
+import inspect
 import logging
 import os
 from typing import Any, Dict, List, Optional
@@ -92,8 +93,13 @@ class CachedStorageManager:
 
     def save_device(self, device_data: Dict[str, Any], device_id: Optional[int] = None) -> int:
         """Save device and invalidate caches"""
-        # Save to database
-        saved_id = self.storage.save_device(device_data, device_id)
+        save_method = getattr(self.storage, "save_device")
+        params = list(inspect.signature(save_method).parameters.values())
+
+        if len(params) == 1:
+            saved_id = save_method(device_data)
+        else:
+            saved_id = save_method(device_data, device_id)
 
         # Invalidate caches
         self.cache.invalidate_by_tag("all_devices")

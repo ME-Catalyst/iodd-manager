@@ -44,6 +44,78 @@ services:
       - "com.iodd-manager.version=2.0.1"
 
   # ============================================================================
+  # Redis - Message Broker and Cache
+  # ============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: greenstack-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks:
+      - iodd-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    labels:
+      - "com.greenstack.description=Redis Message Broker and Cache"
+
+  # ============================================================================
+  # Celery Worker - Background Task Processing
+  # ============================================================================
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: greenstack-celery-worker
+    restart: unless-stopped
+    command: celery -A src.celery_app worker --loglevel=info --concurrency=4 --autoscale=8,2
+    volumes:
+      - iodd-data:/data
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - IODD_DATABASE_URL=sqlite:////data/iodd_manager.db
+      - IODD_STORAGE_DIR=/data/storage
+      - GENERATED_OUTPUT_DIR=/data/generated
+      - LOG_LEVEL=INFO
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - iodd-network
+    labels:
+      - "com.greenstack.description=Celery Background Worker"
+
+  # ============================================================================
+  # Flower - Celery Monitoring Dashboard
+  # ============================================================================
+  flower:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: greenstack-flower
+    restart: unless-stopped
+    command: celery -A src.celery_app flower --port=5555 --basic_auth=admin:admin
+    ports:
+      - "5555:5555"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - FLOWER_USER=admin
+      - FLOWER_PASSWORD=admin
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - iodd-network
+    labels:
+      - "com.greenstack.description=Flower Celery Monitoring"
+
+  # ============================================================================
   # Optional: Nginx Reverse Proxy
   # ============================================================================
   # Uncomment to add nginx reverse proxy for production
@@ -72,6 +144,8 @@ volumes:
       type: none
       o: bind
       device: ./data
+  redis-data:
+    driver: local
 
 # ============================================================================
 # Networks

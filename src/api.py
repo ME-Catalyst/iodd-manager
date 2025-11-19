@@ -444,10 +444,22 @@ except ValueError:
 
 logger.info("Prometheus metrics endpoint enabled at /metrics")
 
-# Initialize rate limiter
-limiter = Limiter(key_func=get_remote_address)
+# Initialize rate limiter with Redis storage for distributed rate limiting
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+DEFAULT_RATE_LIMIT = os.getenv("RATE_LIMIT", "100/minute")
+
+# Create limiter with Redis storage backend
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=[DEFAULT_RATE_LIMIT],
+    storage_uri=REDIS_URL,
+    strategy="fixed-window-elastic-expiry",
+    headers_enabled=True  # Include rate limit info in response headers
+)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+logger.info(f"Rate limiting initialized: {DEFAULT_RATE_LIMIT} with Redis storage")
 
 # Request ID tracking middleware
 @app.middleware("http")

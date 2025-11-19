@@ -366,6 +366,15 @@ via environment variables for production deployments.
 validate_production_security()
 
 # ============================================================================
+# Distributed Tracing (OpenTelemetry)
+# ============================================================================
+
+from src.telemetry import setup_telemetry
+
+# Initialize OpenTelemetry tracing (disabled by default, set OTEL_ENABLED=true to enable)
+setup_telemetry(app=app, service_name="greenstack-api")
+
+# ============================================================================
 # Prometheus Metrics
 # ============================================================================
 

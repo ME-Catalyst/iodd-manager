@@ -1,0 +1,101 @@
+version: '3.8'
+
+# PostgreSQL Primary-Replica Replication Setup
+# This extends docker-compose.yml with PostgreSQL replication
+
+services:
+  # ============================================================================
+  # PostgreSQL Primary Database
+  # ============================================================================
+  postgres-primary:
+    image: postgres:15-alpine
+    container_name: greenstack-postgres-primary
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: greenstack
+      POSTGRES_USER: greenstack
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-greenstack_dev}
+      POSTGRES_REPLICATION_USER: replicator
+      POSTGRES_REPLICATION_PASSWORD: ${REPLICATION_PASSWORD:-replicator_dev}
+    volumes:
+      - postgres-primary-data:/var/lib/postgresql/data
+      - ./config/postgres/primary/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./config/postgres/primary/pg_hba.conf:/etc/postgresql/pg_hba.conf
+      - ./config/postgres/init-primary.sh:/docker-entrypoint-initdb.d/init-primary.sh
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    networks:
+      - iodd-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U greenstack"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    labels:
+      - "com.greenstack.role=database-primary"
+
+  # ============================================================================
+  # PostgreSQL Replica Database
+  # ============================================================================
+  postgres-replica:
+    image: postgres:15-alpine
+    container_name: greenstack-postgres-replica
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: greenstack
+      POSTGRES_USER: greenstack
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-greenstack_dev}
+      PGUSER: greenstack
+      PGPASSWORD: ${POSTGRES_PASSWORD:-greenstack_dev}
+    volumes:
+      - postgres-replica-data:/var/lib/postgresql/data
+      - ./config/postgres/replica/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./config/postgres/init-replica.sh:/docker-entrypoint-initdb.d/init-replica.sh
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+    networks:
+      - iodd-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U greenstack"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    labels:
+      - "com.greenstack.role=database-replica"
+
+  # ============================================================================
+  # PgBouncer - Connection Pooling
+  # ============================================================================
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: greenstack-pgbouncer
+    restart: unless-stopped
+    ports:
+      - "6432:5432"
+    environment:
+      DATABASE_URL: postgres://greenstack:${POSTGRES_PASSWORD:-greenstack_dev}@postgres-primary:5432/greenstack
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 100
+      DEFAULT_POOL_SIZE: 20
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+    networks:
+      - iodd-network
+    labels:
+      - "com.greenstack.role=connection-pooler"
+
+volumes:
+  postgres-primary-data:
+    driver: local
+  postgres-replica-data:
+    driver: local
+
+networks:
+  iodd-network:
+    external: true

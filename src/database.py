@@ -110,3 +110,101 @@ def initialize_database(db_path: Optional[str] = None) -> None:
         logger.info("Database will be created on first connection")
     else:
         logger.info("Using existing database: %s", path)
+
+
+# ============================================================================
+# PostgreSQL Read/Write Split Support (Production)
+# ============================================================================
+
+import os
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.pool import NullPool, QueuePool
+
+# Database URLs from environment
+PRIMARY_DATABASE_URL = os.getenv("PRIMARY_DATABASE_URL", "sqlite:///./greenstack.db")
+REPLICA_DATABASE_URL = os.getenv("REPLICA_DATABASE_URL", PRIMARY_DATABASE_URL)
+
+# Enable read/write split
+ENABLE_READ_REPLICA = os.getenv("ENABLE_READ_REPLICA", "false").lower() == "true"
+
+
+class DatabaseManager:
+    """
+    Manages database connections with primary/replica split for production.
+    Supports both SQLite (development) and PostgreSQL (production).
+    """
+
+    def __init__(self):
+        self.primary_engine = None
+        self.replica_engine = None
+        self.PrimarySession = None
+        self.ReplicaSession = None
+        self._setup_connections()
+
+    def _setup_connections(self):
+        """Set up primary and replica database connections."""
+        logger.info(f"Connecting to primary database")
+
+        if "sqlite" in PRIMARY_DATABASE_URL:
+            self.primary_engine = create_engine(
+                PRIMARY_DATABASE_URL,
+                connect_args={"check_same_thread": False},
+                poolclass=NullPool
+            )
+        else:
+            self.primary_engine = create_engine(
+                PRIMARY_DATABASE_URL,
+                poolclass=QueuePool,
+                pool_size=10,
+                max_overflow=20,
+                pool_pre_ping=True
+            )
+
+        self.PrimarySession = sessionmaker(autocommit=False, autoflush=False, bind=self.primary_engine)
+
+        # Replica setup
+        if ENABLE_READ_REPLICA and REPLICA_DATABASE_URL != PRIMARY_DATABASE_URL:
+            logger.info("Read/write split enabled")
+            if "sqlite" in REPLICA_DATABASE_URL:
+                self.replica_engine = create_engine(REPLICA_DATABASE_URL, connect_args={"check_same_thread": False}, poolclass=NullPool)
+            else:
+                self.replica_engine = create_engine(REPLICA_DATABASE_URL, poolclass=QueuePool, pool_size=20, max_overflow=40, pool_pre_ping=True)
+            self.ReplicaSession = sessionmaker(autocommit=False, autoflush=False, bind=self.replica_engine)
+        else:
+            self.replica_engine = self.primary_engine
+            self.ReplicaSession = self.PrimarySession
+
+    def get_write_session(self) -> Session:
+        """Get session for write operations (primary database)."""
+        return self.PrimarySession()
+
+    def get_read_session(self) -> Session:
+        """Get session for read operations (replica or primary)."""
+        try:
+            return self.ReplicaSession()
+        except Exception as e:
+            logger.warning(f"Replica unavailable, using primary: {e}")
+            return self.PrimarySession()
+
+
+# Global database manager
+db_manager = DatabaseManager()
+
+
+def get_db_write():
+    """FastAPI dependency for write operations."""
+    session = db_manager.get_write_session()
+    try:
+        yield session
+    finally:
+        session.close()
+
+
+def get_db_read():
+    """FastAPI dependency for read operations."""
+    session = db_manager.get_read_session()
+    try:
+        yield session
+    finally:
+        session.close()

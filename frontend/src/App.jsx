@@ -2125,11 +2125,78 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
     }
   };
 
+  const normalizeAssetName = (fileName) => {
+    if (!fileName) return '';
+    const parts = fileName.split(/[/\\]/);
+    return parts[parts.length - 1].toLowerCase();
+  };
+
+  const findAssetByFileName = (fileName) => {
+    if (!fileName || !assets?.length) return null;
+    const normalized = normalizeAssetName(fileName);
+    return assets.find(
+      (asset) => asset.file_name && asset.file_name.toLowerCase() === normalized
+    );
+  };
+
   const imageAssets = assets.filter(a => a.file_type === 'image');
   const lightboxSlides = imageAssets.map(asset => ({
     src: `${API_BASE}/api/iodd/${device.id}/assets/${asset.id}`,
     alt: asset.file_name,
   }));
+
+  const standardVariables = useMemo(() => {
+    const map = {};
+    parameters.forEach((param) => {
+      if (param?.id?.startsWith?.('V_')) {
+        map[param.id] = param;
+      }
+    });
+    return map;
+  }, [parameters]);
+
+  const parseNumericValue = (value) => {
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+    const num = Number(value);
+    return Number.isNaN(num) ? null : num;
+  };
+
+  const deviceStatusValue = standardVariables['V_DeviceStatus']?.default_value;
+  const deviceStatusInfo = useMemo(() => {
+    if (deviceStatusValue === undefined || deviceStatusValue === null) return null;
+    const statusMap = {
+      0: { label: 'OK', tone: 'success', description: 'Device operating normally' },
+      1: { label: 'Maintenance Required', tone: 'warning', description: 'Device needs maintenance soon' },
+      2: { label: 'Out of Specification', tone: 'warning', description: 'Operating outside defined range' },
+      3: { label: 'Function Check', tone: 'muted', description: 'Device in function-check state' },
+      4: { label: 'Failure', tone: 'destructive', description: 'Device reports critical fault' },
+    };
+    const numericValue = parseNumericValue(deviceStatusValue);
+    const resolved = numericValue !== null ? statusMap[numericValue] : null;
+    return {
+      value: deviceStatusValue,
+      label: resolved?.label || `Code ${deviceStatusValue}`,
+      tone: resolved?.tone || 'muted',
+      description: resolved?.description || 'Reported by V_DeviceStatus',
+    };
+  }, [deviceStatusValue]);
+
+  const deviceErrorCount = standardVariables['V_ErrorCount']?.default_value;
+  const deviceOperatingTime = standardVariables['V_OperatingTime']?.default_value;
+  const deviceAccessLocksValue = useMemo(() => {
+    const val = standardVariables['V_DeviceAccessLocks']?.default_value;
+    const numeric = parseNumericValue(val);
+    return numeric !== null ? numeric : null;
+  }, [standardVariables]);
+
+  const diagnosticParameters = useMemo(() => {
+    const matchDiag = (text = '') => /diagnos/i.test(text);
+    return parameters
+      .filter((param) => matchDiag(param?.name) || matchDiag(param?.id) || matchDiag(param?.description))
+      .slice(0, 6);
+  }, [parameters]);
 
   const filteredParameters = useMemo(() => {
     return parameters.filter(p => {
@@ -2719,50 +2786,64 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {deviceVariants.map((variant, idx) => (
-                      <div
-                        key={idx}
-                        className="p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-border hover:border-purple-500/50 transition-all"
-                      >
-                        <div className="flex items-start gap-3">
-                          {variant.product_variant_image && (
-                            <div className="w-16 h-16 rounded-lg bg-background/50 border border-border flex items-center justify-center overflow-hidden flex-shrink-0">
-                              <img
-                                src={`${API_BASE}/api/iodd/${device.id}/asset/${variant.product_variant_image}`}
-                                alt={variant.product_variant_id || 'Variant'}
-                                className="w-full h-full object-contain"
-                                onError={(e) => {
-                                  e.target.style.display = 'none';
-                                  e.target.parentElement.innerHTML = '<div class="text-muted-foreground text-xs">No Image</div>';
-                                }}
-                              />
-                            </div>
-                          )}
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/50 text-xs">
-                                {variant.product_variant_id}
-                              </Badge>
-                              {variant.device_symbol && (
-                                <Badge className="bg-muted text-foreground text-xs">
-                                  {variant.device_symbol}
-                                </Badge>
+                    {deviceVariants.map((variant, idx) => {
+                      const imageAsset = findAssetByFileName(variant.product_variant_image) || findAssetByFileName(variant.device_symbol);
+                      const fallbackName = normalizeAssetName(variant.product_variant_image || variant.device_symbol);
+                      const imageSrc = imageAsset
+                        ? `${API_BASE}/api/iodd/${device.id}/assets/${imageAsset.id}`
+                        : fallbackName
+                          ? `${API_BASE}/api/iodd/${device.id}/asset/${encodeURIComponent(fallbackName)}`
+                          : null;
+
+                      return (
+                        <div
+                          key={idx}
+                          className="p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-border hover:border-purple-500/50 transition-all"
+                        >
+                          <div className="flex items-start gap-4">
+                            <div className="w-24 h-24 rounded-xl bg-background/60 border border-border flex items-center justify-center overflow-hidden flex-shrink-0">
+                              {imageSrc ? (
+                                <img
+                                  src={imageSrc}
+                                  alt={variant.product_variant_name ? translateText(variant.product_variant_name) : 'Variant'}
+                                  className="w-full h-full object-contain"
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.parentElement.innerHTML = '<div class="text-muted-foreground text-xs">No Image</div>';
+                                  }}
+                                />
+                              ) : (
+                                <span className="text-muted-foreground text-xs">No Image</span>
                               )}
                             </div>
-                            {variant.product_variant_name && (
-                              <h4 className="text-foreground font-semibold text-sm mb-1">
-                                {translateText(variant.product_variant_name)}
-                              </h4>
-                            )}
-                            {variant.product_variant_text && (
-                              <p className="text-muted-foreground text-xs leading-relaxed">
-                                {translateText(variant.product_variant_text)}
-                              </p>
-                            )}
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                {variant.product_variant_id && (
+                                  <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/40 text-xs">
+                                    {variant.product_variant_id}
+                                  </Badge>
+                                )}
+                                {variant.device_symbol && (
+                                  <Badge className="bg-muted text-foreground text-xs">
+                                    {variant.device_symbol}
+                                  </Badge>
+                                )}
+                              </div>
+                              {variant.product_variant_name && (
+                                <h4 className="text-foreground font-semibold text-lg mb-1">
+                                  {translateText(variant.product_variant_name)}
+                                </h4>
+                              )}
+                              {variant.product_variant_text && (
+                                <p className="text-muted-foreground text-sm leading-relaxed">
+                                  {translateText(variant.product_variant_text)}
+                                </p>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
@@ -3029,119 +3110,280 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {customDatatypes.map((datatype, idx) => (
-                      <div
-                        key={idx}
-                        className="p-4 rounded-lg bg-gradient-to-br from-amber-500/10 to-yellow-500/5 border border-border hover:border-amber-500/30 transition-all"
-                      >
-                        <div className="space-y-3">
-                          {/* Datatype Header */}
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <h4 className="text-foreground font-semibold text-base">
-                                  {datatype.datatype_name || datatype.datatype_id}
-                                </h4>
-                                <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/50 text-xs">
-                                  {datatype.value_type}
-                                </Badge>
-                                {datatype.bit_length && (
-                                  <Badge className="bg-muted text-foreground text-xs">
-                                    {datatype.bit_length} bits
+                    {customDatatypes.map((datatype, idx) => {
+                      const hasSingleValues = Array.isArray(datatype.single_values) && datatype.single_values.length > 0;
+                      const hasRecordItems = Array.isArray(datatype.record_items) && datatype.record_items.length > 0;
+                      const inferredValueType = datatype.value_type || (hasRecordItems ? 'RecordItem' : hasSingleValues ? 'SingleValue' : 'Datatype');
+                      const isColorDatatype = /color|led/i.test(datatype.datatype_id || '');
+                      const isEffectDatatype = /effect|pattern|blink|pulse/i.test(datatype.datatype_id || '');
+
+                      return (
+                        <div
+                          key={idx}
+                          className="p-4 rounded-lg bg-gradient-to-br from-amber-500/10 to-yellow-500/5 border border-border hover:border-amber-500/30 transition-all"
+                        >
+                          <div className="space-y-3">
+                            {/* Datatype Header */}
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <h4 className="text-foreground font-semibold text-base">
+                                    {datatype.datatype_name || datatype.datatype_id}
+                                  </h4>
+                                  <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/50 text-xs">
+                                    {inferredValueType}
                                   </Badge>
+                                  {datatype.bit_length && (
+                                    <Badge className="bg-muted text-foreground text-xs">
+                                      {datatype.bit_length} bits
+                                    </Badge>
+                                  )}
+                                </div>
+                                {datatype.datatype_id && datatype.datatype_id !== datatype.datatype_name && (
+                                  <p className="text-xs text-muted-foreground font-mono mb-2">
+                                    ID: {datatype.datatype_id}
+                                  </p>
                                 )}
                               </div>
-                              {datatype.datatype_id && datatype.datatype_id !== datatype.datatype_name && (
-                                <p className="text-xs text-muted-foreground font-mono mb-2">
-                                  ID: {datatype.datatype_id}
-                                </p>
-                              )}
                             </div>
-                          </div>
 
-                          {/* Single Value Enumeration */}
-                          {datatype.value_type === 'SingleValue' && datatype.single_values && datatype.single_values.length > 0 && (
-                            <div>
-                              <h5 className="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-                                <List className="w-3 h-3" />
-                                Enumeration Values ({datatype.single_values.length})
-                              </h5>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                {datatype.single_values.map((sv, svIdx) => (
-                                  <div
-                                    key={svIdx}
-                                    className="p-2 rounded bg-background/50 border border-border hover:bg-amber-500/5 transition-colors"
-                                  >
-                                    <div className="flex items-center gap-2">
-                                      <div className="w-8 h-8 rounded bg-amber-500/20 border border-amber-500/30 flex items-center justify-center flex-shrink-0">
-                                        <span className="text-xs font-mono font-semibold text-amber-300">
-                                          {sv.value}
-                                        </span>
-                                      </div>
-                                      <div className="flex-1 min-w-0">
-                                        <p className="text-sm text-foreground truncate">
-                                          {translateText(sv.value_text) || `Value ${sv.value}`}
-                                        </p>
+                            {/* Single Value Enumeration */}
+                            {datatype.value_type === 'SingleValue' && hasSingleValues && (
+                              <div>
+                                <h5 className="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                  <List className="w-3 h-3" />
+                                  Enumeration Values ({datatype.single_values.length})
+                                </h5>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                  {datatype.single_values.map((sv, svIdx) => (
+                                    <div
+                                      key={svIdx}
+                                      className="p-2 rounded bg-background/50 border border-border hover:bg-amber-500/5 transition-colors"
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-8 h-8 rounded bg-amber-500/20 border border-amber-500/30 flex items-center justify-center flex-shrink-0">
+                                          <span className="text-xs font-mono font-semibold text-amber-300">
+                                            {sv.value}
+                                          </span>
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                          <p className="text-sm text-foreground truncate">
+                                            {sv.name || `Value ${sv.value}`}
+                                          </p>
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
-                                ))}
+                                  ))}
+                                </div>
                               </div>
+                            )}
+
+                            {/* Color Palette Preview */}
+                            {isColorDatatype && hasSingleValues && (
+                              <div>
+                                <h5 className="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                  <Palette className="w-3 h-3" />
+                                  Color Palette
+                                </h5>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                  {datatype.single_values.map((sv, svIdx) => (
+                                    <div
+                                      key={`color-${svIdx}`}
+                                      className="p-2 rounded-lg border border-border bg-background/70"
+                                    >
+                                      <div
+                                        className="w-full h-12 rounded-md border border-border mb-2"
+                                        style={{ backgroundColor: resolveColorHex(sv.name) }}
+                                      />
+                                      <div className="flex items-center justify-between text-xs">
+                                        <span className="text-foreground font-medium truncate">{sv.name}</span>
+                                        <span className="text-muted-foreground font-mono">{sv.value}</span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Effect Preview */}
+                            {isEffectDatatype && hasSingleValues && (
+                              <div>
+                                <h5 className="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                  <Zap className="w-3 h-3" />
+                                  Effect Preview
+                                </h5>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                  {datatype.single_values.map((sv, svIdx) => {
+                                    const effectStyle = resolveEffectStyle(sv.name || '');
+                                    return (
+                                      <div
+                                        key={`effect-${svIdx}`}
+                                        className={`p-3 rounded-xl border border-border/50 bg-gradient-to-br ${effectStyle.gradient}`}
+                                      >
+                                        <div className="flex items-center justify-between mb-1">
+                                          <span className="text-sm font-semibold text-white drop-shadow">{sv.name}</span>
+                                          <Badge className="bg-white/20 text-white border-white/40 text-[10px]">
+                                            {sv.value}
+                                          </Badge>
+                                        </div>
+                                        <p className="text-[11px] text-white/80 leading-relaxed">{effectStyle.description}</p>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Record Item Structure */}
+                            {datatype.value_type === 'RecordItem' && datatype.record_items && datatype.record_items.length > 0 && (
+                              <div>
+                                <h5 className="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                  <Layers className="w-3 h-3" />
+                                  Record Structure ({datatype.record_items.length} fields)
+                                </h5>
+                                <div className="overflow-x-auto">
+                                  <table className="w-full text-sm">
+                                    <thead>
+                                      <tr className="border-b border-border">
+                                        <th className="text-left py-2 px-3 text-xs font-semibold text-amber-400 uppercase tracking-wider">Subindex</th>
+                                        <th className="text-left py-2 px-3 text-xs font-semibold text-amber-400 uppercase tracking-wider">Field Name</th>
+                                        <th className="text-left py-2 px-3 text-xs font-semibold text-amber-400 uppercase tracking-wider">Type</th>
+                                        <th className="text-left py-2 px-3 text-xs font-semibold text-amber-400 uppercase tracking-wider">Bit Length</th>
+                                        <th className="text-left py-2 px-3 text-xs font-semibold text-amber-400 uppercase tracking-wider">Offset</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {datatype.record_items.map((item, itemIdx) => (
+                                        <tr key={itemIdx} className="border-b border-border/50 hover:bg-amber-500/5 transition-colors">
+                                          <td className="py-2 px-3">
+                                            <div className="w-7 h-7 rounded bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
+                                              <span className="text-xs font-semibold text-amber-300">
+                                                {item.subindex}
+                                              </span>
+                                            </div>
+                                          </td>
+                                          <td className="py-2 px-3 text-foreground font-mono text-xs">
+                                            {item.record_item_name}
+                                          </td>
+                                          <td className="py-2 px-3">
+                                            <Badge className="bg-muted text-foreground text-xs">
+                                              {item.simple_datatype}
+                                            </Badge>
+                                          </td>
+                                          <td className="py-2 px-3 text-muted-foreground text-xs font-mono">
+                                            {item.bit_length || '-'}
+                                          </td>
+                                          <td className="py-2 px-3 text-muted-foreground text-xs font-mono">
+                                            {item.bit_offset !== null ? item.bit_offset : '-'}
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* IO-Link Advanced Profiles */}
+            {profileCharacteristics.length > 0 && (
+              <Card className="bg-card/80 backdrop-blur-sm border-border hover:border-brand-green/30 transition-all">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-foreground text-xl flex items-center gap-2">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-green/20 to-brand-green/5 flex items-center justify-center">
+                        <Server className="w-5 h-5 text-brand-green" />
+                      </div>
+                      Advanced IO-Link Profiles
+                    </CardTitle>
+                    <Badge className="bg-brand-green/20 text-brand-green border-brand-green/40">
+                      Profiles {profileCharacteristics.join(', ')}
+                    </Badge>
+                  </div>
+                  <CardDescription className="text-muted-foreground mt-2">
+                    This device exposes additional IO-Link profiles for binary transfers and firmware updates.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {profileCharacteristics.map((code, idx) => {
+                      const meta = profileCharacteristicInfo[code] || {
+                        label: `Profile ${code}`,
+                        description: 'Custom IO-Link profile supported by this device.',
+                        icon: <Cpu className="w-4 h-4" />,
+                      };
+                      return (
+                        <div
+                          key={idx}
+                          className="p-4 rounded-lg bg-gradient-to-br from-brand-green/10 to-brand-green/5 border border-border"
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-8 h-8 rounded-full bg-brand-green/20 border border-brand-green/40 flex items-center justify-center">
+                              {meta.icon}
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-foreground">{meta.label}</p>
+                              <p className="text-xs text-muted-foreground">Profile {code}</p>
+                            </div>
+                          </div>
+                          <p className="text-sm text-muted-foreground">{meta.description}</p>
+                          {code === '48' && (
+                            <div className="mt-3">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="border-brand-green/40 text-brand-green hover:bg-brand-green/10"
+                                onClick={() =>
+                                  toast({
+                                    title: 'BLOB Transfer Tools',
+                                    description: 'Scene/BLOB management UI coming soon.',
+                                  })
+                                }
+                              >
+                                Manage Scenes
+                              </Button>
                             </div>
                           )}
-
-                          {/* Record Item Structure */}
-                          {datatype.value_type === 'RecordItem' && datatype.record_items && datatype.record_items.length > 0 && (
-                            <div>
-                              <h5 className="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-2 flex items-center gap-2">
-                                <Layers className="w-3 h-3" />
-                                Record Structure ({datatype.record_items.length} fields)
-                              </h5>
-                              <div className="overflow-x-auto">
-                                <table className="w-full text-sm">
-                                  <thead>
-                                    <tr className="border-b border-border">
-                                      <th className="text-left py-2 px-3 text-xs font-semibold text-amber-400 uppercase tracking-wider">Subindex</th>
-                                      <th className="text-left py-2 px-3 text-xs font-semibold text-amber-400 uppercase tracking-wider">Field Name</th>
-                                      <th className="text-left py-2 px-3 text-xs font-semibold text-amber-400 uppercase tracking-wider">Type</th>
-                                      <th className="text-left py-2 px-3 text-xs font-semibold text-amber-400 uppercase tracking-wider">Bit Length</th>
-                                      <th className="text-left py-2 px-3 text-xs font-semibold text-amber-400 uppercase tracking-wider">Offset</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {datatype.record_items.map((item, itemIdx) => (
-                                      <tr key={itemIdx} className="border-b border-border/50 hover:bg-amber-500/5 transition-colors">
-                                        <td className="py-2 px-3">
-                                          <div className="w-7 h-7 rounded bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
-                                            <span className="text-xs font-semibold text-amber-300">
-                                              {item.subindex}
-                                            </span>
-                                          </div>
-                                        </td>
-                                        <td className="py-2 px-3 text-foreground font-mono text-xs">
-                                          {item.record_item_name}
-                                        </td>
-                                        <td className="py-2 px-3">
-                                          <Badge className="bg-muted text-foreground text-xs">
-                                            {item.simple_datatype}
-                                          </Badge>
-                                        </td>
-                                        <td className="py-2 px-3 text-muted-foreground text-xs font-mono">
-                                          {item.bit_length || '-'}
-                                        </td>
-                                        <td className="py-2 px-3 text-muted-foreground text-xs font-mono">
-                                          {item.bit_offset !== null ? item.bit_offset : '-'}
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
+                          {code === '49' && (
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="border-brand-green/40 text-brand-green hover:bg-brand-green/10"
+                                onClick={() =>
+                                  toast({
+                                    title: 'Firmware Update',
+                                    description: 'Firmware workflow UI coming soon.',
+                                  })
+                                }
+                              >
+                                Upload Firmware
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-muted-foreground hover:text-foreground"
+                                onClick={() =>
+                                  toast({
+                                    title: 'Check Compatibility',
+                                    description: 'Firmware compatibility checks will be available soon.',
+                                  })
+                                }
+                              >
+                                Check Compatibility
+                              </Button>
                             </div>
                           )}
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
@@ -3242,6 +3484,120 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
                       </div>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Standard IO-Link Status & Diagnostics */}
+            {(deviceStatusInfo || deviceAccessLocksValue !== null || deviceErrorCount || diagnosticParameters.length > 0) && (
+              <Card className="bg-card/80 backdrop-blur-sm border-border hover:border-brand-green/30 transition-all">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-foreground text-xl flex items-center gap-2">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-success/20 to-success/10 flex items-center justify-center">
+                        <Activity className="w-5 h-5 text-success" />
+                      </div>
+                      Standard Device Status
+                    </CardTitle>
+                    <Badge className="bg-success/20 text-success border-success/40">
+                      IO-Link Spec
+                    </Badge>
+                  </div>
+                  <CardDescription className="text-muted-foreground mt-2">
+                    Real-time health indicators derived from standard IO-Link variables (V_*)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {deviceStatusInfo && (
+                      <div className={`p-4 rounded-lg border ${deviceStatusInfo.tone === 'success' ? 'border-success/40 bg-success/10' : deviceStatusInfo.tone === 'warning' ? 'border-warning/40 bg-warning/10' : deviceStatusInfo.tone === 'destructive' ? 'border-destructive/40 bg-destructive/10' : 'border-border bg-secondary/50'}`}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs uppercase tracking-wide text-muted-foreground">Device Status</span>
+                          <Badge className="bg-background/50 text-foreground text-xs">
+                            {deviceStatusInfo.value}
+                          </Badge>
+                        </div>
+                        <p className="text-lg font-semibold text-foreground">{deviceStatusInfo.label}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{deviceStatusInfo.description}</p>
+                      </div>
+                    )}
+                    {deviceErrorCount !== undefined && deviceErrorCount !== null && (
+                      <div className="p-4 rounded-lg border border-border bg-secondary/40">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs uppercase tracking-wide text-muted-foreground">Error Count</span>
+                          <AlertTriangle className="w-4 h-4 text-warning" />
+                        </div>
+                        <p className="text-lg font-semibold text-foreground">
+                          {deviceErrorCount || '0'}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">Reported via V_ErrorCount</p>
+                      </div>
+                    )}
+                    {(deviceAccessLocksValue !== null || deviceOperatingTime) && (
+                      <div className="p-4 rounded-lg border border-border bg-secondary/40 space-y-2">
+                        {deviceOperatingTime && (
+                          <div>
+                            <p className="text-xs uppercase tracking-wide text-muted-foreground">Operating Time (approx.)</p>
+                            <p className="text-lg font-semibold text-foreground">{deviceOperatingTime}</p>
+                          </div>
+                        )}
+                        {deviceAccessLocksValue !== null && (
+                          <div>
+                            <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Access Locks</p>
+                            <div className="flex flex-wrap gap-1 text-xs">
+                              {[
+                                { label: 'Parameter', mask: 1 },
+                                { label: 'Data Storage', mask: 2 },
+                                { label: 'Local Params', mask: 4 },
+                                { label: 'Local UI', mask: 8 },
+                              ].map((lock) => (
+                                <Badge
+                                  key={lock.label}
+                                  className={`${deviceAccessLocksValue & lock.mask ? 'bg-success/20 text-success border-success/40' : 'bg-muted text-muted-foreground border-border'}`}
+                                >
+                                  {lock.label}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {diagnosticParameters.length > 0 && (
+                    <div className="mt-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/40">Diagnostics</Badge>
+                        <span className="text-xs text-muted-foreground">Key variables with diagnostic focus</span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {diagnosticParameters.map((param) => (
+                          <div key={`${param.id}-${param.subindex ?? 0}`} className="p-3 rounded-lg border border-border bg-background/60">
+                            <div className="flex items-center justify-between mb-1">
+                              <h5 className="text-sm font-semibold text-foreground">{param.name || param.id}</h5>
+                              {param.bit_length && (
+                                <Badge className="bg-muted text-foreground text-[10px]">
+                                  {param.bit_length} bits
+                                </Badge>
+                              )}
+                            </div>
+                            {param.description && (
+                              <p className="text-xs text-muted-foreground mb-2">
+                                {param.description}
+                              </p>
+                            )}
+                            <div className="flex items-center text-xs text-muted-foreground gap-3">
+                              <span className="font-mono text-foreground/80">Index {param.index}</span>
+                              {param.default_value !== undefined && (
+                                <span>Default: {param.default_value === null ? '—' : param.default_value}</span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
@@ -3982,208 +4338,7 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
                           Process Data Inputs ({processData.filter(pd => pd.direction === 'input').length})
                         </h3>
                         <div className="space-y-3">
-                          {processData.filter(pd => pd.direction === 'input').map((pd) => (
-                            <div
-                              key={pd.id}
-                              className="p-4 rounded-lg bg-gradient-to-br from-brand-green/10 to-brand-green/5 border border-border hover:border-brand-green/50 transition-all"
-                            >
-                              <div className="flex items-start justify-between mb-3">
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <h4 className="text-foreground font-semibold">{pd.name}</h4>
-                                    <Badge className="bg-brand-green/20 text-foreground-secondary border-brand-green/50 text-xs">
-                                      {pd.bit_length} bits
-                                    </Badge>
-                                    <Badge className="bg-muted text-foreground text-xs">
-                                      {pd.data_type}
-                                    </Badge>
-                                  </div>
-                                  <p className="text-xs text-muted-foreground font-mono">ID: {pd.pd_id}</p>
-                                </div>
-                              </div>
-                              {pd.record_items && pd.record_items.length > 0 && (
-                                <>
-                                  {/* Bit Field Visualizer */}
-                                  <div className="mt-3 pt-3 border-t border-border">
-                                    <p className="text-xs text-muted-foreground mb-2 font-semibold flex items-center gap-2">
-                                      <span>Bit Field Layout</span>
-                                      <Badge className="bg-muted text-foreground text-xs">
-                                        {Math.ceil(pd.bit_length / 8)} bytes
-                                      </Badge>
-                                    </p>
-                                    <div className="space-y-2">
-                                      {(() => {
-                                        const totalBytes = Math.ceil(pd.bit_length / 8);
-                                        const bytes = [];
-
-                                        for (let byteIdx = 0; byteIdx < totalBytes; byteIdx++) {
-                                          const bitStart = byteIdx * 8;
-                                          const bitEnd = Math.min(bitStart + 8, pd.bit_length);
-                                          const bits = [];
-
-                                          for (let bitPos = bitStart; bitPos < bitEnd; bitPos++) {
-                                            // Find which field this bit belongs to
-                                            const field = pd.record_items.find(item =>
-                                              bitPos >= item.bit_offset &&
-                                              bitPos < item.bit_offset + item.bit_length
-                                            );
-
-                                            bits.push({
-                                              position: bitPos,
-                                              field: field,
-                                              isStart: field && bitPos === field.bit_offset,
-                                              isEnd: field && bitPos === field.bit_offset + field.bit_length - 1
-                                            });
-                                          }
-
-                                          bytes.push({ byteIdx, bits });
-                                        }
-
-                                        return bytes.map(({ byteIdx, bits }) => (
-                                          <div key={byteIdx} className="bg-secondary/30 rounded p-2">
-                                            <div className="flex items-center gap-2 mb-1">
-                                              <span className="text-xs text-muted-foreground font-mono w-16">Byte {byteIdx}:</span>
-                                              <div className="flex gap-px flex-1">
-                                                {bits.map((bit, idx) => {
-                                                  const color = bit.field
-                                                    ? `hsl(${(bit.field.subindex * 137.5) % 360}, 70%, 50%)`
-                                                    : 'hsl(var(--muted-foreground))';
-
-                                                  return (
-                                                    <div
-                                                      key={idx}
-                                                      className="relative group"
-                                                      style={{ flex: 1 }}
-                                                    >
-                                                      <div
-                                                        className="h-8 border border-border flex items-center justify-center text-xs font-mono transition-all hover:z-10 hover:scale-110"
-                                                        style={{
-                                                          backgroundColor: bit.field ? `${color}20` : 'hsl(var(--background))',
-                                                          borderColor: bit.field ? `${color}80` : 'hsl(var(--border))',
-                                                          borderLeftWidth: bit.isStart ? '2px' : '1px',
-                                                          borderRightWidth: bit.isEnd ? '2px' : '1px'
-                                                        }}
-                                                        title={bit.field ? `${bit.field.name} (bit ${bit.position})` : `Unused (bit ${bit.position})`}
-                                                      >
-                                                        <span className="text-muted-foreground" style={{ fontSize: '9px' }}>
-                                                          {7 - (bit.position % 8)}
-                                                        </span>
-                                                      </div>
-                                                      {bit.field && (
-                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:block z-20">
-                                                          <div className="bg-card border border-border rounded px-2 py-1 text-xs whitespace-nowrap shadow-lg">
-                                                            <div className="font-semibold text-foreground">{bit.field.name}</div>
-                                                            <div className="text-muted-foreground">Bit {bit.position} ({bit.field.data_type})</div>
-                                                          </div>
-                                                        </div>
-                                                      )}
-                                                    </div>
-                                                  );
-                                                })}
-                                              </div>
-                                            </div>
-                                          </div>
-                                        ));
-                                      })()}
-                                    </div>
-                                    <div className="mt-2 flex flex-wrap gap-2">
-                                      {pd.record_items.map((item) => {
-                                        const color = `hsl(${(item.subindex * 137.5) % 360}, 70%, 50%)`;
-                                        return (
-                                          <div key={item.subindex} className="flex items-center gap-1 text-xs">
-                                            <div
-                                              className="w-3 h-3 rounded border"
-                                              style={{
-                                                backgroundColor: `${color}30`,
-                                                borderColor: `${color}80`
-                                              }}
-                                            />
-                                            <span className="text-foreground">{item.name}</span>
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
-
-                                  {/* Record Structure Details */}
-                                  <div className="mt-3 pt-3 border-t border-border">
-                                    <p className="text-xs text-muted-foreground mb-2 font-semibold">Field Details:</p>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                      {pd.record_items.map((item) => {
-                                        const uiInfo = getUiInfo(item.name);
-                                        return (
-                                          <div
-                                            key={item.subindex}
-                                            className="p-2 rounded bg-secondary/50 border border-border"
-                                          >
-                                            <div className="flex items-center justify-between mb-1">
-                                              <span className="text-foreground text-sm font-medium">{item.name}</span>
-                                              <span className="text-xs text-muted-foreground font-mono">idx:{item.subindex}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                              <span className="font-mono">{item.data_type}</span>
-                                              <span>•</span>
-                                              <span>{item.bit_length} bits</span>
-                                              <span>•</span>
-                                              <span>offset: {item.bit_offset}</span>
-                                            </div>
-                                            {uiInfo && (uiInfo.gradient !== null || uiInfo.offset !== null || uiInfo.unit_code || uiInfo.display_format) && (
-                                              <div className="mt-2 pt-2 border-t border-brand-green/20">
-                                                <p className="text-xs text-brand-green mb-1 font-semibold">UI Rendering:</p>
-                                                <div className="space-y-0.5 text-xs">
-                                                  {uiInfo.gradient !== null && (
-                                                    <div className="text-muted-foreground">
-                                                      <span className="font-mono">Gradient:</span> {uiInfo.gradient}
-                                                    </div>
-                                                  )}
-                                                  {uiInfo.offset !== null && (
-                                                    <div className="text-muted-foreground">
-                                                      <span className="font-mono">Offset:</span> {uiInfo.offset}
-                                                    </div>
-                                                  )}
-                                                  {uiInfo.unit_code && (
-                                                    <div className="text-muted-foreground">
-                                                      <span className="font-mono">Unit:</span> {uiInfo.unit_code}
-                                                    </div>
-                                                  )}
-                                                  {uiInfo.display_format && (
-                                                    <div className="text-muted-foreground">
-                                                      <span className="font-mono">Format:</span> {uiInfo.display_format}
-                                                    </div>
-                                                  )}
-                                                  <div className="text-brand-green font-mono mt-1">
-                                                    Example: raw value 100 → {formatDisplayValue(100, uiInfo)}
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            )}
-                                            {item.single_values && item.single_values.length > 0 && (
-                                              <div className="mt-2 pt-2 border-t border-border">
-                                                <p className="text-xs text-muted-foreground mb-1">Values:</p>
-                                                <div className="flex flex-wrap gap-1">
-                                                  {item.single_values.map((sv, svIdx) => (
-                                                    <div
-                                                      key={svIdx}
-                                                      className="text-xs px-2 py-1 rounded bg-muted/50 text-foreground"
-                                                      title={sv.description || sv.name}
-                                                    >
-                                                      <span className="font-mono text-brand-green">{sv.value}</span>
-                                                      <span className="text-muted-foreground mx-1">=</span>
-                                                      <span>{sv.name}</span>
-                                                    </div>
-                                                  ))}
-                                                </div>
-                                              </div>
-                                            )}
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                          ))}
+                          {processData.filter(pd => pd.direction === 'input').map((pd) => renderProcessDataCard(pd, 'input'))}
                         </div>
                       </div>
                     )}
@@ -4196,234 +4351,103 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
                           Process Data Outputs ({processData.filter(pd => pd.direction === 'output').length})
                         </h3>
                         <div className="space-y-3">
-                          {processData.filter(pd => pd.direction === 'output').map((pd) => (
-                            <div
-                              key={pd.id}
-                              className="p-4 rounded-lg bg-gradient-to-br from-secondary/10 to-accent/5 border border-border hover:border-secondary/50 transition-all"
-                            >
-                              <div className="flex items-start justify-between mb-3">
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <h4 className="text-foreground font-semibold">{pd.name}</h4>
-                                    <Badge className="bg-secondary/20 text-foreground-secondary border-secondary/50 text-xs">
-                                      {pd.bit_length} bits
-                                    </Badge>
-                                    <Badge className="bg-muted text-foreground text-xs">
-                                      {pd.data_type}
-                                    </Badge>
-                                  </div>
-                                  <p className="text-xs text-muted-foreground font-mono">ID: {pd.pd_id}</p>
-                                </div>
-                              </div>
-                              {pd.record_items && pd.record_items.length > 0 && (
-                                <>
-                                  {/* Bit Field Visualizer */}
-                                  <div className="mt-3 pt-3 border-t border-border">
-                                    <p className="text-xs text-muted-foreground mb-2 font-semibold flex items-center gap-2">
-                                      <span>Bit Field Layout</span>
-                                      <Badge className="bg-muted text-foreground text-xs">
-                                        {Math.ceil(pd.bit_length / 8)} bytes
-                                      </Badge>
-                                    </p>
-                                    <div className="space-y-2">
-                                      {(() => {
-                                        const totalBytes = Math.ceil(pd.bit_length / 8);
-                                        const bytes = [];
-
-                                        for (let byteIdx = 0; byteIdx < totalBytes; byteIdx++) {
-                                          const bitStart = byteIdx * 8;
-                                          const bitEnd = Math.min(bitStart + 8, pd.bit_length);
-                                          const bits = [];
-
-                                          for (let bitPos = bitStart; bitPos < bitEnd; bitPos++) {
-                                            // Find which field this bit belongs to
-                                            const field = pd.record_items.find(item =>
-                                              bitPos >= item.bit_offset &&
-                                              bitPos < item.bit_offset + item.bit_length
-                                            );
-
-                                            bits.push({
-                                              position: bitPos,
-                                              field: field,
-                                              isStart: field && bitPos === field.bit_offset,
-                                              isEnd: field && bitPos === field.bit_offset + field.bit_length - 1
-                                            });
-                                          }
-
-                                          bytes.push({ byteIdx, bits });
-                                        }
-
-                                        return bytes.map(({ byteIdx, bits }) => (
-                                          <div key={byteIdx} className="bg-secondary/30 rounded p-2">
-                                            <div className="flex items-center gap-2 mb-1">
-                                              <span className="text-xs text-muted-foreground font-mono w-16">Byte {byteIdx}:</span>
-                                              <div className="flex gap-px flex-1">
-                                                {bits.map((bit, idx) => {
-                                                  const color = bit.field
-                                                    ? `hsl(${(bit.field.subindex * 137.5) % 360}, 70%, 50%)`
-                                                    : 'hsl(var(--muted-foreground))';
-
-                                                  return (
-                                                    <div
-                                                      key={idx}
-                                                      className="relative group"
-                                                      style={{ flex: 1 }}
-                                                    >
-                                                      <div
-                                                        className="h-8 border border-border flex items-center justify-center text-xs font-mono transition-all hover:z-10 hover:scale-110"
-                                                        style={{
-                                                          backgroundColor: bit.field ? `${color}20` : 'hsl(var(--background))',
-                                                          borderColor: bit.field ? `${color}80` : 'hsl(var(--border))',
-                                                          borderLeftWidth: bit.isStart ? '2px' : '1px',
-                                                          borderRightWidth: bit.isEnd ? '2px' : '1px'
-                                                        }}
-                                                        title={bit.field ? `${bit.field.name} (bit ${bit.position})` : `Unused (bit ${bit.position})`}
-                                                      >
-                                                        <span className="text-muted-foreground" style={{ fontSize: '9px' }}>
-                                                          {7 - (bit.position % 8)}
-                                                        </span>
-                                                      </div>
-                                                      {bit.field && (
-                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:block z-20">
-                                                          <div className="bg-card border border-border rounded px-2 py-1 text-xs whitespace-nowrap shadow-lg">
-                                                            <div className="font-semibold text-foreground">{bit.field.name}</div>
-                                                            <div className="text-muted-foreground">Bit {bit.position} ({bit.field.data_type})</div>
-                                                          </div>
-                                                        </div>
-                                                      )}
-                                                    </div>
-                                                  );
-                                                })}
-                                              </div>
-                                            </div>
-                                          </div>
-                                        ));
-                                      })()}
-                                    </div>
-                                    <div className="mt-2 flex flex-wrap gap-2">
-                                      {pd.record_items.map((item) => {
-                                        const color = `hsl(${(item.subindex * 137.5) % 360}, 70%, 50%)`;
-                                        return (
-                                          <div key={item.subindex} className="flex items-center gap-1 text-xs">
-                                            <div
-                                              className="w-3 h-3 rounded border"
-                                              style={{
-                                                backgroundColor: `${color}30`,
-                                                borderColor: `${color}80`
-                                              }}
-                                            />
-                                            <span className="text-foreground">{item.name}</span>
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
-
-                                  {/* Record Structure Details */}
-                                  <div className="mt-3 pt-3 border-t border-border">
-                                    <p className="text-xs text-muted-foreground mb-2 font-semibold">Field Details:</p>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                      {pd.record_items.map((item) => {
-                                        const uiInfo = getUiInfo(item.name);
-                                        return (
-                                          <div
-                                            key={item.subindex}
-                                            className="p-2 rounded bg-secondary/50 border border-border"
-                                          >
-                                            <div className="flex items-center justify-between mb-1">
-                                              <span className="text-foreground text-sm font-medium">{item.name}</span>
-                                              <span className="text-xs text-muted-foreground font-mono">idx:{item.subindex}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                              <span className="font-mono">{item.data_type}</span>
-                                              <span>•</span>
-                                              <span>{item.bit_length} bits</span>
-                                              <span>•</span>
-                                              <span>offset: {item.bit_offset}</span>
-                                            </div>
-                                            {uiInfo && (uiInfo.gradient !== null || uiInfo.offset !== null || uiInfo.unit_code || uiInfo.display_format) && (
-                                              <div className="mt-2 pt-2 border-t border-brand-green/20">
-                                                <p className="text-xs text-brand-green mb-1 font-semibold">UI Rendering:</p>
-                                                <div className="space-y-0.5 text-xs">
-                                                  {uiInfo.gradient !== null && (
-                                                    <div className="text-muted-foreground">
-                                                      <span className="font-mono">Gradient:</span> {uiInfo.gradient}
-                                                    </div>
-                                                  )}
-                                                  {uiInfo.offset !== null && (
-                                                    <div className="text-muted-foreground">
-                                                      <span className="font-mono">Offset:</span> {uiInfo.offset}
-                                                    </div>
-                                                  )}
-                                                  {uiInfo.unit_code && (
-                                                    <div className="text-muted-foreground">
-                                                      <span className="font-mono">Unit:</span> {uiInfo.unit_code}
-                                                    </div>
-                                                  )}
-                                                  {uiInfo.display_format && (
-                                                    <div className="text-muted-foreground">
-                                                      <span className="font-mono">Format:</span> {uiInfo.display_format}
-                                                    </div>
-                                                  )}
-                                                  <div className="text-brand-green font-mono mt-1">
-                                                    Example: raw value 100 → {formatDisplayValue(100, uiInfo)}
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            )}
-                                            {item.single_values && item.single_values.length > 0 && (
-                                              <div className="mt-2 pt-2 border-t border-border">
-                                                <p className="text-xs text-muted-foreground mb-1">Values:</p>
-                                                <div className="flex flex-wrap gap-1">
-                                                  {item.single_values.map((sv, svIdx) => (
-                                                    <div
-                                                      key={svIdx}
-                                                      className="text-xs px-2 py-1 rounded bg-muted/50 text-foreground"
-                                                      title={sv.description || sv.name}
-                                                    >
-                                                      <span className="font-mono text-brand-green">{sv.value}</span>
-                                                      <span className="text-muted-foreground mx-1">=</span>
-                                                      <span>{sv.name}</span>
-                                                    </div>
-                                                  ))}
-                                                </div>
-                                              </div>
-                                            )}
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                          ))}
+                          {processData.filter(pd => pd.direction === 'output').map((pd) => renderProcessDataCard(pd, 'output'))}
                         </div>
                       </div>
                     )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
 
-          {/* Communication Tab */}
-          <TabsContent value="communication" className="space-y-4 mt-6">
-            {communicationProfile ? (
-              <Card className="bg-card/80 backdrop-blur-sm border-border">
-                <CardHeader>
-                  <CardTitle className="text-foreground text-xl flex items-center gap-2">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-teal-500/20 to-emerald-500/20 flex items-center justify-center">
-                      <Wifi className="w-5 h-5 text-teal-400" />
-                    </div>
-                    IO-Link Communication Profile
-                  </CardTitle>
-                  <CardDescription className="text-muted-foreground">
-                    Network configuration and physical connection details
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
+                    {displayPreview && (
+                      <div className="mt-6">
+                        <Card className="bg-card/80 border-border hover:border-brand-green/40 transition-all">
+                          <CardHeader>
+                            <div className="flex items-center justify-between">
+                              <CardTitle className="text-foreground text-xl flex items-center gap-2">
+                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-green/20 to-brand-green/5 flex items-center justify-center">
+                                  <Monitor className="w-5 h-5 text-brand-green" />
+                                </div>
+                                Display Layout Preview
+                              </CardTitle>
+                              <Badge className="bg-brand-green/20 text-brand-green border-brand-green/40">
+                                CANEO Visualization
+                              </Badge>
+                            </div>
+                            <CardDescription className="text-muted-foreground mt-2">
+                              Mapping of process-data fields to the four-digit display and LED ring
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                              <div className="p-4 rounded-xl bg-gradient-to-br from-slate-900/40 to-slate-800/30 border border-border">
+                                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+                                  <Layers className="w-3 h-3" />
+                                  Digits & Text Segments
+                                </p>
+                                {displayPreview.digitItems.length > 0 ? (
+                                  <div className="grid grid-cols-2 gap-3">
+                                    {displayPreview.digitItems.map((digit, idx) => (
+                                      <div key={`digit-${idx}`} className="p-3 rounded-lg border border-slate-700 bg-slate-900/60 text-white">
+                                        <p className="text-sm font-semibold">{digit.name || `Digit ${digit.subindex}`}</p>
+                                        <p className="text-[11px] text-white/70 font-mono">
+                                          Bits {formatBitRange(digit)}
+                                        </p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <p className="text-xs text-muted-foreground">
+                                    No digit fields detected in process data outputs.
+                                  </p>
+                                )}
+                              </div>
+                              <div className="space-y-4">
+                                {displayPreview.ledColorItems.length > 0 && (
+                                  <div className="p-4 rounded-xl bg-background/60 border border-border">
+                                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+                                      <Palette className="w-3 h-3" />
+                                      LED Color Channels
+                                    </p>
+                                    <div className="grid grid-cols-2 gap-3">
+                                      {displayPreview.ledColorItems.map((item, idx) => (
+                                        <div key={`led-color-${idx}`} className="flex items-center gap-3">
+                                          <div
+                                            className="w-10 h-10 rounded-full border border-border"
+                                            style={{ backgroundColor: resolveColorHex(item.name || '') }}
+                                          />
+                                          <div>
+                                            <p className="text-sm font-medium text-foreground">{item.name}</p>
+                                            <p className="text-[11px] text-muted-foreground font-mono">
+                                              Bits {formatBitRange(item)}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                {displayPreview.miscItems.length > 0 && (
+                                  <div className="p-4 rounded-xl bg-background/60 border border-border">
+                                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+                                      <List className="w-3 h-3" />
+                                      Auxiliary Fields
+                                    </p>
+                                    <div className="space-y-2">
+                                      {displayPreview.miscItems.map((item, idx) => (
+                                        <div key={`misc-${idx}`} className="flex items-center justify-between text-xs">
+                                          <span className="text-foreground font-medium">{item.name}</span>
+                                          <span className="font-mono text-muted-foreground">{formatBitRange(item)}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )}
+
+
                     {/* Protocol Information */}
                     <div>
                       <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-3">Protocol</h3>
@@ -6208,3 +6232,290 @@ const IODDManager = () => {
 };
 
 export default IODDManager;
+const processDataColorClasses = [
+  'from-brand-green/40 to-emerald-500/20 text-emerald-50',
+    'from-purple-500/40 to-indigo-500/20 text-purple-50',
+    'from-sky-500/40 to-cyan-500/20 text-sky-50',
+    'from-amber-500/40 to-orange-500/20 text-amber-50',
+    'from-rose-500/40 to-pink-500/20 text-rose-50',
+    'from-slate-500/40 to-slate-500/10 text-slate-50',
+  ];
+
+  const getSegmentColorClass = (index) => {
+    return `bg-gradient-to-br ${processDataColorClasses[index % processDataColorClasses.length]}`;
+  };
+
+  const buildProcessDataSegments = (pd) => {
+    if (!pd.record_items || pd.record_items.length === 0) {
+      return [{
+        name: pd.name || 'Process Data',
+        subindex: 0,
+        bit_offset: 0,
+        bit_length: pd.bit_length || 1,
+      }];
+    }
+
+    let runningOffset = 0;
+    return pd.record_items
+      .map((item) => {
+        const start = item.bit_offset !== null && item.bit_offset !== undefined ? item.bit_offset : runningOffset;
+        const length = item.bit_length || 1;
+        runningOffset = start + length;
+        return {
+          ...item,
+          bit_offset: start,
+          bit_length: length,
+        };
+      })
+      .sort((a, b) => a.bit_offset - b.bit_offset);
+  };
+
+  const formatBitRange = (item) => {
+    const start = item.bit_offset || 0;
+    const end = item.bit_length ? start + item.bit_length - 1 : start;
+    return `${start}–${end}`;
+  };
+
+  const processDataToneConfig = {
+    input: {
+      gradient: 'from-brand-green/10 to-brand-green/5',
+      border: 'hover:border-brand-green/50',
+      badge: 'bg-brand-green/20 text-brand-green border-brand-green/40',
+      dot: 'bg-brand-green',
+      accentText: 'text-brand-green',
+    },
+    output: {
+      gradient: 'from-secondary/10 to-accent/5',
+      border: 'hover:border-secondary/50',
+      badge: 'bg-secondary/20 text-foreground-secondary border-secondary/40',
+      dot: 'bg-secondary',
+      accentText: 'text-secondary',
+    },
+  };
+
+  const renderProcessDataCard = (pd, toneKey = 'input') => {
+    const tone = processDataToneConfig[toneKey] || processDataToneConfig.input;
+    const segments = buildProcessDataSegments(pd);
+
+    return (
+      <div
+        key={pd.id}
+        className={`p-4 rounded-lg bg-gradient-to-br ${tone.gradient} border border-border ${tone.border} transition-all`}
+      >
+        <div className="flex items-start justify-between flex-wrap gap-2 mb-2">
+          <div>
+            <div className="flex items-center gap-2">
+              <h4 className="text-foreground font-semibold text-lg">{pd.name}</h4>
+              <Badge className={tone.badge}>{pd.bit_length} bits</Badge>
+              <Badge className="bg-muted text-foreground text-[11px]">{pd.data_type}</Badge>
+            </div>
+            <p className="text-xs text-muted-foreground font-mono mt-1">ID: {pd.pd_id}</p>
+            {pd.description && (
+              <p className="text-sm text-muted-foreground mt-1">{pd.description}</p>
+            )}
+          </div>
+        </div>
+
+        {segments.length > 0 && (
+          <div className="mt-3 space-y-2">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Bit Layout</p>
+            <div className="w-full h-16 flex rounded-lg border border-border overflow-hidden">
+              {segments.map((segment, segIdx) => (
+                <div
+                  key={`${segment.subindex}-${segIdx}`}
+                  className={`relative flex items-center justify-center text-[10px] font-semibold ${getSegmentColorClass(segIdx)} px-2`}
+                  style={{ flexGrow: segment.bit_length || 1 }}
+                  title={`${segment.name || `Field ${segment.subindex}`} • bits ${formatBitRange(segment)}`}
+                >
+                  <div className="text-xs text-white/90 text-center leading-tight drop-shadow">
+                    <div className="font-semibold truncate">{segment.name || `Sub ${segment.subindex}`}</div>
+                    <div className="text-[10px] opacity-80 font-mono">{formatBitRange(segment)}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-3 text-[11px] text-muted-foreground">
+              {segments.map((segment, segIdx) => (
+                <div key={`legend-${segment.subindex}-${segIdx}`} className="flex items-center gap-1">
+                  <span className={`w-3 h-3 rounded-full border border-border ${tone.dot}`} />
+                  <span>{segment.name || `Subindex ${segment.subindex}`}</span>
+                  <span className="font-mono text-[10px] opacity-70">{formatBitRange(segment)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+          {(pd.record_items && pd.record_items.length > 0 ? pd.record_items : [{
+            name: pd.name,
+            subindex: 0,
+            bit_length: pd.bit_length,
+            bit_offset: 0,
+            data_type: pd.data_type,
+          }]).map((item, index) => {
+            const uiInfo = getUiInfo(item.name);
+            return (
+              <div
+                key={item.subindex ?? index}
+                className="p-3 rounded-lg bg-background border border-border hover:border-brand-green/30 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">
+                      {item.name || `Field ${item.subindex}`}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground font-mono">
+                      Bits {formatBitRange(item)}
+                    </p>
+                  </div>
+                  <Badge className="bg-muted text-foreground text-[10px]">
+                    {item.data_type || pd.data_type}
+                  </Badge>
+                </div>
+                <div className="text-[11px] text-muted-foreground flex flex-wrap gap-2">
+                  <span>Offset: {item.bit_offset ?? 0}</span>
+                  <span>Length: {item.bit_length ?? '—'} bits</span>
+                  {item.default_value !== undefined && item.default_value !== null && (
+                    <span>Default: {item.default_value}</span>
+                  )}
+                </div>
+                {uiInfo && (uiInfo.gradient !== null || uiInfo.offset !== null || uiInfo.unit_code || uiInfo.display_format) && (
+                  <div className="mt-2 p-2 rounded bg-brand-green/5 border border-brand-green/20 text-xs text-brand-green">
+                    <p className="font-semibold mb-1">UI Scaling</p>
+                    {uiInfo.gradient !== null && <p>Gradient: {uiInfo.gradient}</p>}
+                    {uiInfo.offset !== null && <p>Offset: {uiInfo.offset}</p>}
+                    {uiInfo.unit_code && <p>Unit: {uiInfo.unit_code}</p>}
+                    {uiInfo.display_format && <p>Format: {uiInfo.display_format}</p>}
+                  </div>
+                )}
+                {item.single_values && item.single_values.length > 0 && (
+                  <div className="mt-3">
+                    <p className="text-xs text-muted-foreground mb-1">Enumeration:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {item.single_values.map((sv, svIdx) => (
+                        <Badge
+                          key={svIdx}
+                          className="bg-muted text-foreground-secondary border-border text-[11px]"
+                          title={sv.description || sv.name}
+                        >
+                          {sv.value}: {sv.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+  );
+};
+
+const baseColorMap = {
+  red: '#ef4444',
+  green: '#22c55e',
+  blue: '#3b82f6',
+  yellow: '#eab308',
+  magenta: '#d946ef',
+  cyan: '#06b6d4',
+  orange: '#fb923c',
+  violet: '#8b5cf6',
+  purple: '#a855f7',
+  black: '#020617',
+  white: '#f8fafc',
+  cleanblue: '#38bdf8',
+  turquoise: '#14b8a6',
+  amber: '#f59e0b',
+  teal: '#0d9488',
+  pink: '#ec4899',
+};
+
+const resolveColorHex = (label = '') => {
+  const key = label.toLowerCase().trim();
+  if (baseColorMap[key]) {
+    return baseColorMap[key];
+  }
+  if (/user/.test(key)) {
+    return '#4b5563';
+  }
+  return '#1f2937';
+};
+
+const effectStyles = [
+  { pattern: /(blink|flash)/i, gradient: 'from-rose-500/40 to-orange-400/30', label: 'Blink', description: 'Rapid on/off pulse' },
+  { pattern: /(pulse|breath|fade)/i, gradient: 'from-indigo-500/40 to-purple-400/30', label: 'Pulse', description: 'Smooth breathing effect' },
+  { pattern: /(wave|scroll|rotate|wheel)/i, gradient: 'from-sky-500/40 to-cyan-400/30', label: 'Wave', description: 'Sequential animation' },
+  { pattern: /(static|solid|steady)/i, gradient: 'from-emerald-500/40 to-lime-400/30', label: 'Static', description: 'Constant output' },
+];
+
+const resolveEffectStyle = (name = '') => {
+  const match = effectStyles.find((style) => style.pattern.test(name));
+  return match || {
+    gradient: 'from-slate-500/30 to-slate-400/20',
+    label: 'Effect',
+    description: 'Custom pattern',
+  };
+};
+
+const profileCharacteristicInfo = {
+  '48': {
+    label: 'BLOB Transfer',
+    description: 'Supports Binary Large Object streaming for custom scenes or configuration data.',
+    icon: <Database className="w-4 h-4" />,
+  },
+  '49': {
+    label: 'Firmware Update',
+    description: 'Enables IO-Link firmware update workflow (Profile 0x31).',
+    icon: <Upload className="w-4 h-4" />,
+  },
+};
+
+const displayPreview = useMemo(() => {
+    if (!Array.isArray(processData) || processData.length === 0) {
+      return null;
+    }
+    const outputs = processData.filter((pd) => pd.direction === 'output');
+    if (!outputs.length) {
+      return null;
+    }
+    const digitItems = [];
+    const ledColorItems = [];
+    const miscItems = [];
+
+    outputs.forEach((pd) => {
+      if (!Array.isArray(pd.record_items)) return;
+      pd.record_items.forEach((item) => {
+        const name = item.name || '';
+        if (/display digit/i.test(name) || /digit [1-9]/i.test(name)) {
+          digitItems.push(item);
+        } else if (/led color/i.test(name) || /rgb/i.test(name)) {
+          ledColorItems.push(item);
+        } else if (/active leds|automatic|brightness|effect/i.test(name)) {
+          miscItems.push(item);
+        }
+      });
+    });
+
+    if (!digitItems.length && !ledColorItems.length && !miscItems.length) {
+      return null;
+    }
+
+  return {
+    digitItems: digitItems.sort((a, b) => (a.subindex || 0) - (b.subindex || 0)),
+    ledColorItems,
+    miscItems,
+  };
+}, [processData]);
+
+  const profileCharacteristics = useMemo(() => {
+    if (!deviceFeatures?.profile_characteristic) {
+      return [];
+    }
+    return deviceFeatures.profile_characteristic
+      .split(/\s+/)
+      .map((value) => value.trim())
+      .filter(Boolean);
+  }, [deviceFeatures]);
+};

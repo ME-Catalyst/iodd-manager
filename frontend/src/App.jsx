@@ -985,44 +985,6 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
 
   const deviceId = device?.id;
 
-  useEffect(() => {
-    if (!device) return;
-    fetchAssets();
-    fetchParameters();
-    fetchErrors();
-    fetchEvents();
-    fetchDocumentInfo();
-    fetchDeviceFeatures();
-    fetchCommunicationProfile();
-    fetchUiMenus();
-    fetchLanguages();
-    fetchProcessDataUiInfo();
-    fetchDeviceVariants();
-    fetchProcessDataConditions();
-    fetchMenuButtons();
-    fetchWiringConfigurations();
-    fetchTestConfigurations();
-    fetchCustomDatatypes();
-  }, [
-    device,
-    fetchAssets,
-    fetchParameters,
-    fetchErrors,
-    fetchEvents,
-    fetchDocumentInfo,
-    fetchDeviceFeatures,
-    fetchCommunicationProfile,
-    fetchUiMenus,
-    fetchLanguages,
-    fetchProcessDataUiInfo,
-    fetchDeviceVariants,
-    fetchProcessDataConditions,
-    fetchMenuButtons,
-    fetchWiringConfigurations,
-    fetchTestConfigurations,
-    fetchCustomDatatypes,
-  ]);
-
   const fetchAssets = useCallback(async () => {
     if (!deviceId) return;
     try {
@@ -1298,6 +1260,45 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
       console.error('Failed to fetch config schema:', error);
     }
   };
+
+  // Fetch all device data when device changes
+  useEffect(() => {
+    if (!device) return;
+    fetchAssets();
+    fetchParameters();
+    fetchErrors();
+    fetchEvents();
+    fetchDocumentInfo();
+    fetchDeviceFeatures();
+    fetchCommunicationProfile();
+    fetchUiMenus();
+    fetchLanguages();
+    fetchProcessDataUiInfo();
+    fetchDeviceVariants();
+    fetchProcessDataConditions();
+    fetchMenuButtons();
+    fetchWiringConfigurations();
+    fetchTestConfigurations();
+    fetchCustomDatatypes();
+  }, [
+    device,
+    fetchAssets,
+    fetchParameters,
+    fetchErrors,
+    fetchEvents,
+    fetchDocumentInfo,
+    fetchDeviceFeatures,
+    fetchCommunicationProfile,
+    fetchUiMenus,
+    fetchLanguages,
+    fetchProcessDataUiInfo,
+    fetchDeviceVariants,
+    fetchProcessDataConditions,
+    fetchMenuButtons,
+    fetchWiringConfigurations,
+    fetchTestConfigurations,
+    fetchCustomDatatypes,
+  ]);
 
   const handleTabChange = (value) => {
     setActiveTab(value);

@@ -5858,7 +5858,7 @@ const IODDManager = () => {
       />
 
       {/* Global Ticket Button - appears on every page */}
-      <GlobalTicketButton API_BASE={API_BASE} />
+      <GlobalTicketButton API_BASE={API_BASE} activeView={activeView} />
 
       <Toaster />
     </div>

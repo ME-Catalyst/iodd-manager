@@ -1,23 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Bug, MessageSquarePlus } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
 import EnhancedTicketModal from './EnhancedTicketModal';
 
 /**
  * Global floating action button for creating tickets from any page
- * Automatically captures context from the current page/route
+ * Automatically captures context from the current page
  */
-const GlobalTicketButton = ({ API_BASE = '' }) => {
-  const location = useLocation();
+const GlobalTicketButton = ({ API_BASE = '', activeView = '', selectedDevice = null }) => {
   const [showModal, setShowModal] = useState(false);
   const [context, setContext] = useState({});
 
-  // Extract context from current page whenever location changes
+  // Extract context from current page whenever view/device changes
   useEffect(() => {
     const extractContext = () => {
-      const path = location.pathname;
-      const searchParams = new URLSearchParams(location.search);
-
       let pageContext = {
         page: 'Unknown',
         section: '',
@@ -25,61 +20,104 @@ const GlobalTicketButton = ({ API_BASE = '' }) => {
         timestamp: new Date().toISOString()
       };
 
-      // Detect page from URL
-      if (path === '/' || path === '/home') {
-        pageContext.page = 'Home';
-      } else if (path.startsWith('/eds')) {
-        pageContext.page = 'EDS Devices';
-        pageContext.deviceType = 'EDS';
+      // Detect page from activeView
+      switch (activeView) {
+        case 'overview':
+        case 'home':
+          pageContext.page = 'Home';
+          break;
 
-        // Check if we're on a device detail page
-        const deviceMatch = location.state;
-        if (deviceMatch) {
-          pageContext.deviceId = deviceMatch.id;
-          pageContext.deviceName = deviceMatch.product_name || deviceMatch.name;
-          pageContext.vendorName = deviceMatch.vendor_name;
-          pageContext.productCode = deviceMatch.product_code;
-        }
+        case 'devices':
+          pageContext.page = 'IODD Devices';
+          pageContext.deviceType = 'IODD';
+          break;
 
-        // Detect active tab from hash
-        if (location.hash) {
-          pageContext.activeTab = location.hash.replace('#', '');
-        }
-      } else if (path.startsWith('/iodd')) {
-        pageContext.page = 'IODD Devices';
-        pageContext.deviceType = 'IODD';
+        case 'eds':
+        case 'eds-list':
+          pageContext.page = 'EDS Devices';
+          pageContext.deviceType = 'EDS';
+          break;
 
-        // Check for device details
-        const deviceMatch = location.state;
-        if (deviceMatch) {
-          pageContext.deviceId = deviceMatch.id;
-          pageContext.deviceName = deviceMatch.product_name || deviceMatch.name;
-          pageContext.vendorName = deviceMatch.vendor_name;
-          pageContext.productCode = deviceMatch.product_code;
-        }
-      } else if (path.startsWith('/pqa')) {
-        pageContext.page = 'PQA Console';
-        pageContext.section = 'Parameter Query';
-      } else if (path.startsWith('/admin')) {
-        pageContext.page = 'Admin Console';
-      } else if (path.startsWith('/tickets')) {
-        pageContext.page = 'Tickets';
-      } else if (path.startsWith('/docs')) {
-        pageContext.page = 'Documentation';
-        // Extract doc section from path
-        const parts = path.split('/').filter(Boolean);
-        if (parts.length > 1) {
-          pageContext.section = parts.slice(1).map(p =>
-            p.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
-          ).join(' / ');
-        }
+        case 'eds-details':
+          pageContext.page = 'EDS Device Details';
+          pageContext.deviceType = 'EDS';
+          if (selectedDevice) {
+            pageContext.deviceId = selectedDevice.id;
+            pageContext.deviceName = selectedDevice.product_name || selectedDevice.name;
+            pageContext.vendorName = selectedDevice.vendor_name;
+            pageContext.productCode = selectedDevice.product_code;
+          }
+          break;
+
+        case 'device-details':
+          pageContext.page = 'IODD Device Details';
+          pageContext.deviceType = 'IODD';
+          if (selectedDevice) {
+            pageContext.deviceId = selectedDevice.id;
+            pageContext.deviceName = selectedDevice.product_name || selectedDevice.name;
+            pageContext.vendorName = selectedDevice.vendor_name;
+            pageContext.productCode = selectedDevice.product_code;
+          }
+          break;
+
+        case 'pqa':
+          pageContext.page = 'PQA Console';
+          pageContext.section = 'Parameter Query Analysis';
+          break;
+
+        case 'admin':
+          pageContext.page = 'Admin Console';
+          break;
+
+        case 'tickets':
+          pageContext.page = 'Tickets';
+          break;
+
+        case 'docs':
+          pageContext.page = 'Documentation';
+          break;
+
+        case 'search':
+          pageContext.page = 'Search';
+          break;
+
+        case 'comparison':
+          pageContext.page = 'Device Comparison';
+          break;
+
+        case 'analytics':
+          pageContext.page = 'Analytics Dashboard';
+          break;
+
+        case 'mqtt':
+          pageContext.page = 'MQTT Manager';
+          pageContext.section = 'Services';
+          break;
+
+        case 'influx':
+          pageContext.page = 'InfluxDB Manager';
+          pageContext.section = 'Services';
+          break;
+
+        case 'nodered':
+          pageContext.page = 'Node-RED Manager';
+          pageContext.section = 'Services';
+          break;
+
+        case 'grafana':
+          pageContext.page = 'Grafana Manager';
+          pageContext.section = 'Services';
+          break;
+
+        default:
+          pageContext.page = activeView || 'Unknown Page';
       }
 
       return pageContext;
     };
 
     setContext(extractContext());
-  }, [location]);
+  }, [activeView, selectedDevice]);
 
   const handleOpenModal = () => {
     // Refresh context right before opening

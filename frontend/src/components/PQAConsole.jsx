@@ -90,8 +90,8 @@ const PQAConsole = ({ API_BASE, toast }) => {
   const loadDevices = async () => {
     try {
       const [ioddRes, edsRes] = await Promise.all([
-        axios.get(`${API_BASE}/api/iodd/devices`).catch(() => ({ data: [] })),
-        axios.get(`${API_BASE}/api/eds/devices`).catch(() => ({ data: [] }))
+        axios.get(`${API_BASE}/api/devices`).catch(() => ({ data: [] })),
+        axios.get(`${API_BASE}/api/eds`).catch(() => ({ data: [] }))
       ]);
 
       const ioddDevices = (ioddRes.data || []).map(d => ({ ...d, file_type: 'IODD' }));

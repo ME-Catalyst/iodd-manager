@@ -2837,16 +2837,16 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
                   <div className="space-y-6">
                     {/* Group by connector type */}
                     {Object.entries(
-                      wiringConfigurations.reduce((acc, wire) => {
-                        const connectorType = wire.connector_type || 'Unknown';
+                      wiringConfigurations.reduce((acc, wire, idx) => {
+                        const connectorType = wire.connector_type || `Unknown-${idx}`;
                         if (!acc[connectorType]) {
                           acc[connectorType] = [];
                         }
                         acc[connectorType].push(wire);
                         return acc;
                       }, {})
-                    ).map(([connectorType, wires]) => (
-                      <div key={connectorType} className="p-4 rounded-lg bg-gradient-to-br from-teal-500/10 to-emerald-500/5 border border-border">
+                    ).map(([connectorType, wires], mapIdx) => (
+                      <div key={`${connectorType}-${mapIdx}`} className="p-4 rounded-lg bg-gradient-to-br from-teal-500/10 to-emerald-500/5 border border-border">
                         <div className="flex items-start gap-4">
                           {/* Diagram Image (if available) */}
                           {wires[0].diagram_image && (
@@ -2890,7 +2890,7 @@ const DeviceDetailsPage = ({ device, onBack, API_BASE, toast }) => {
                                 </thead>
                                 <tbody>
                                   {wires.map((wire, idx) => (
-                                    <tr key={idx} className="border-b border-border/50 hover:bg-teal-500/5 transition-colors">
+                                    <tr key={`${connectorType}-wire-${wire.wire_number || idx}`} className="border-b border-border/50 hover:bg-teal-500/5 transition-colors">
                                       <td className="py-2 px-3">
                                         <div className="flex items-center gap-2">
                                           <div className="w-6 h-6 rounded-full bg-teal-500/20 border border-teal-500/50 flex items-center justify-center">

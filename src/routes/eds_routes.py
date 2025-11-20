@@ -19,7 +19,8 @@ from fastapi.responses import StreamingResponse
 from src.database import get_db_path
 from src.parsers.eds_diagnostics import Severity
 from src.parsers.eds_package_parser import EDSPackageParser
-from src.parsers.eds_parser import parse_eds_file
+from src.parsers.eds_parser import parse_eds_file, EDSParser
+from src.parsers.eds_advanced_sections import EDSAdvancedSectionsParser
 from src.utils.pqa_orchestrator import UnifiedPQAOrchestrator, FileType
 
 # Set up logger
@@ -230,6 +231,30 @@ async def upload_eds_file(background_tasks: BackgroundTasks, file: UploadFile = 
                 param.get('decimal_places')
             ))
 
+            # Get the inserted parameter ID for enum linking
+            parameter_id = cursor.lastrowid
+
+            # Insert enum values into eds_enum_values table
+            enum_values_json = param.get('enum_values')
+            if enum_values_json:
+                try:
+                    enum_values = json.loads(enum_values_json)
+                    # enum_values is a list of dicts: [{"value": 0, "label": "...", "is_default": True}, ...]
+                    for enum_entry in enum_values:
+                        cursor.execute("""
+                            INSERT INTO eds_enum_values (
+                                parameter_id, enum_name, enum_value, enum_display, is_default
+                            ) VALUES (?, ?, ?, ?, ?)
+                        """, (
+                            parameter_id,
+                            f"Enum{param.get('param_number')}",  # e.g., "Enum1", "Enum2"
+                            enum_entry.get('value'),
+                            enum_entry.get('label'),
+                            1 if enum_entry.get('is_default') else 0
+                        ))
+                except (json.JSONDecodeError, TypeError) as e:
+                    logger.warning(f"Failed to parse enum values for param {param.get('param_number')}: {e}")
+
         # Insert connections with all fields
         for conn_info in parsed_data.get('connections', []):
             cursor.execute("""
@@ -394,6 +419,204 @@ async def upload_eds_file(background_tasks: BackgroundTasks, file: UploadFile = 
                     tspec.get('data_size'),
                     tspec.get('rate')
                 ))
+
+        # Parse and store advanced sections (DLR, TCP/IP, Ethernet, QoS, LLDP, metadata)
+        try:
+            # Create EDSParser instance to get sections
+            eds_parser_instance = EDSParser(eds_content)
+            advanced_parser = EDSAdvancedSectionsParser(eds_parser_instance.sections)
+            advanced_data = advanced_parser.parse_all_advanced_sections()
+
+            # Store DLR configuration
+            if advanced_data.get('dlr_config'):
+                dlr = advanced_data['dlr_config']
+                import json
+                cursor.execute("""
+                    INSERT INTO eds_dlr_config (
+                        file_id, revision, object_name, object_class_code,
+                        network_topology, enable_switch, beacon_interval,
+                        beacon_timeout, vlan_id, max_inst, num_static_instances,
+                        max_dynamic_instances, additional_attributes
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    eds_id,
+                    dlr.get('revision'),
+                    dlr.get('object_name'),
+                    dlr.get('object_class_code'),
+                    dlr.get('network_topology'),
+                    dlr.get('enable_switch'),
+                    dlr.get('beacon_interval'),
+                    dlr.get('beacon_timeout'),
+                    dlr.get('vlan_id'),
+                    dlr.get('max_inst'),
+                    dlr.get('num_static_instances'),
+                    dlr.get('max_dynamic_instances'),
+                    json.dumps(dlr.get('additional_attributes')) if dlr.get('additional_attributes') else None
+                ))
+
+            # Store TCP/IP Interface
+            if advanced_data.get('tcpip_interface'):
+                tcpip = advanced_data['tcpip_interface']
+                cursor.execute("""
+                    INSERT INTO eds_tcpip_interface (
+                        file_id, revision, object_name, object_class_code,
+                        interface_config, host_name, ttl_value,
+                        mcast_config, select_acd, encap_timeout,
+                        max_inst, num_static_instances, max_dynamic_instances,
+                        additional_attributes
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    eds_id,
+                    tcpip.get('revision'),
+                    tcpip.get('object_name'),
+                    tcpip.get('object_class_code'),
+                    tcpip.get('interface_config'),
+                    tcpip.get('host_name'),
+                    tcpip.get('ttl_value'),
+                    tcpip.get('mcast_config'),
+                    tcpip.get('select_acd'),
+                    tcpip.get('encap_timeout'),
+                    tcpip.get('max_inst'),
+                    tcpip.get('num_static_instances'),
+                    tcpip.get('max_dynamic_instances'),
+                    json.dumps(tcpip.get('additional_attributes')) if tcpip.get('additional_attributes') else None
+                ))
+
+            # Store Ethernet Link
+            if advanced_data.get('ethernet_link'):
+                eth = advanced_data['ethernet_link']
+                cursor.execute("""
+                    INSERT INTO eds_ethernet_link (
+                        file_id, revision, object_name, object_class_code,
+                        interface_speed, interface_flags, physical_address,
+                        interface_label, interface_labels, max_inst,
+                        num_static_instances, max_dynamic_instances,
+                        additional_attributes
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    eds_id,
+                    eth.get('revision'),
+                    eth.get('object_name'),
+                    eth.get('object_class_code'),
+                    eth.get('interface_speed'),
+                    eth.get('interface_flags'),
+                    eth.get('physical_address'),
+                    eth.get('interface_label'),
+                    json.dumps(eth.get('interface_labels')) if eth.get('interface_labels') else None,
+                    eth.get('max_inst'),
+                    eth.get('num_static_instances'),
+                    eth.get('max_dynamic_instances'),
+                    json.dumps(eth.get('additional_attributes')) if eth.get('additional_attributes') else None
+                ))
+
+            # Store QoS configuration
+            if advanced_data.get('qos_config'):
+                qos = advanced_data['qos_config']
+                cursor.execute("""
+                    INSERT INTO eds_qos_config (
+                        file_id, revision, object_name, object_class_code,
+                        qos_tag_enable, dscp_urgent, dscp_scheduled,
+                        dscp_high, dscp_low, dscp_explicit, max_inst,
+                        num_static_instances, max_dynamic_instances,
+                        additional_attributes
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    eds_id,
+                    qos.get('revision'),
+                    qos.get('object_name'),
+                    qos.get('object_class_code'),
+                    qos.get('qos_tag_enable'),
+                    qos.get('dscp_urgent'),
+                    qos.get('dscp_scheduled'),
+                    qos.get('dscp_high'),
+                    qos.get('dscp_low'),
+                    qos.get('dscp_explicit'),
+                    qos.get('max_inst'),
+                    qos.get('num_static_instances'),
+                    qos.get('max_dynamic_instances'),
+                    json.dumps(qos.get('additional_attributes')) if qos.get('additional_attributes') else None
+                ))
+
+            # Store LLDP Management
+            if advanced_data.get('lldp_management'):
+                lldp = advanced_data['lldp_management']
+                cursor.execute("""
+                    INSERT INTO eds_lldp_management (
+                        file_id, revision, object_name, object_class_code,
+                        msg_tx_interval, msg_tx_hold, chassis_id_subtype,
+                        chassis_id, port_id_subtype, port_id, max_inst,
+                        num_static_instances, max_dynamic_instances,
+                        additional_attributes
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    eds_id,
+                    lldp.get('revision'),
+                    lldp.get('object_name'),
+                    lldp.get('object_class_code'),
+                    lldp.get('msg_tx_interval'),
+                    lldp.get('msg_tx_hold'),
+                    lldp.get('chassis_id_subtype'),
+                    lldp.get('chassis_id'),
+                    lldp.get('port_id_subtype'),
+                    lldp.get('port_id'),
+                    lldp.get('max_inst'),
+                    lldp.get('num_static_instances'),
+                    lldp.get('max_dynamic_instances'),
+                    json.dumps(lldp.get('additional_attributes')) if lldp.get('additional_attributes') else None
+                ))
+
+            # Store file metadata
+            if advanced_data.get('file_metadata'):
+                file_meta = advanced_data['file_metadata']
+                cursor.execute("""
+                    INSERT INTO eds_file_metadata (
+                        file_id, home_url, revision, license_key,
+                        file_format, file_revision
+                    ) VALUES (?, ?, ?, ?, ?, ?)
+                """, (
+                    eds_id,
+                    file_meta.get('home_url'),
+                    file_meta.get('revision'),
+                    file_meta.get('license_key'),
+                    file_meta.get('file_format'),
+                    file_meta.get('file_revision')
+                ))
+
+            # Update device metadata (icon_contents)
+            if advanced_data.get('device_metadata'):
+                dev_meta = advanced_data['device_metadata']
+                if dev_meta.get('icon_contents'):
+                    # Store icon_contents in eds_file_metadata
+                    cursor.execute("""
+                        UPDATE eds_file_metadata
+                        SET icon_contents = ?
+                        WHERE file_id = ?
+                    """, (
+                        dev_meta.get('icon_contents'),
+                        eds_id
+                    ))
+
+            # Store object metadata for all CIP objects
+            if advanced_data.get('object_metadata'):
+                for obj_meta in advanced_data['object_metadata']:
+                    cursor.execute("""
+                        INSERT INTO eds_object_metadata (
+                            file_id, section_name, object_name,
+                            object_class_code, revision
+                        ) VALUES (?, ?, ?, ?, ?)
+                    """, (
+                        eds_id,
+                        obj_meta.get('section_name'),
+                        obj_meta.get('object_name'),
+                        obj_meta.get('object_class_code'),
+                        obj_meta.get('revision')
+                    ))
+
+            logger.info(f"Successfully stored advanced sections for EDS file {eds_id}")
+
+        except Exception as e:
+            logger.warning(f"Could not parse advanced sections for EDS {file.filename}: {e}")
+            # Don't fail the entire import if advanced sections fail
 
         conn.commit()
         conn.close()
@@ -1425,11 +1648,11 @@ async def upload_eds_package(background_tasks: BackgroundTasks, file: UploadFile
                             eds_file_id, param_number, param_name, data_type,
                             data_size, default_value, min_value, max_value,
                             description, link_path_size, link_path, descriptor,
-                            help_string_1, help_string_2, help_string_3,
+                            help_string_1, help_string_2, help_string_3, enum_values,
                             units, scaling_multiplier, scaling_divisor, scaling_base, scaling_offset,
                             link_scaling_multiplier, link_scaling_divisor, link_scaling_base, link_scaling_offset,
                             decimal_places
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """, (
                         eds_id, param.get('param_number'), param.get('param_name'),
                         param.get('data_type'), param.get('data_size'),
@@ -1437,6 +1660,7 @@ async def upload_eds_package(background_tasks: BackgroundTasks, file: UploadFile
                         param.get('help_string_1', ''), param.get('link_path_size'),
                         param.get('link_path'), param.get('descriptor'),
                         param.get('help_string_1'), param.get('help_string_2'), param.get('help_string_3'),
+                        param.get('enum_values'),  # JSON string or None
                         param.get('units'),
                         param.get('scaling_multiplier'),
                         param.get('scaling_divisor'),
@@ -1448,6 +1672,30 @@ async def upload_eds_package(background_tasks: BackgroundTasks, file: UploadFile
                         param.get('link_scaling_offset'),
                         param.get('decimal_places')
                     ))
+
+                    # Get the inserted parameter ID for enum linking
+                    parameter_id = cursor.lastrowid
+
+                    # Insert enum values into eds_enum_values table
+                    enum_values_json = param.get('enum_values')
+                    if enum_values_json:
+                        try:
+                            enum_values = json.loads(enum_values_json)
+                            # enum_values is a list of dicts: [{"value": 0, "label": "...", "is_default": True}, ...]
+                            for enum_entry in enum_values:
+                                cursor.execute("""
+                                    INSERT INTO eds_enum_values (
+                                        parameter_id, enum_name, enum_value, enum_display, is_default
+                                    ) VALUES (?, ?, ?, ?, ?)
+                                """, (
+                                    parameter_id,
+                                    f"Enum{param.get('param_number')}",  # e.g., "Enum1", "Enum2"
+                                    enum_entry.get('value'),
+                                    enum_entry.get('label'),
+                                    1 if enum_entry.get('is_default') else 0
+                                ))
+                        except (json.JSONDecodeError, TypeError) as e:
+                            logger.warning(f"Failed to parse enum values for param {param.get('param_number')}: {e}")
 
                 # Insert connections
                 for conn_info in parsed.get('connections', []):
@@ -2041,6 +2289,121 @@ async def get_eds_modules(eds_id: int):
         "modules": modules,
         "total_count": len(modules)
     }
+
+
+@router.get("/{eds_id}/network-config")
+async def get_eds_network_config(eds_id: int):
+    """
+    Get network configuration for an EDS file.
+
+    Includes DLR (Device Level Ring), TCP/IP Interface, Ethernet Link,
+    QoS (Quality of Service), LLDP (Link Layer Discovery Protocol),
+    and related metadata.
+
+    Args:
+        eds_id: EDS file ID
+
+    Returns:
+        Network configuration data including all advanced sections
+    """
+    conn = sqlite3.connect(get_db_path())
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    result = {}
+
+    # Get DLR configuration
+    cursor.execute("""
+        SELECT
+            revision, object_name, object_class_code, network_topology,
+            enable_switch, beacon_interval, beacon_timeout, vlan_id
+        FROM eds_dlr_config
+        WHERE file_id = ?
+    """, (eds_id,))
+
+    row = cursor.fetchone()
+    if row:
+        result['dlr_config'] = dict(row)
+
+    # Get TCP/IP Interface
+    cursor.execute("""
+        SELECT
+            revision, object_name, object_class_code, interface_config,
+            host_name, ttl_value, mcast_config, select_acd, encap_timeout
+        FROM eds_tcpip_interface
+        WHERE file_id = ?
+    """, (eds_id,))
+
+    row = cursor.fetchone()
+    if row:
+        result['tcpip_interface'] = dict(row)
+
+    # Get Ethernet Link
+    cursor.execute("""
+        SELECT
+            revision, object_name, object_class_code, interface_speed,
+            interface_flags, physical_address, interface_label
+        FROM eds_ethernet_link
+        WHERE file_id = ?
+    """, (eds_id,))
+
+    row = cursor.fetchone()
+    if row:
+        result['ethernet_link'] = dict(row)
+
+    # Get QoS configuration
+    cursor.execute("""
+        SELECT
+            revision, object_name, object_class_code, qos_tag_enable,
+            dscp_urgent, dscp_scheduled, dscp_high, dscp_low, dscp_explicit
+        FROM eds_qos_config
+        WHERE file_id = ?
+    """, (eds_id,))
+
+    row = cursor.fetchone()
+    if row:
+        result['qos_config'] = dict(row)
+
+    # Get LLDP Management
+    cursor.execute("""
+        SELECT
+            revision, object_name, object_class_code, msg_tx_interval,
+            msg_tx_hold, chassis_id_subtype, chassis_id,
+            port_id_subtype, port_id
+        FROM eds_lldp_management
+        WHERE file_id = ?
+    """, (eds_id,))
+
+    row = cursor.fetchone()
+    if row:
+        result['lldp_management'] = dict(row)
+
+    # Get file metadata
+    cursor.execute("""
+        SELECT
+            home_url, revision, license_key, file_format, file_revision
+        FROM eds_file_metadata
+        WHERE file_id = ?
+    """, (eds_id,))
+
+    row = cursor.fetchone()
+    if row:
+        result['file_metadata'] = dict(row)
+
+    # Get object metadata
+    cursor.execute("""
+        SELECT
+            section_name, object_name, object_class_code, revision
+        FROM eds_object_metadata
+        WHERE file_id = ?
+        ORDER BY section_name
+    """, (eds_id,))
+
+    result['object_metadata'] = [dict(row) for row in cursor.fetchall()]
+
+    conn.close()
+
+    return result
 
 
 @router.get("/{eds_id}/groups")

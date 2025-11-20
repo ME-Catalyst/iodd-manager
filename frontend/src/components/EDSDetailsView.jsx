@@ -7,6 +7,7 @@ import {
 import AssembliesSection from './AssembliesSection';
 import PortsSection from './PortsSection';
 import ModulesSection from './ModulesSection';
+import NetworkConfigTab from './NetworkConfigTab';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui';
 import { Button } from '@/components/ui';
 import { Badge } from '@/components/ui';
@@ -203,6 +204,7 @@ const EDSDetailsView = ({ selectedEds: initialEds, onBack, onExportJSON, onExpor
     { id: 'assemblies', label: 'Assemblies', icon: Boxes },
     { id: 'ports', label: 'Ports', icon: Network },
     { id: 'modules', label: 'Modules', icon: Cpu },
+    { id: 'network', label: 'Network Config', icon: Network },
     { id: 'capacity', label: 'Capacity & Performance', icon: Server },
     { id: 'raw', label: 'Raw EDS Content', icon: FileCode },
   ];
@@ -493,6 +495,7 @@ const EDSDetailsView = ({ selectedEds: initialEds, onBack, onExportJSON, onExpor
         {activeTab === 'assemblies' && <AssembliesSection edsId={selectedEds.id} />}
         {activeTab === 'ports' && <PortsSection edsId={selectedEds.id} />}
         {activeTab === 'modules' && <ModulesSection edsId={selectedEds.id} />}
+        {activeTab === 'network' && <NetworkConfigTab selectedEds={selectedEds} API_BASE={API_BASE} />}
         {activeTab === 'capacity' && <CapacityTab selectedEds={selectedEds} />}
         {activeTab === 'raw' && <RawContentTab selectedEds={selectedEds} />}
       </div>

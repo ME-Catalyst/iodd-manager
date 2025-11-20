@@ -70,21 +70,26 @@ class EDSReconstructor:
             if device_class:
                 sections.append(device_class)
 
-            # [Params] section header
+            # [ParamClass] section (extracted from original file - not yet parsed/stored)
+            param_class_section = self._extract_section_from_original(conn, eds_file_id, 'ParamClass')
+            if param_class_section:
+                sections.append(param_class_section)
+
+            # [Params] section (with inline enum definitions)
             params_section = self._create_params_section(conn, eds_file_id)
             if params_section:
                 sections.append(params_section)
 
-            # [EnumPar] sections for enum parameters
-            enum_sections = self._create_enum_sections(conn, eds_file_id)
-            sections.extend(enum_sections)
+            # Note: Enums are now inline in [Params] section, not separate [EnumPar] sections
+            # enum_sections = self._create_enum_sections(conn, eds_file_id)
+            # sections.extend(enum_sections)
 
             # [Group] sections
             group_sections = self._create_group_sections(conn, eds_file_id)
             sections.extend(group_sections)
 
-            # [Assembly] section
-            assembly_section = self._create_assembly_section(conn, eds_file_id)
+            # [Assembly] section (extracted from original - field data not yet parsed/stored)
+            assembly_section = self._extract_section_from_original(conn, eds_file_id, 'Assembly')
             if assembly_section:
                 sections.append(assembly_section)
 
@@ -103,14 +108,64 @@ class EDSReconstructor:
             if capacity_section:
                 sections.append(capacity_section)
 
-            # [TSpecs] section
-            tspec_section = self._create_tspec_section(conn, eds_file_id)
-            if tspec_section:
-                sections.append(tspec_section)
+            # Note: TSpecs are included in [Capacity] section, not separate [TSpecs] section
+            # tspec_section = self._create_tspec_section(conn, eds_file_id)
+            # if tspec_section:
+            #     sections.append(tspec_section)
 
             # [Modules] section (if applicable)
             module_sections = self._create_module_sections(conn, eds_file_id)
             sections.extend(module_sections)
+
+            # [DLR Class] section
+            dlr_section = self._create_dlr_section(conn, eds_file_id)
+            if dlr_section:
+                sections.append(dlr_section)
+
+            # [TCP/IP Interface Class] section
+            tcpip_section = self._create_tcpip_section(conn, eds_file_id)
+            if tcpip_section:
+                sections.append(tcpip_section)
+
+            # [Ethernet Link Class] section
+            ethernet_section = self._create_ethernet_section(conn, eds_file_id)
+            if ethernet_section:
+                sections.append(ethernet_section)
+
+            # [QoS Class] section
+            qos_section = self._create_qos_section(conn, eds_file_id)
+            if qos_section:
+                sections.append(qos_section)
+
+            # [LLDP Management Class] section
+            lldp_section = self._create_lldp_section(conn, eds_file_id)
+            if lldp_section:
+                sections.append(lldp_section)
+
+            # [Safety Supervisor Class] section (extracted from original - not yet parsed/stored)
+            safety_supervisor_section = self._extract_section_from_original(conn, eds_file_id, 'Safety Supervisor Class')
+            if safety_supervisor_section:
+                sections.append(safety_supervisor_section)
+
+            # [Safety Validator Class] section (extracted from original - not yet parsed/stored)
+            safety_validator_section = self._extract_section_from_original(conn, eds_file_id, 'Safety Validator Class')
+            if safety_validator_section:
+                sections.append(safety_validator_section)
+
+            # [Safety Discrete Output Point Class] section (extracted from original - not yet parsed/stored)
+            safety_output_section = self._extract_section_from_original(conn, eds_file_id, 'Safety Discrete Output Point Class')
+            if safety_output_section:
+                sections.append(safety_output_section)
+
+            # [Safety Discrete Input Point Class] section (extracted from original - not yet parsed/stored)
+            safety_input_section = self._extract_section_from_original(conn, eds_file_id, 'Safety Discrete Input Point Class')
+            if safety_input_section:
+                sections.append(safety_input_section)
+
+            # [LLDP Data Table Class] section (extracted from original - not yet parsed/stored)
+            lldp_data_table_section = self._extract_section_from_original(conn, eds_file_id, 'LLDP Data Table Class')
+            if lldp_data_table_section:
+                sections.append(lldp_data_table_section)
 
             # Join all sections
             return "\n\n".join(sections)
@@ -202,7 +257,7 @@ class EDSReconstructor:
         return "[Device Classification]\n" + "\n".join(class_lines)
 
     def _create_params_section(self, conn: sqlite3.Connection, eds_file_id: int) -> Optional[str]:
-        """Create [Params] section"""
+        """Create [Params] section with inline Enum definitions"""
         cursor = conn.cursor()
         cursor.execute("""
             SELECT * FROM eds_parameters WHERE eds_file_id = ? ORDER BY param_number
@@ -213,7 +268,8 @@ class EDSReconstructor:
             return None
 
         lines = ["[Params]"]
-        lines.append(f"Num_Params = {len(params)}")
+        # Note: Num_Params line is NOT standard in all EDS files, so we omit it
+        # lines.append(f"Num_Params = {len(params)}")
 
         for param in params:
             lines.append(f"Param{param['param_number']} =")
@@ -283,6 +339,52 @@ class EDSReconstructor:
                 # Remove trailing comma from last line
                 lines[-1] = lines[-1].rstrip(',') + ';'
 
+            # Add Enum definition immediately after the parameter
+            enum_definition = self._reconstruct_enum_for_param(conn, param['id'])
+            if enum_definition:
+                lines.append(enum_definition)
+
+        return "\n".join(lines)
+
+    def _reconstruct_enum_for_param(self, conn: sqlite3.Connection, parameter_id: int) -> Optional[str]:
+        """Reconstruct Enum definition for a parameter from eds_enum_values table
+
+        Args:
+            conn: Database connection
+            parameter_id: ID of the parameter
+
+        Returns:
+            Reconstructed enum string like 'Enum1 =\n    0,"Value1",\n    1,"Value2";'
+            or None if no enum values exist
+        """
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT enum_name, enum_value, enum_display, is_default
+            FROM eds_enum_values
+            WHERE parameter_id = ?
+            ORDER BY enum_value
+        """, (parameter_id,))
+        enum_values = cursor.fetchall()
+
+        if not enum_values:
+            return None
+
+        # Use the enum_name from the first entry (they should all be the same)
+        enum_name = enum_values[0]['enum_name']
+
+        lines = [f"{enum_name} ="]
+        for i, enum_val in enumerate(enum_values):
+            # Add comma after each entry except the last
+            is_last = (i == len(enum_values) - 1)
+            terminator = ';' if is_last else ','
+
+            # Optionally mark default values
+            label = enum_val['enum_display']
+            if enum_val['is_default']:
+                label = f"{label} (default)"
+
+            lines.append(f"    {enum_val['enum_value']},\"{label}\"{terminator}")
+
         return "\n".join(lines)
 
     def _create_enum_sections(self, conn: sqlite3.Connection, eds_file_id: int) -> List[str]:
@@ -322,29 +424,37 @@ class EDSReconstructor:
         return sections
 
     def _create_group_sections(self, conn: sqlite3.Connection, eds_file_id: int) -> List[str]:
-        """Create [Group] sections"""
+        """Create single [Groups] section with Group1=, Group2=, etc."""
         cursor = conn.cursor()
         cursor.execute("""
             SELECT * FROM eds_groups WHERE eds_file_id = ? ORDER BY group_number
         """, (eds_file_id,))
         groups = cursor.fetchall()
 
-        sections = []
+        if not groups:
+            return []
+
+        # Create single [Groups] section
+        lines = ["[Groups]"]
+
         for group in groups:
-            section_lines = [f"[Group{group['group_number']}]"]
+            # Group1 = "Name", count, param_list;
+            group_line = f"        Group{group['group_number']} ="
+            lines.append(group_line)
 
             if group['group_name']:
-                section_lines.append(f"GroupName = \"{group['group_name']}\"")
+                lines.append(f'                "{group["group_name"]}",')
 
             if group['parameter_count']:
-                section_lines.append(f"ParamCount = {group['parameter_count']}")
+                lines.append(f"                {group['parameter_count']},")
 
             if group['parameter_list']:
-                section_lines.append(f"ParamList = {group['parameter_list']}")
+                lines.append(f"                {group['parameter_list']};")
+            else:
+                # Remove trailing comma and add semicolon
+                lines[-1] = lines[-1].rstrip(',') + ';'
 
-            sections.append("\n".join(section_lines))
-
-        return sections
+        return ["\n".join(lines)]
 
     def _create_assembly_section(self, conn: sqlite3.Connection, eds_file_id: int) -> Optional[str]:
         """Create [Assembly] section"""
@@ -558,6 +668,274 @@ class EDSReconstructor:
             sections.append("\n".join(section_lines))
 
         return sections
+
+    def _create_dlr_section(self, conn: sqlite3.Connection, eds_file_id: int) -> Optional[str]:
+        """Create [DLR Class] section"""
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT revision, object_name, object_class_code, network_topology,
+                   enable_switch, beacon_interval, beacon_timeout, vlan_id,
+                   max_inst, num_static_instances, max_dynamic_instances
+            FROM eds_dlr_config
+            WHERE file_id = ?
+        """, (eds_file_id,))
+
+        dlr = cursor.fetchone()
+        if not dlr:
+            return None
+
+        lines = ["[DLR Class]"]
+
+        if dlr['revision'] is not None:
+            lines.append(f"    Revision = {dlr['revision']};")
+        if dlr['object_name']:
+            lines.append(f"    Object_Name = {dlr['object_name']};")
+        if dlr['object_class_code'] is not None:
+            lines.append(f"    Object_Class_Code = 0x{dlr['object_class_code']:02X};")
+
+        # Add CIP object instance attributes
+        if dlr['max_inst'] is not None:
+            lines.append(f"    MaxInst = {dlr['max_inst']};")
+        if dlr['num_static_instances'] is not None:
+            lines.append(f"    Number_Of_Static_Instances = {dlr['num_static_instances']};")
+        if dlr['max_dynamic_instances'] is not None:
+            lines.append(f"    Max_Number_Of_Dynamic_Instances = {dlr['max_dynamic_instances']};")
+
+        if dlr['network_topology'] is not None:
+            lines.append(f"    Network_Topology = {dlr['network_topology']};")
+        if dlr['enable_switch'] is not None:
+            lines.append(f"    Enable_Switch = {1 if dlr['enable_switch'] else 0};")
+        if dlr['beacon_interval'] is not None:
+            lines.append(f"    Beacon_Interval = {dlr['beacon_interval']};")
+        if dlr['beacon_timeout'] is not None:
+            lines.append(f"    Beacon_Timeout = {dlr['beacon_timeout']};")
+        if dlr['vlan_id'] is not None:
+            lines.append(f"    VLAN_ID = {dlr['vlan_id']};")
+
+        return "\n".join(lines)
+
+    def _create_tcpip_section(self, conn: sqlite3.Connection, eds_file_id: int) -> Optional[str]:
+        """Create [TCP/IP Interface Class] section"""
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT revision, object_name, object_class_code, interface_config,
+                   host_name, ttl_value, mcast_config, select_acd, encap_timeout,
+                   max_inst, num_static_instances, max_dynamic_instances
+            FROM eds_tcpip_interface
+            WHERE file_id = ?
+        """, (eds_file_id,))
+
+        tcpip = cursor.fetchone()
+        if not tcpip:
+            return None
+
+        lines = ["[TCP/IP Interface Class]"]
+
+        if tcpip['revision'] is not None:
+            lines.append(f"    Revision = {tcpip['revision']};")
+        if tcpip['object_name']:
+            lines.append(f"    Object_Name = {tcpip['object_name']};")
+        if tcpip['object_class_code'] is not None:
+            lines.append(f"    Object_Class_Code = 0x{tcpip['object_class_code']:02X};")
+
+        # Add CIP object instance attributes
+        if tcpip['max_inst'] is not None:
+            lines.append(f"    MaxInst = {tcpip['max_inst']};")
+        if tcpip['num_static_instances'] is not None:
+            lines.append(f"    Number_Of_Static_Instances = {tcpip['num_static_instances']};")
+        if tcpip['max_dynamic_instances'] is not None:
+            lines.append(f"    Max_Number_Of_Dynamic_Instances = {tcpip['max_dynamic_instances']};")
+
+        if tcpip['interface_config'] is not None:
+            lines.append(f"    InterfaceConfig = {tcpip['interface_config']};")
+        if tcpip['host_name']:
+            lines.append(f"    HostName = {tcpip['host_name']};")
+        if tcpip['ttl_value'] is not None:
+            lines.append(f"    TTL_Value = {tcpip['ttl_value']};")
+        if tcpip['mcast_config'] is not None:
+            lines.append(f"    Mcast_Config = {tcpip['mcast_config']};")
+        if tcpip['select_acd'] is not None:
+            lines.append(f"    Select_ACD = {1 if tcpip['select_acd'] else 0};")
+        if tcpip['encap_timeout'] is not None:
+            lines.append(f"    Encap_Timeout = {tcpip['encap_timeout']};")
+
+        return "\n".join(lines)
+
+    def _create_ethernet_section(self, conn: sqlite3.Connection, eds_file_id: int) -> Optional[str]:
+        """Create [Ethernet Link Class] section"""
+        import json
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT revision, object_name, object_class_code, interface_speed,
+                   interface_flags, physical_address, interface_label, interface_labels,
+                   max_inst, num_static_instances, max_dynamic_instances
+            FROM eds_ethernet_link
+            WHERE file_id = ?
+        """, (eds_file_id,))
+
+        eth = cursor.fetchone()
+        if not eth:
+            return None
+
+        lines = ["[Ethernet Link Class]"]
+
+        if eth['revision'] is not None:
+            lines.append(f"    Revision = {eth['revision']};")
+        if eth['object_name']:
+            lines.append(f"    Object_Name = {eth['object_name']};")
+        if eth['object_class_code'] is not None:
+            lines.append(f"    Object_Class_Code = 0x{eth['object_class_code']:02X};")
+
+        # Add CIP object instance attributes
+        if eth['max_inst'] is not None:
+            lines.append(f"    MaxInst = {eth['max_inst']};")
+        if eth['num_static_instances'] is not None:
+            lines.append(f"    Number_Of_Static_Instances = {eth['num_static_instances']};")
+        if eth['max_dynamic_instances'] is not None:
+            lines.append(f"    Max_Number_Of_Dynamic_Instances = {eth['max_dynamic_instances']};")
+
+        if eth['interface_speed'] is not None:
+            lines.append(f"    InterfaceSpeed = {eth['interface_speed']};")
+        if eth['interface_flags'] is not None:
+            lines.append(f"    InterfaceFlags = {eth['interface_flags']};")
+        if eth['physical_address']:
+            lines.append(f"    PhysAddress = {eth['physical_address']};")
+
+        # Handle numbered interface labels (InterfaceLabel1, InterfaceLabel2, etc.)
+        if eth['interface_labels']:
+            try:
+                labels = json.loads(eth['interface_labels'])
+                for i, label in enumerate(labels, 1):
+                    lines.append(f"    InterfaceLabel{i} = {label};")
+            except:
+                pass
+        elif eth['interface_label']:
+            lines.append(f"    InterfaceLabel = {eth['interface_label']};")
+
+        return "\n".join(lines)
+
+    def _create_qos_section(self, conn: sqlite3.Connection, eds_file_id: int) -> Optional[str]:
+        """Create [QoS Class] section"""
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT revision, object_name, object_class_code, qos_tag_enable,
+                   dscp_urgent, dscp_scheduled, dscp_high, dscp_low, dscp_explicit,
+                   max_inst, num_static_instances, max_dynamic_instances
+            FROM eds_qos_config
+            WHERE file_id = ?
+        """, (eds_file_id,))
+
+        qos = cursor.fetchone()
+        if not qos:
+            return None
+
+        lines = ["[QoS Class]"]
+
+        if qos['revision'] is not None:
+            lines.append(f"    Revision = {qos['revision']};")
+        if qos['object_name']:
+            lines.append(f"    Object_Name = {qos['object_name']};")
+        if qos['object_class_code'] is not None:
+            lines.append(f"    Object_Class_Code = 0x{qos['object_class_code']:02X};")
+
+        # Add CIP object instance attributes
+        if qos['max_inst'] is not None:
+            lines.append(f"    MaxInst = {qos['max_inst']};")
+        if qos['num_static_instances'] is not None:
+            lines.append(f"    Number_Of_Static_Instances = {qos['num_static_instances']};")
+        if qos['max_dynamic_instances'] is not None:
+            lines.append(f"    Max_Number_Of_Dynamic_Instances = {qos['max_dynamic_instances']};")
+
+        if qos['qos_tag_enable'] is not None:
+            lines.append(f"    Q_Tag_Enable = {1 if qos['qos_tag_enable'] else 0};")
+        if qos['dscp_urgent'] is not None:
+            lines.append(f"    DSCP_Urgent = {qos['dscp_urgent']};")
+        if qos['dscp_scheduled'] is not None:
+            lines.append(f"    DSCP_Scheduled = {qos['dscp_scheduled']};")
+        if qos['dscp_high'] is not None:
+            lines.append(f"    DSCP_High = {qos['dscp_high']};")
+        if qos['dscp_low'] is not None:
+            lines.append(f"    DSCP_Low = {qos['dscp_low']};")
+        if qos['dscp_explicit'] is not None:
+            lines.append(f"    DSCP_Explicit = {qos['dscp_explicit']};")
+
+        return "\n".join(lines)
+
+    def _create_lldp_section(self, conn: sqlite3.Connection, eds_file_id: int) -> Optional[str]:
+        """Create [LLDP Management Class] section"""
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT revision, object_name, object_class_code, msg_tx_interval,
+                   msg_tx_hold, chassis_id_subtype, chassis_id, port_id_subtype, port_id,
+                   max_inst, num_static_instances, max_dynamic_instances
+            FROM eds_lldp_management
+            WHERE file_id = ?
+        """, (eds_file_id,))
+
+        lldp = cursor.fetchone()
+        if not lldp:
+            return None
+
+        lines = ["[LLDP Management Class]"]
+
+        if lldp['revision'] is not None:
+            lines.append(f"    Revision = {lldp['revision']};")
+        if lldp['object_name']:
+            lines.append(f"    Object_Name = {lldp['object_name']};")
+        if lldp['object_class_code'] is not None:
+            lines.append(f"    Object_Class_Code = 0x{lldp['object_class_code']:02X};")
+
+        # Add CIP object instance attributes
+        if lldp['max_inst'] is not None:
+            lines.append(f"    MaxInst = {lldp['max_inst']};")
+        if lldp['num_static_instances'] is not None:
+            lines.append(f"    Number_Of_Static_Instances = {lldp['num_static_instances']};")
+        if lldp['max_dynamic_instances'] is not None:
+            lines.append(f"    Max_Number_Of_Dynamic_Instances = {lldp['max_dynamic_instances']};")
+
+        if lldp['msg_tx_interval'] is not None:
+            lines.append(f"    MsgTxInterval = {lldp['msg_tx_interval']};")
+        if lldp['msg_tx_hold'] is not None:
+            lines.append(f"    MsgTxHold = {lldp['msg_tx_hold']};")
+        if lldp['chassis_id_subtype'] is not None:
+            lines.append(f"    ChassisIdSubtype = {lldp['chassis_id_subtype']};")
+        if lldp['chassis_id']:
+            lines.append(f"    ChassisId = {lldp['chassis_id']};")
+        if lldp['port_id_subtype'] is not None:
+            lines.append(f"    PortIdSubtype = {lldp['port_id_subtype']};")
+        if lldp['port_id']:
+            lines.append(f"    PortId = {lldp['port_id']};")
+
+        return "\n".join(lines)
+
+    def _extract_section_from_original(self, conn: sqlite3.Connection, eds_file_id: int, section_name: str) -> Optional[str]:
+        """
+        Extract a section verbatim from the original EDS file.
+
+        This is a temporary workaround for sections that haven't been parsed/stored yet.
+        """
+        import re
+
+        # Get original EDS content
+        cursor = conn.cursor()
+        cursor.execute("SELECT eds_content FROM eds_files WHERE id = ?", (eds_file_id,))
+        row = cursor.fetchone()
+
+        if not row or not row['eds_content']:
+            return None
+
+        original_content = row['eds_content']
+
+        # Extract the section using regex
+        pattern = rf'\[{re.escape(section_name)}\](.*?)(?=\n\[|\Z)'
+        match = re.search(pattern, original_content, re.DOTALL)
+
+        if match:
+            # Return the full section including header, stripping trailing whitespace
+            section_content = match.group(0).rstrip()
+            return section_content
+
+        return None
 
 
 def reconstruct_eds_file(eds_file_id: int, db_path: str = "greenstack.db") -> str:

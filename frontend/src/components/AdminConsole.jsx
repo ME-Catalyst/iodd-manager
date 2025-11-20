@@ -4,7 +4,7 @@ import {
   Download, Trash2, BarChart3, Server, Cpu, Package, FileText,
   RefreshCw, Shield, Zap, TrendingUp, Info, BookOpen,
   ExternalLink, Home, Rocket, Terminal, Github, Bug, Search, GitBranch,
-  Wifi, WifiOff, Play, StopCircle, RotateCw, Palette, AlertCircle, XCircle
+  Wifi, WifiOff, Play, StopCircle, RotateCw, Palette, AlertCircle, XCircle, FileCode
 } from 'lucide-react';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle, Button, Badge } from './ui';

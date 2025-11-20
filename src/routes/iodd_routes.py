@@ -7,7 +7,7 @@ from typing import Dict, Any, List, Optional
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
-from src.database import get_db
+from src.database import get_db_connection
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/iodd", tags=["IODD"])
@@ -42,6 +42,9 @@ class MenuResponse(BaseModel):
     menu_id: str
     name: str  # Resolved from textId
     items: List[MenuItemResponse]
+
+    class Config:
+        from_attributes = True
 
 
 class MenuRoleSetResponse(BaseModel):
@@ -79,7 +82,7 @@ async def get_device_menus(
         Complete menu structure with resolved text and parameter data
     """
     try:
-        conn = get_db()
+        conn = get_db_connection()
         conn.row_factory = lambda cursor, row: dict(zip([col[0] for col in cursor.description], row))
         cursor = conn.cursor()
 
@@ -159,6 +162,10 @@ async def get_device_menus(
                                 menu_item['enumeration_values'] = json.loads(param['enumeration_values'])
                             except:
                                 menu_item['enumeration_values'] = None
+                    else:
+                        # Fallback: Use variable_id as display name if no parameter found
+                        # Standard IO-Link variables (V_VendorName, etc.) won't be in parameters table
+                        menu_item['parameter_name'] = item['variable_id']
 
                 elif item.get('record_item_ref'):
                     menu_item['type'] = 'RecordItemRef'
@@ -178,6 +185,9 @@ async def get_device_menus(
                         menu_item['parameter_name'] = param['name']
                         menu_item['parameter_description'] = param['description']
                         menu_item['data_type'] = param['data_type']
+                    else:
+                        # Fallback: Use record_item_ref as display name
+                        menu_item['parameter_name'] = item['record_item_ref']
 
                 elif item.get('button_value'):
                     menu_item['type'] = 'Button'

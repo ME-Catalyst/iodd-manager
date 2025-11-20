@@ -188,6 +188,169 @@ async def run_pqa_analysis(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.post("/analyze-all", response_model=Dict[str, Any])
+async def run_pqa_analysis_all(
+    background_tasks: BackgroundTasks,
+    file_type: Optional[str] = Query(None, description="Filter by file type: IODD or EDS. If not specified, analyzes all types")
+):
+    """
+    Run PQA analysis on all devices/files
+
+    This endpoint queues analysis for all IODD devices and/or EDS files.
+    Analysis runs in background for optimal performance.
+
+    Args:
+        file_type: Optional filter - 'IODD', 'EDS', or None for both
+
+    Returns:
+        Summary of queued analyses
+    """
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+
+        queued_count = 0
+        iodd_count = 0
+        eds_count = 0
+
+        # Queue IODD analyses
+        if not file_type or file_type.upper() == 'IODD':
+            cursor.execute("SELECT id, product_name FROM devices")
+            iodd_devices = cursor.fetchall()
+
+            for device in iodd_devices:
+                device_id = device['id']
+
+                # Get XML content
+                cursor.execute("""
+                    SELECT file_content FROM iodd_assets
+                    WHERE device_id = ? AND file_type = 'xml'
+                    LIMIT 1
+                """, (device_id,))
+                xml_row = cursor.fetchone()
+
+                if xml_row:
+                    xml_content = xml_row['file_content']
+                    if isinstance(xml_content, bytes):
+                        xml_content = xml_content.decode('utf-8')
+
+                    # Queue analysis
+                    def run_analysis(did=device_id, content=xml_content):
+                        try:
+                            orchestrator = UnifiedPQAOrchestrator()
+                            orchestrator.run_full_analysis(did, FileType.IODD, content)
+                            logger.info(f"Completed PQA analysis for IODD device {did}")
+                        except Exception as e:
+                            logger.error(f"PQA analysis failed for IODD {did}: {e}")
+
+                    background_tasks.add_task(run_analysis)
+                    queued_count += 1
+                    iodd_count += 1
+
+        # Queue EDS analyses
+        if not file_type or file_type.upper() == 'EDS':
+            cursor.execute("SELECT id, product_name, eds_content FROM eds_files")
+            eds_files = cursor.fetchall()
+
+            for eds_file in eds_files:
+                eds_id = eds_file['id']
+                eds_content = eds_file['eds_content']
+
+                if eds_content:
+                    # Queue analysis
+                    def run_analysis(eid=eds_id, content=eds_content):
+                        try:
+                            orchestrator = UnifiedPQAOrchestrator()
+                            orchestrator.run_full_analysis(eid, FileType.EDS, content)
+                            logger.info(f"Completed PQA analysis for EDS file {eid}")
+                        except Exception as e:
+                            logger.error(f"PQA analysis failed for EDS {eid}: {e}")
+
+                    background_tasks.add_task(run_analysis)
+                    queued_count += 1
+                    eds_count += 1
+
+        conn.close()
+
+        return {
+            "status": "queued",
+            "message": f"Queued {queued_count} analyses ({iodd_count} IODD, {eds_count} EDS)",
+            "total_queued": queued_count,
+            "iodd_queued": iodd_count,
+            "eds_queued": eds_count
+        }
+
+    except Exception as e:
+        logger.error(f"Error queuing bulk analyses: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/analyzed-devices", response_model=List[Dict[str, Any]])
+async def get_analyzed_devices():
+    """
+    Get list of all devices that have been analyzed
+
+    Returns a list of devices with their latest analysis metrics.
+    Useful for the Analysis History list view.
+    """
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT
+                m.device_id,
+                a.file_type,
+                MAX(m.analysis_timestamp) as latest_analysis,
+                COUNT(m.id) as analysis_count,
+                (SELECT overall_score FROM pqa_quality_metrics m2
+                 WHERE m2.device_id = m.device_id AND m2.archive_id IN
+                   (SELECT id FROM pqa_file_archive a2 WHERE a2.device_id = m.device_id AND a2.file_type = a.file_type)
+                 ORDER BY m2.analysis_timestamp DESC LIMIT 1) as latest_score,
+                (SELECT passed_threshold FROM pqa_quality_metrics m2
+                 WHERE m2.device_id = m.device_id AND m2.archive_id IN
+                   (SELECT id FROM pqa_file_archive a2 WHERE a2.device_id = m.device_id AND a2.file_type = a.file_type)
+                 ORDER BY m2.analysis_timestamp DESC LIMIT 1) as passed
+            FROM pqa_quality_metrics m
+            JOIN pqa_file_archive a ON m.archive_id = a.id
+            GROUP BY m.device_id, a.file_type
+            ORDER BY latest_analysis DESC
+        """)
+
+        devices = cursor.fetchall()
+
+        result = []
+        for device in devices:
+            device_id = device['device_id']
+            file_type = device['file_type']
+
+            # Get device name
+            if file_type == 'IODD':
+                cursor.execute("SELECT product_name, vendor_name FROM devices WHERE id = ?", (device_id,))
+            else:
+                cursor.execute("SELECT product_name, vendor_name FROM eds_files WHERE id = ?", (device_id,))
+
+            device_row = cursor.fetchone()
+
+            result.append({
+                "id": device_id,
+                "file_type": file_type,
+                "product_name": device_row['product_name'] if device_row else f"Unknown Device {device_id}",
+                "vendor_name": device_row['vendor_name'] if device_row else None,
+                "latest_analysis": device['latest_analysis'],
+                "analysis_count": device['analysis_count'],
+                "latest_score": device['latest_score'],
+                "passed": bool(device['passed'])
+            })
+
+        conn.close()
+        return result
+
+    except Exception as e:
+        logger.error(f"Error fetching analyzed devices: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/metrics/{device_id}", response_model=QualityMetricsResponse)
 async def get_latest_metrics(device_id: int, file_type: str = Query("IODD", description="IODD or EDS")):
     """Get latest quality metrics for a device"""

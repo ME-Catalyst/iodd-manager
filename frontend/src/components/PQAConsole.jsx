@@ -27,10 +27,12 @@ const PQAConsole = ({ API_BASE, toast }) => {
   const [selectedFileType, setSelectedFileType] = useState('IODD');
   const [devices, setDevices] = useState([]);
   const [analysisHistory, setAnalysisHistory] = useState([]);
+  const [analyzedDevices, setAnalyzedDevices] = useState([]);
   const [selectedMetric, setSelectedMetric] = useState(null);
   const [diffDetails, setDiffDetails] = useState(null);
   const [expandedFailure, setExpandedFailure] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [runningAll, setRunningAll] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterSeverity, setFilterSeverity] = useState('all');
   const [showThresholdModal, setShowThresholdModal] = useState(false);
@@ -47,6 +49,7 @@ const PQAConsole = ({ API_BASE, toast }) => {
   useEffect(() => {
     loadPQAData();
     loadDevices();
+    loadAnalyzedDevices();
   }, []);
 
   useEffect(() => {
@@ -54,6 +57,12 @@ const PQAConsole = ({ API_BASE, toast }) => {
       loadAnalysisHistory(selectedDevice.id);
     }
   }, [selectedDevice, activeView]);
+
+  useEffect(() => {
+    if (activeView === 'history') {
+      loadAnalyzedDevices();
+    }
+  }, [activeView]);
 
   useEffect(() => {
     if (selectedMetric && activeView === 'diff') {
@@ -131,6 +140,15 @@ const PQAConsole = ({ API_BASE, toast }) => {
     }
   };
 
+  const loadAnalyzedDevices = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/api/pqa/analyzed-devices`);
+      setAnalyzedDevices(res.data || []);
+    } catch (error) {
+      console.error('Error loading analyzed devices:', error);
+    }
+  };
+
   const runAnalysis = async (deviceId, fileType) => {
     setAnalyzing(true);
     try {
@@ -159,6 +177,7 @@ const PQAConsole = ({ API_BASE, toast }) => {
 
       setTimeout(() => {
         loadPQAData();
+        loadAnalyzedDevices();
         if (selectedDevice && selectedDevice.id === deviceId) {
           loadAnalysisHistory(deviceId);
         }
@@ -171,6 +190,34 @@ const PQAConsole = ({ API_BASE, toast }) => {
       });
     } finally {
       setAnalyzing(false);
+    }
+  };
+
+  const runAllAnalyses = async (fileTypeFilter = null) => {
+    setRunningAll(true);
+    try {
+      const params = fileTypeFilter ? `?file_type=${fileTypeFilter}` : '';
+      const res = await axios.post(`${API_BASE}/api/pqa/analyze-all${params}`);
+
+      toast?.({
+        title: 'Bulk Analysis Started',
+        description: res.data.message || `Queued analyses for ${res.data.total_queued} devices`,
+        variant: 'success'
+      });
+
+      // Refresh data after a delay
+      setTimeout(() => {
+        loadPQAData();
+        loadAnalyzedDevices();
+      }, 5000);
+    } catch (error) {
+      toast?.({
+        title: 'Bulk Analysis Failed',
+        description: error.response?.data?.detail || 'Could not start bulk analysis',
+        variant: 'error'
+      });
+    } finally {
+      setRunningAll(false);
     }
   };
 
@@ -684,9 +731,44 @@ const PQAConsole = ({ API_BASE, toast }) => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Run All Button */}
+            <div className="p-4 bg-brand-green/10 rounded-lg border border-brand-green/30">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <h3 className="font-semibold text-foreground">Bulk Analysis</h3>
+                  <p className="text-sm text-muted-foreground">Analyze all devices at once for comprehensive quality metrics</p>
+                </div>
+                <Zap className="w-6 h-6 text-brand-green opacity-50" />
+              </div>
+              <div className="flex gap-2 mt-3">
+                <Button
+                  onClick={() => runAllAnalyses()}
+                  disabled={runningAll}
+                  className="flex-1 bg-brand-green hover:bg-brand-green/80 text-black font-semibold"
+                >
+                  {runningAll ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Zap className="w-4 h-4 mr-2" />}
+                  Run All ({devices.length} devices)
+                </Button>
+                <Button
+                  onClick={() => runAllAnalyses('IODD')}
+                  disabled={runningAll}
+                  className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-500"
+                >
+                  IODD Only
+                </Button>
+                <Button
+                  onClick={() => runAllAnalyses('EDS')}
+                  disabled={runningAll}
+                  className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-500"
+                >
+                  EDS Only
+                </Button>
+              </div>
+            </div>
+
             {/* File Type Selector */}
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">File Type:</label>
+              <label className="text-sm font-semibold text-foreground">Filter Individual Devices:</label>
               <div className="flex gap-2">
                 <Button
                   onClick={() => setSelectedFileType('all')}

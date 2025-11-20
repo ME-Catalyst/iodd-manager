@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Activity, AlertCircle, XCircle, CheckCircle, Target, BarChart,
-  ArrowRight, ChevronDown, ChevronRight, RefreshCw, TrendingUp,
+  ArrowRight, ChevronDown, ChevronRight, ChevronLeft, RefreshCw, TrendingUp,
   AlertTriangle, FileText, Play, Clock, Database, Eye, Settings,
   Plus, Edit, Trash2, Search, Filter, Download, Upload, Code,
   GitCompare, FileCode, Hash, Calendar, User, Zap
@@ -875,12 +875,98 @@ const PQAConsole = ({ API_BASE, toast }) => {
         </Card>
       )}
 
-      {/* Analysis History View */}
+      {/* Analysis History View - All Analyzed Devices List */}
+      {activeView === 'history' && !selectedDevice && (
+        <Card className="bg-card border-border">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-brand-green" />
+                Analysis History - All Analyzed Devices
+              </div>
+              <Button
+                size="sm"
+                onClick={() => loadAnalyzedDevices()}
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Refresh
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {analyzedDevices.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Clock className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p>No devices have been analyzed yet</p>
+                <p className="text-sm mt-2">Run an analysis or upload a device to get started</p>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-[600px] overflow-y-auto">
+                {analyzedDevices.map((device) => (
+                  <div
+                    key={`${device.id}-${device.file_type}`}
+                    className={`p-4 rounded-lg border ${getScoreBgColor(device.latest_score)} cursor-pointer hover:opacity-80 transition-opacity`}
+                    onClick={() => {
+                      setSelectedDevice(device);
+                      loadAnalysisHistory(device.id);
+                    }}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Badge className={device.file_type === 'IODD' ? 'bg-blue-500/20 text-blue-500' : 'bg-purple-500/20 text-purple-500'}>
+                          {device.file_type}
+                        </Badge>
+                        <Badge className={device.passed ? 'bg-success/20 text-success' : 'bg-error/20 text-error'}>
+                          {device.passed ? 'PASSING' : 'FAILING'}
+                        </Badge>
+                        <span className={`text-2xl font-bold ${getScoreColor(device.latest_score)}`}>
+                          {device.latest_score?.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {device.analysis_count} {device.analysis_count === 1 ? 'analysis' : 'analyses'}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-semibold text-foreground">
+                          {device.product_name}
+                        </div>
+                        {device.vendor_name && (
+                          <div className="text-sm text-muted-foreground">
+                            {device.vendor_name}
+                          </div>
+                        )}
+                        <div className="text-xs text-muted-foreground mt-1">
+                          Device ID: {device.id}
+                        </div>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <div>Latest: {new Date(device.latest_analysis).toLocaleString()}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Analysis History View - Single Device History */}
       {activeView === 'history' && selectedDevice && (
         <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setSelectedDevice(null)}
+                >
+                  <ChevronLeft className="w-4 h-4 mr-1" />
+                  Back
+                </Button>
                 <Clock className="w-5 h-5 text-brand-green" />
                 Analysis History - {selectedDevice.file_type} Device #{selectedDevice.id || selectedDevice.device_id}
               </div>

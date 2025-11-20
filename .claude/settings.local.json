@@ -80,7 +80,9 @@
       "Bash(if exist node_modules rmdir /s /q node_modules)",
       "Bash(if exist package-lock.json del package-lock.json)",
       "Bash(scripts/setup.bat)",
-      "Bash(npm cache clean:*)"
+      "Bash(npm cache clean:*)",
+      "Bash(alembic current:*)",
+      "Bash(alembic history:*)"
     ],
     "deny": [],
     "ask": []

@@ -7,10 +7,18 @@ from typing import Dict, Any, List, Optional
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
-from src.database import get_db_connection
+import sqlite3
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/iodd", tags=["IODD"])
+
+
+# Database helper
+def get_db():
+    """Get database connection"""
+    conn = sqlite3.connect("greenstack.db")
+    conn.row_factory = lambda cursor, row: dict(zip([col[0] for col in cursor.description], row))
+    return conn
 
 
 class MenuItemResponse(BaseModel):
@@ -82,8 +90,7 @@ async def get_device_menus(
         Complete menu structure with resolved text and parameter data
     """
     try:
-        conn = get_db_connection()
-        conn.row_factory = lambda cursor, row: dict(zip([col[0] for col in cursor.description], row))
+        conn = get_db()
         cursor = conn.cursor()
 
         # Fetch all menus for this device

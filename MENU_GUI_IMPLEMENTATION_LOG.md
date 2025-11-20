@@ -115,17 +115,36 @@ Transform the parsed IODD UserInterface menu structure into a fully functional, 
 - **Status**: API partially functional, needs additional debugging
 - **Next**: Fix role_sets query and verify complete API response
 
+### 2025-11-20 - Step 4: Database Connection Pattern Fix
+- ✅ Root cause identified: `get_db_connection()` returns context manager, not direct connection
+- ✅ Fixed by implementing local `get_db()` function (following pattern from pqa_routes.py)
+- ✅ Removed problematic context manager import
+- ✅ Added `import sqlite3` and direct connection pattern
+- ✅ Fixed indentation issues from failed context manager attempt
+- ✅ Moved `role_sets` creation outside for loop (was creating it inside loop)
+- ✅ Added proper `conn.close()` before return
+- ✅ Server started successfully and API tested
+- ✅ **VERIFIED**: API endpoint working correctly:
+  - `device_id: 56` (fixed - was null)
+  - 7 menus with complete item data
+  - 3 role sets (maintenance, observer, specialist) (fixed - was empty array)
+  - All role sets have proper menu assignments
+- **Status**: Backend API fully functional
+- **Next**: Test frontend component in browser
+
 ---
 
 ## Completed Steps
 1. ✅ Backend API endpoint `/api/iodd/{device_id}/menus` created and registered
 2. ✅ IODDMenuRenderer component created and integrated with MenusTab
+3. ✅ Fixed database connection issues and verified API works correctly
+4. ✅ Verified role_sets and device_id bugs are resolved
 
 ## Current Step
-**Step 3**: Test Menu GUI with Device #56
+**Step 5**: Test frontend component in browser with live data
 
 ## Blockers/Issues
-<!-- None yet -->
+- None currently
 
 ## Notes
 - Menu data already parsed and stored from IODD files

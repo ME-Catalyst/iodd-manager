@@ -668,6 +668,11 @@ class IODDParser:
             name_text_id = name_elem.get('textId') if name_elem is not None else None
             name = self._resolve_text(name_text_id) or f'RecordItem_{subindex}'
 
+            # Get description from textId (PQA reconstruction)
+            desc_elem = ri_elem.find('iodd:Description', self.NAMESPACES)
+            description_text_id = desc_elem.get('textId') if desc_elem is not None else None
+            description = self._resolve_text(description_text_id) if description_text_id else None
+
             # Determine datatype - could be DatatypeRef or SimpleDatatype
             datatype_ref = ri_elem.find('iodd:DatatypeRef', self.NAMESPACES)
             simple_dt = ri_elem.find('iodd:SimpleDatatype', self.NAMESPACES)
@@ -705,6 +710,8 @@ class IODDParser:
                 data_type=data_type,
                 name_text_id=name_text_id,
                 single_values=single_values,
+                description=description,
+                description_text_id=description_text_id,
             ))
 
         return record_items
@@ -782,6 +789,11 @@ class IODDParser:
                     item_name_id = item_name_elem.get('textId') if item_name_elem is not None else None
                     item_name = self._resolve_text(item_name_id) or f'Item {subindex}'
 
+                    # Get record item description (PQA reconstruction)
+                    item_desc_elem = record_item.find('.//iodd:Description', self.NAMESPACES)
+                    item_desc_id = item_desc_elem.get('textId') if item_desc_elem is not None else None
+                    item_description = self._resolve_text(item_desc_id) if item_desc_id else None
+
                     # Get datatype info and single values
                     item_type = 'Unknown'
                     item_bit_length = 8
@@ -841,7 +853,9 @@ class IODDParser:
                         bit_length=item_bit_length,
                         data_type=item_type,
                         single_values=single_values,
-                        name_text_id=item_name_id  # Preserve original textId for PQA
+                        name_text_id=item_name_id,  # Preserve original textId for PQA
+                        description=item_description,
+                        description_text_id=item_desc_id  # PQA reconstruction
                     ))
 
             process_data = ProcessData(
@@ -892,6 +906,11 @@ class IODDParser:
                     item_name_id = item_name_elem.get('textId') if item_name_elem is not None else None
                     item_name = self._resolve_text(item_name_id) or f'Item {subindex}'
 
+                    # Get record item description (PQA reconstruction)
+                    item_desc_elem = record_item.find('.//iodd:Description', self.NAMESPACES)
+                    item_desc_id = item_desc_elem.get('textId') if item_desc_elem is not None else None
+                    item_description = self._resolve_text(item_desc_id) if item_desc_id else None
+
                     # Get datatype info and single values
                     item_type = 'Unknown'
                     item_bit_length = 8
@@ -951,7 +970,9 @@ class IODDParser:
                         bit_length=item_bit_length,
                         data_type=item_type,
                         single_values=single_values,
-                        name_text_id=item_name_id  # Preserve original textId for PQA
+                        name_text_id=item_name_id,  # Preserve original textId for PQA
+                        description=item_description,
+                        description_text_id=item_desc_id  # PQA reconstruction
                     ))
 
             process_data = ProcessData(
@@ -1793,6 +1814,11 @@ class IODDParser:
                 name_text_id = name_elem.get('textId') if name_elem is not None else None
                 item_name = self._resolve_text(name_text_id) or f"Item_{subindex}"
 
+                # Get description (PQA reconstruction)
+                desc_elem = record_item_elem.find('.//iodd:Description', self.NAMESPACES)
+                description_text_id = desc_elem.get('textId') if desc_elem is not None else None
+                description = self._resolve_text(description_text_id) if description_text_id else None
+
                 # Get datatype reference or inline datatype
                 datatype_ref_elem = record_item_elem.find('.//iodd:DatatypeRef', self.NAMESPACES)
                 if datatype_ref_elem is not None:
@@ -1812,7 +1838,9 @@ class IODDParser:
                         bit_offset=int(bit_offset),
                         bit_length=int(record_item_elem.get('bitLength', 0)),
                         data_type=datatype_ref or 'Unknown',
-                        name_text_id=name_text_id  # Preserve original textId for PQA
+                        name_text_id=name_text_id,  # Preserve original textId for PQA
+                        description=description,
+                        description_text_id=description_text_id  # PQA reconstruction
                     ))
 
             datatypes.append(CustomDatatype(

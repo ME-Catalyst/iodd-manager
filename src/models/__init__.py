@@ -121,6 +121,8 @@ class RecordItem:
     default_value: Optional[str] = None
     single_values: List[SingleValue] = field(default_factory=list)
     name_text_id: Optional[str] = None  # Original textId for Name element (PQA)
+    description: Optional[str] = None  # Description text (PQA)
+    description_text_id: Optional[str] = None  # Original textId for Description element (PQA)
 
 
 @dataclass

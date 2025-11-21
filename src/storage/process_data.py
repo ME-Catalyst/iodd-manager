@@ -103,12 +103,12 @@ class ProcessDataSaver(BaseSaver):
             return
 
         for item in pd.record_items:
-            # Save record item with name_text_id for PQA reconstruction
+            # Save record item with name_text_id and description_text_id for PQA reconstruction
             query = """
                 INSERT INTO process_data_record_items (
                     process_data_id, subindex, name,
-                    bit_offset, bit_length, data_type, default_value, name_text_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    bit_offset, bit_length, data_type, default_value, name_text_id, description_text_id
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
 
             params = (
@@ -120,6 +120,7 @@ class ProcessDataSaver(BaseSaver):
                 getattr(item, 'data_type', None),
                 getattr(item, 'default_value', None),
                 getattr(item, 'name_text_id', None),  # PQA: store original textId
+                getattr(item, 'description_text_id', None),  # PQA: Description textId
             )
 
             self._execute(query, params)

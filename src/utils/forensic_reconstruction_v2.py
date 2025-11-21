@@ -655,6 +655,12 @@ class IODDReconstructor:
                     clean_name = item['name'].replace(' ', '_').replace(',', '').replace('(', '').replace(')', '')
                     name_elem.set('textId', f'TN_RI_{clean_name[:20]}')
 
+            # Add Description element with textId (PQA reconstruction)
+            desc_text_id = item['description_text_id'] if 'description_text_id' in item.keys() else None
+            if desc_text_id:
+                desc_elem = ET.SubElement(record_elem, 'Description')
+                desc_elem.set('textId', desc_text_id)
+
     def _add_variable_record_items(self, conn: sqlite3.Connection, parameter_id: int,
                                    datatype_elem: ET.Element, device_id: int) -> None:
         """Add RecordItem elements to Variable/Datatype for RecordT types
@@ -725,6 +731,12 @@ class IODDReconstructor:
                         # Generate text ID from name
                         clean_name = item['name'].replace(' ', '_').replace(',', '').replace('(', '').replace(')', '')
                         name_elem.set('textId', f'TN_RI_{clean_name[:20]}')
+
+            # Add Description element with textId (PQA reconstruction)
+            description_text_id = item['description_text_id'] if 'description_text_id' in item.keys() else None
+            if description_text_id:
+                desc_elem = ET.SubElement(record_elem, 'Description')
+                desc_elem.set('textId', description_text_id)
 
     def _add_variable_single_values(self, conn: sqlite3.Connection, parameter_id: int,
                                     datatype_elem: ET.Element) -> None:
@@ -921,6 +933,12 @@ class IODDReconstructor:
                         # Final fallback: generate a text ID from the name
                         clean_name = item['name'].replace(' ', '').replace('-', '_')
                         name.set('textId', 'TN_RI_' + clean_name)
+
+            # Add Description element with textId (PQA reconstruction)
+            desc_text_id = item['description_text_id'] if 'description_text_id' in item.keys() else None
+            if desc_text_id:
+                desc_elem = ET.SubElement(record_elem, 'Description')
+                desc_elem.set('textId', desc_text_id)
 
             # Determine whether to use DatatypeRef or SimpleDatatype
             # Base types (ending in 'T' like UIntegerT, IntegerT, StringT) use SimpleDatatype

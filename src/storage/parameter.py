@@ -154,7 +154,7 @@ class ParameterSaver(BaseSaver):
                 getattr(ri, 'name', None),
                 getattr(ri, 'name_text_id', None),
                 getattr(ri, 'description', None),
-                None,  # description_text_id - not currently extracted
+                getattr(ri, 'description_text_id', None),  # PQA reconstruction
                 getattr(ri, 'default_value', None),
                 idx  # order_index
             ))

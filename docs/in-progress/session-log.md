@@ -136,7 +136,7 @@ stored, or reconstructed. This affected ~271 issues across:
 
 ### Fix #6: Variable@id/@index Ordering (400 issues) - COMMITTED
 
-**Commit**: `TBD` feat(pqa): preserve original XML order for Variables
+**Commit**: `40ec80b` feat(pqa): preserve original XML order for Variables
 
 **Problem**: Variables were being reconstructed in `param_index` order (the index attribute value),
 not the original XML document order. This caused ~400 issues where Variable id/index appeared mismatched.

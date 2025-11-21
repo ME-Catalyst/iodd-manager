@@ -493,12 +493,16 @@ class IODDReconstructor:
                 pd_id = 'P_' + pd_id[3:]  # PO_ProcessDataOut -> P_ProcessDataOut
 
             # Then, strip direction suffixes (In/Out/_IN/_OUT)
-            # Be careful to preserve numeric suffixes like "1", "2", etc.
-            # Remove 'In' suffix but not if followed by a digit (e.g., In1 should stay as 1)
-            pd_id = re.sub(r'In(\d*)$', r'\1', pd_id)  # ProcessDataIn -> ProcessData, ProcessDataIn1 -> ProcessData1
-            pd_id = re.sub(r'Out(\d*)$', r'\1', pd_id)  # ProcessDataOut -> ProcessData, ProcessDataOut1 -> ProcessData1
-            pd_id = re.sub(r'_IN(\d*)$', r'\1', pd_id)  # _IN suffix
-            pd_id = re.sub(r'_OUT(\d*)$', r'\1', pd_id)  # _OUT suffix
+            # Be careful to preserve numeric suffixes like "_1", "_2", etc.
+            # Examples:
+            #   P_ProcessDataIn -> P_ProcessData
+            #   P_ProcessDataIn_1 -> P_ProcessData_1
+            #   P_ProcessDataOut -> P_ProcessData
+            #   PD_Modlight_IN -> PD_Modlight
+            pd_id = re.sub(r'In(_?\d*)$', r'\1', pd_id)  # ProcessDataIn -> ProcessData, ProcessDataIn_1 -> ProcessData_1
+            pd_id = re.sub(r'Out(_?\d*)$', r'\1', pd_id)  # ProcessDataOut -> ProcessData
+            pd_id = re.sub(r'_IN(_?\d*)$', r'\1', pd_id)  # _IN suffix
+            pd_id = re.sub(r'_OUT(_?\d*)$', r'\1', pd_id)  # _OUT suffix
             pd_elem.set('id', pd_id)
 
             # Direction (ProcessDataIn or ProcessDataOut) - create child element

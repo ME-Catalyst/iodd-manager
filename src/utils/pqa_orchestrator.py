@@ -55,8 +55,7 @@ class UnifiedPQAOrchestrator:
         self.eds_analyzer = EDSDiffAnalyzer(db_path)
 
     def run_full_analysis(self, file_id: int, file_type: FileType,
-                         original_content: str,
-                         force: bool = False) -> Tuple[Union[QualityMetrics, EDSQualityMetrics],
+                         original_content: str) -> Tuple[Union[QualityMetrics, EDSQualityMetrics],
                                                          Union[List[DiffItem], List[EDSDiffItem]]]:
         """
         Run complete PQA analysis workflow
@@ -73,29 +72,14 @@ class UnifiedPQAOrchestrator:
             file_id: IODD device_id or EDS file_id
             file_type: FileType.IODD or FileType.EDS
             original_content: Original file content
-            force: If True, run analysis even if one already exists
 
         Returns:
             Tuple of (QualityMetrics, DiffItems)
         """
         logger.info(f"Starting PQA analysis for {file_type.value} file {file_id}")
 
-        # Check if analysis already exists (prevent duplicates)
-        if not force:
-            conn = sqlite3.connect(self.db_path)
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT id, overall_score FROM pqa_quality_metrics
-                WHERE device_id = ? ORDER BY analysis_timestamp DESC LIMIT 1
-            """, (file_id,))
-            existing = cursor.fetchone()
-            conn.close()
-
-            if existing:
-                logger.info(f"PQA analysis already exists for {file_type.value} {file_id} (score: {existing['overall_score']:.1f}%), skipping")
-                # Return the existing metrics
-                return self._get_existing_metrics(file_id, file_type)
+        # Delete any existing analysis for this device (we only keep the latest)
+        self._delete_existing_analysis(file_id)
 
         try:
             # Step 1: Archive original file
@@ -174,6 +158,30 @@ class UnifiedPQAOrchestrator:
             logger.error(f"PQA analysis failed for {file_type.value} {file_id}: {e}")
             raise
 
+    def _delete_existing_analysis(self, file_id: int) -> None:
+        """Delete any existing PQA analysis for this device (we only keep the latest)"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        try:
+            # Delete diff details first (foreign key constraint)
+            cursor.execute("""
+                DELETE FROM pqa_diff_details
+                WHERE metric_id IN (SELECT id FROM pqa_quality_metrics WHERE device_id = ?)
+            """, (file_id,))
+
+            # Delete quality metrics
+            cursor.execute("DELETE FROM pqa_quality_metrics WHERE device_id = ?", (file_id,))
+
+            # Delete file archives
+            cursor.execute("DELETE FROM pqa_file_archive WHERE device_id = ?", (file_id,))
+
+            conn.commit()
+            logger.debug(f"Deleted existing PQA data for device {file_id}")
+
+        finally:
+            conn.close()
+
     def _archive_original_file(self, file_id: int, file_type: FileType,
                                content: str) -> int:
         """Archive original file in pqa_file_archive table"""
@@ -232,90 +240,6 @@ class UnifiedPQAOrchestrator:
             return self.iodd_analyzer.analyze(original, reconstructed)
         else:  # EDS
             return self.eds_analyzer.analyze(original, reconstructed)
-
-    def _get_existing_metrics(self, file_id: int, file_type: FileType
-                             ) -> Tuple[Union[QualityMetrics, EDSQualityMetrics],
-                                       Union[List[DiffItem], List[EDSDiffItem]]]:
-        """Retrieve existing metrics for a file that was already analyzed"""
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-
-        try:
-            # Get latest metrics
-            cursor.execute("""
-                SELECT * FROM pqa_quality_metrics
-                WHERE device_id = ? ORDER BY analysis_timestamp DESC LIMIT 1
-            """, (file_id,))
-            row = cursor.fetchone()
-
-            if not row:
-                raise ValueError(f"No existing metrics found for {file_type.value} {file_id}")
-
-            # Create appropriate metrics object
-            if file_type == FileType.IODD:
-                metrics = QualityMetrics(
-                    overall_score=row['overall_score'],
-                    structural_score=row['structural_score'],
-                    attribute_score=row['attribute_score'],
-                    value_score=row['value_score'],
-                    data_loss_percentage=row['data_loss_percentage'],
-                    critical_data_loss=bool(row['critical_data_loss']),
-                    phase1_score=row['phase1_score'] or 0.0,
-                    phase2_score=row['phase2_score'] or 0.0,
-                    phase3_score=row['phase3_score'] or 0.0,
-                    phase4_score=row['phase4_score'] or 0.0,
-                    phase5_score=row['phase5_score'] or 0.0,
-                    total_elements_original=row['total_elements_original'] or 0,
-                    total_elements_reconstructed=row['total_elements_reconstructed'] or 0,
-                    missing_elements=row['missing_elements'] or 0,
-                    extra_elements=row['extra_elements'] or 0
-                )
-            else:
-                metrics = EDSQualityMetrics(
-                    overall_score=row['overall_score'],
-                    structural_score=row['structural_score'],
-                    attribute_score=row['attribute_score'],
-                    value_score=row['value_score'],
-                    data_loss_percentage=row['data_loss_percentage'],
-                    critical_data_loss=bool(row['critical_data_loss'])
-                )
-
-            # Get diff items
-            cursor.execute("""
-                SELECT * FROM pqa_diff_details
-                WHERE metric_id = ?
-            """, (row['id'],))
-            diff_rows = cursor.fetchall()
-
-            diff_items = []
-            for d in diff_rows:
-                if file_type == FileType.IODD:
-                    from .pqa_diff_analyzer import DiffType
-                    diff_items.append(DiffItem(
-                        diff_type=DiffType(d['diff_type']),
-                        severity=d['severity'],
-                        xpath=d['xpath'],
-                        expected_value=d['expected_value'],
-                        actual_value=d['actual_value'],
-                        description=d['description'],
-                        phase=d['phase']
-                    ))
-                else:
-                    from .eds_diff_analyzer import EDSDiffType
-                    diff_items.append(EDSDiffItem(
-                        diff_type=EDSDiffType(d['diff_type']),
-                        severity=d['severity'],
-                        section=d['xpath'],  # xpath stores section for EDS
-                        key=d['expected_value'],  # expected_value stores key
-                        expected=d['actual_value'],  # actual_value stores expected
-                        actual=d['description']  # description stores actual
-                    ))
-
-            return metrics, diff_items
-
-        finally:
-            conn.close()
 
     def _save_quality_metrics(self, file_id: int, archive_id: int,
                              metrics: Union[QualityMetrics, EDSQualityMetrics],
@@ -717,30 +641,30 @@ Parser quality still needs improvement to meet the threshold.
 
 # Convenience functions
 def analyze_iodd_quality(device_id: int, original_xml: str,
-                        db_path: str = "greenstack.db",
-                        force: bool = False) -> Tuple[QualityMetrics, List[DiffItem]]:
+                        db_path: str = "greenstack.db") -> Tuple[QualityMetrics, List[DiffItem]]:
     """Analyze IODD parser quality
 
     Args:
         device_id: IODD device ID
         original_xml: Original XML content
         db_path: Database path
-        force: If True, run analysis even if one already exists
+
+    Note: Any existing analysis for this device is automatically replaced.
     """
     orchestrator = UnifiedPQAOrchestrator(db_path)
-    return orchestrator.run_full_analysis(device_id, FileType.IODD, original_xml, force=force)
+    return orchestrator.run_full_analysis(device_id, FileType.IODD, original_xml)
 
 
 def analyze_eds_quality(eds_file_id: int, original_eds: str,
-                       db_path: str = "greenstack.db",
-                       force: bool = False) -> Tuple[EDSQualityMetrics, List[EDSDiffItem]]:
+                       db_path: str = "greenstack.db") -> Tuple[EDSQualityMetrics, List[EDSDiffItem]]:
     """Analyze EDS parser quality
 
     Args:
         eds_file_id: EDS file ID
         original_eds: Original EDS content
         db_path: Database path
-        force: If True, run analysis even if one already exists
+
+    Note: Any existing analysis for this device is automatically replaced.
     """
     orchestrator = UnifiedPQAOrchestrator(db_path)
-    return orchestrator.run_full_analysis(eds_file_id, FileType.EDS, original_eds, force=force)
+    return orchestrator.run_full_analysis(eds_file_id, FileType.EDS, original_eds)

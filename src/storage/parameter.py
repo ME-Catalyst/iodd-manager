@@ -46,8 +46,11 @@ class ParameterSaver(BaseSaver):
                     access_rights, default_value, min_value,
                     max_value, unit, description, enumeration_values, bit_length,
                     dynamic, excluded_from_data_storage, modifies_other_variables,
-                    unit_code, value_range_name, variable_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    unit_code, value_range_name, variable_id,
+                    array_count, array_element_type, subindex_access_supported,
+                    array_element_bit_length, array_element_fixed_length,
+                    name_text_id, description_text_id
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
 
             self._execute(query, (
@@ -69,6 +72,15 @@ class ParameterSaver(BaseSaver):
                 getattr(param, 'unit_code', None),
                 getattr(param, 'value_range_name', None),
                 getattr(param, 'id', None),  # variable_id is stored as param.id
+                # ArrayT specific fields
+                getattr(param, 'array_count', None),
+                getattr(param, 'array_element_type', None),
+                1 if getattr(param, 'subindex_access_supported', None) else (0 if getattr(param, 'subindex_access_supported', None) is False else None),
+                getattr(param, 'array_element_bit_length', None),
+                getattr(param, 'array_element_fixed_length', None),
+                # PQA reconstruction fields
+                getattr(param, 'name_text_id', None),
+                getattr(param, 'description_text_id', None),
             ))
 
             parameter_id = self._get_lastrowid()
@@ -84,6 +96,11 @@ class ParameterSaver(BaseSaver):
             if single_values:
                 self._save_single_values(parameter_id, single_values)
 
+            # Save RecordItemInfo if present (for RecordT variables)
+            record_item_info = getattr(param, '_record_item_info', [])
+            if record_item_info:
+                self._save_record_item_info(parameter_id, record_item_info)
+
         logger.info(f"Saved {len(parameters)} parameters for device {device_id}")
         if params_with_record_items:
             logger.info(f"Saved record_items for {len(params_with_record_items)} RecordT parameters")
@@ -96,15 +113,6 @@ class ParameterSaver(BaseSaver):
             parameter_id: Database ID of the parent parameter
             record_items: List of RecordItem objects
         """
-        query = """
-            INSERT INTO parameter_record_items (
-                parameter_id, subindex, bit_offset, bit_length,
-                datatype_ref, simple_datatype, name, name_text_id,
-                description, description_text_id, default_value, order_index
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """
-
-        items_list = []
         for idx, ri in enumerate(record_items):
             # Determine if datatype is a reference or simple
             data_type = getattr(ri, 'data_type', None)
@@ -118,7 +126,15 @@ class ParameterSaver(BaseSaver):
             elif data_type:
                 simple_datatype = data_type
 
-            items_list.append((
+            # Insert RecordItem
+            query = """
+                INSERT INTO parameter_record_items (
+                    parameter_id, subindex, bit_offset, bit_length,
+                    datatype_ref, simple_datatype, name, name_text_id,
+                    description, description_text_id, default_value, order_index
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """
+            self._execute(query, (
                 parameter_id,
                 getattr(ri, 'subindex', 0),
                 getattr(ri, 'bit_offset', 0),
@@ -133,7 +149,12 @@ class ParameterSaver(BaseSaver):
                 idx  # order_index
             ))
 
-        self._execute_many(query, items_list)
+            record_item_id = self._get_lastrowid()
+
+            # Save SingleValues for this RecordItem
+            single_values = getattr(ri, 'single_values', [])
+            if single_values:
+                self._save_record_item_single_values(record_item_id, single_values)
 
     def _save_single_values(self, parameter_id: int, single_values: list) -> None:
         """
@@ -157,6 +178,60 @@ class ParameterSaver(BaseSaver):
                 getattr(sv, 'name', None),
                 getattr(sv, 'text_id', None),
                 getattr(sv, 'xsi_type', None),
+                idx  # order_index
+            ))
+
+        self._execute_many(query, values_list)
+
+    def _save_record_item_info(self, parameter_id: int, record_item_info: list) -> None:
+        """
+        Save RecordItemInfo elements for a RecordT parameter
+
+        Args:
+            parameter_id: Database ID of the parent parameter
+            record_item_info: List of dicts with subindex, default_value, and boolean attributes
+        """
+        query = """
+            INSERT INTO variable_record_item_info (
+                parameter_id, subindex, default_value, excluded_from_data_storage,
+                modifies_other_variables, order_index
+            ) VALUES (?, ?, ?, ?, ?, ?)
+        """
+
+        values_list = []
+        for idx, rii in enumerate(record_item_info):
+            values_list.append((
+                parameter_id,
+                rii.get('subindex', 0),
+                rii.get('default_value'),
+                1 if rii.get('excluded_from_data_storage', False) else 0,
+                1 if rii.get('modifies_other_variables', False) else 0,
+                idx  # order_index
+            ))
+
+        self._execute_many(query, values_list)
+
+    def _save_record_item_single_values(self, record_item_id: int, single_values: list) -> None:
+        """
+        Save SingleValue elements for a RecordItem's SimpleDatatype
+
+        Args:
+            record_item_id: Database ID of the parent record item
+            single_values: List of SingleValue objects
+        """
+        query = """
+            INSERT INTO record_item_single_values (
+                record_item_id, value, name, name_text_id, order_index
+            ) VALUES (?, ?, ?, ?, ?)
+        """
+
+        values_list = []
+        for idx, sv in enumerate(single_values):
+            values_list.append((
+                record_item_id,
+                getattr(sv, 'value', ''),
+                getattr(sv, 'name', None),
+                getattr(sv, 'text_id', None),
                 idx  # order_index
             ))
 

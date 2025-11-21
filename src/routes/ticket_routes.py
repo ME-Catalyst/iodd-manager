@@ -61,9 +61,10 @@ class CommentCreate(BaseModel):
 def generate_ticket_number(conn):
     """Generate a unique ticket number like TICKET-0001"""
     cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(*) FROM tickets")
-    count = cursor.fetchone()[0]
-    return f"TICKET-{str(count + 1).zfill(4)}"
+    # Use MAX to get the highest ticket number, not COUNT (which can cause conflicts after deletions)
+    cursor.execute("SELECT MAX(CAST(SUBSTR(ticket_number, 8) AS INTEGER)) FROM tickets WHERE ticket_number LIKE 'TICKET-%'")
+    max_num = cursor.fetchone()[0] or 0
+    return f"TICKET-{str(max_num + 1).zfill(4)}"
 
 
 def get_ticket_with_details(conn, ticket_id: int):

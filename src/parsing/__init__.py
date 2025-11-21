@@ -32,6 +32,7 @@ from src.models import (
     RecordItem,
     SingleValue,
     StdVariableRef,
+    StdVariableRefSingleValue,
     TestEventTrigger,
     UserInterfaceMenus,
     VendorInfo,
@@ -290,15 +291,15 @@ class IODDParser:
         excluded_from_data_storage = var_elem.get('excludedFromDataStorage', 'false').lower() == 'true'
         modifies_other_variables = var_elem.get('modifiesOtherVariables', 'false').lower() == 'true'
 
-        # Get name from textId reference
-        name_elem = var_elem.find('.//iodd:Name', self.NAMESPACES)
-        name_id = name_elem.get('textId') if name_elem is not None else None
-        param_name = self._resolve_text(name_id) or var_id
+        # Get name from textId reference (store textId for PQA reconstruction)
+        name_elem = var_elem.find('iodd:Name', self.NAMESPACES)  # Direct child only
+        name_text_id = name_elem.get('textId') if name_elem is not None else None
+        param_name = self._resolve_text(name_text_id) or var_id
 
-        # Get description from textId reference
-        desc_elem = var_elem.find('.//iodd:Description', self.NAMESPACES)
-        desc_id = desc_elem.get('textId') if desc_elem is not None else None
-        description = self._resolve_text(desc_id)
+        # Get description from textId reference (store textId for PQA reconstruction)
+        desc_elem = var_elem.find('iodd:Description', self.NAMESPACES)  # Direct child only
+        description_text_id = desc_elem.get('textId') if desc_elem is not None else None
+        description = self._resolve_text(description_text_id)
 
         # Parse datatype
         datatype_info = self._parse_variable_datatype(var_elem)
@@ -308,6 +309,21 @@ class IODDParser:
             access_rights = AccessRights(access_rights_str)
         except ValueError:
             access_rights = AccessRights.READ_WRITE
+
+        # Extract RecordItemInfo elements (for RecordT variables)
+        record_item_info = []
+        for rii_elem in var_elem.findall('iodd:RecordItemInfo', self.NAMESPACES):
+            rii_subindex = rii_elem.get('subindex')
+            rii_default = rii_elem.get('defaultValue')
+            rii_excluded = rii_elem.get('excludedFromDataStorage', 'false') == 'true'
+            rii_modifies = rii_elem.get('modifiesOtherVariables', 'false') == 'true'
+            if rii_subindex is not None:
+                record_item_info.append({
+                    'subindex': int(rii_subindex),
+                    'default_value': rii_default,
+                    'excluded_from_data_storage': rii_excluded,
+                    'modifies_other_variables': rii_modifies,
+                })
 
         # Create parameter
         param = Parameter(
@@ -330,8 +346,20 @@ class IODDParser:
             unit_code=datatype_info.get('unit_code'),
             value_range_name=datatype_info.get('value_range_name'),
             single_values=datatype_info.get('single_values', []),
-            record_items=datatype_info.get('record_items', [])
+            record_items=datatype_info.get('record_items', []),
+            # ArrayT specific fields
+            array_count=datatype_info.get('array_count'),
+            array_element_type=datatype_info.get('array_element_type'),
+            array_element_bit_length=datatype_info.get('array_element_bit_length'),
+            array_element_fixed_length=datatype_info.get('array_element_fixed_length'),
+            subindex_access_supported=datatype_info.get('subindex_access_supported'),
+            # PQA reconstruction fields
+            name_text_id=name_text_id,
+            description_text_id=description_text_id,
         )
+
+        # Store RecordItemInfo as an attribute (not in Parameter model, will be saved separately)
+        param._record_item_info = record_item_info
 
         return param
 
@@ -443,7 +471,9 @@ class IODDParser:
     def _parse_variable_datatype(self, var_elem) -> Dict[str, Any]:
         """Parse datatype information from a Variable element
 
-        Returns dict with keys: data_type, min_value, max_value, enumeration_values, bit_length, record_items
+        Returns dict with keys: data_type, min_value, max_value, enumeration_values, bit_length, record_items,
+        plus ArrayT-specific fields: array_count, array_element_type, array_element_bit_length,
+        array_element_fixed_length, subindex_access_supported
         """
         result = {
             'data_type': IODDDataType.OCTET_STRING,
@@ -451,7 +481,13 @@ class IODDParser:
             'max_value': None,
             'enumeration_values': {},
             'bit_length': None,
-            'record_items': []
+            'record_items': [],
+            # ArrayT specific
+            'array_count': None,
+            'array_element_type': None,
+            'array_element_bit_length': None,
+            'array_element_fixed_length': None,
+            'subindex_access_supported': None,
         }
 
         # Check for DatatypeRef (reference to custom datatype)
@@ -516,6 +552,36 @@ class IODDParser:
             # Extract RecordItems for RecordT types
             if type_str == 'RecordT':
                 result['record_items'] = self._extract_variable_record_items(datatype_elem)
+                # Get subindexAccessSupported for RecordT
+                subindex_supported = datatype_elem.get('subindexAccessSupported')
+                if subindex_supported is not None:
+                    result['subindex_access_supported'] = subindex_supported.lower() == 'true'
+
+            # Extract ArrayT specific data
+            if type_str == 'ArrayT':
+                # Get ArrayT attributes
+                count = datatype_elem.get('count')
+                if count:
+                    result['array_count'] = int(count)
+
+                subindex_supported = datatype_elem.get('subindexAccessSupported')
+                if subindex_supported is not None:
+                    result['subindex_access_supported'] = subindex_supported.lower() == 'true'
+
+                # Get SimpleDatatype child element
+                simple_datatype = datatype_elem.find('iodd:SimpleDatatype', self.NAMESPACES)
+                if simple_datatype is not None:
+                    element_type = simple_datatype.get('{http://www.w3.org/2001/XMLSchema-instance}type')
+                    if element_type:
+                        result['array_element_type'] = element_type
+
+                    element_bit_length = simple_datatype.get('bitLength')
+                    if element_bit_length:
+                        result['array_element_bit_length'] = int(element_bit_length)
+
+                    element_fixed_length = simple_datatype.get('fixedLength')
+                    if element_fixed_length:
+                        result['array_element_fixed_length'] = int(element_fixed_length)
 
         return result
 
@@ -535,6 +601,7 @@ class IODDParser:
             # Determine datatype - could be DatatypeRef or SimpleDatatype
             datatype_ref = ri_elem.find('iodd:DatatypeRef', self.NAMESPACES)
             simple_dt = ri_elem.find('iodd:SimpleDatatype', self.NAMESPACES)
+            single_values = []
 
             if datatype_ref is not None:
                 data_type = datatype_ref.get('datatypeId', 'Unknown')
@@ -542,6 +609,20 @@ class IODDParser:
             elif simple_dt is not None:
                 data_type = simple_dt.get('{http://www.w3.org/2001/XMLSchema-instance}type', 'UIntegerT')
                 bit_length = int(simple_dt.get('bitLength', 8)) if simple_dt.get('bitLength') else 8
+
+                # Extract SingleValues from SimpleDatatype
+                for sv_elem in simple_dt.findall('iodd:SingleValue', self.NAMESPACES):
+                    sv_value = sv_elem.get('value')
+                    if sv_value is not None:
+                        sv_name_elem = sv_elem.find('iodd:Name', self.NAMESPACES)
+                        sv_name_text_id = sv_name_elem.get('textId') if sv_name_elem is not None else None
+                        sv_name = self._resolve_text(sv_name_text_id) or ''
+
+                        single_values.append(SingleValue(
+                            value=sv_value,
+                            name=sv_name,
+                            text_id=sv_name_text_id,
+                        ))
             else:
                 data_type = 'Unknown'
                 bit_length = 8
@@ -552,7 +633,8 @@ class IODDParser:
                 bit_offset=bit_offset,
                 bit_length=bit_length or 8,
                 data_type=data_type,
-                name_text_id=name_text_id
+                name_text_id=name_text_id,
+                single_values=single_values,
             ))
 
         return record_items
@@ -1659,12 +1741,49 @@ class IODDParser:
             fixed_len = std_ref.get('fixedLengthRestriction')
             excluded = std_ref.get('excludedFromDataStorage')
 
+            # Extract SingleValue and StdSingleValueRef children
+            single_values = []
+            sv_idx = 0
+
+            # SingleValue children (have Name child with textId)
+            for sv_elem in std_ref.findall('iodd:SingleValue', self.NAMESPACES):
+                value = sv_elem.get('value')
+                if value is None:
+                    continue
+
+                # Get Name element's textId
+                name_elem = sv_elem.find('iodd:Name', self.NAMESPACES)
+                name_text_id = name_elem.get('textId') if name_elem is not None else None
+
+                single_values.append(StdVariableRefSingleValue(
+                    value=value,
+                    name_text_id=name_text_id,
+                    is_std_ref=False,
+                    order_index=sv_idx
+                ))
+                sv_idx += 1
+
+            # StdSingleValueRef children (just value attribute, no Name child)
+            for sv_ref_elem in std_ref.findall('iodd:StdSingleValueRef', self.NAMESPACES):
+                value = sv_ref_elem.get('value')
+                if value is None:
+                    continue
+
+                single_values.append(StdVariableRefSingleValue(
+                    value=value,
+                    name_text_id=None,
+                    is_std_ref=True,
+                    order_index=sv_idx
+                ))
+                sv_idx += 1
+
             refs.append(StdVariableRef(
                 variable_id=var_id,
                 default_value=default_val,
                 fixed_length_restriction=int(fixed_len) if fixed_len else None,
                 excluded_from_data_storage=excluded.lower() == 'true' if excluded else None,
-                order_index=idx
+                order_index=idx,
+                single_values=single_values
             ))
 
         logger.info(f"Extracted {len(refs)} StdVariableRef elements")

@@ -337,8 +337,8 @@ class IODDReconstructor:
 
         features = ET.Element('Features')
 
-        if features_row['block_parameter']:
-            features.set('blockParameter', 'true')
+        # Always emit blockParameter attribute (even when false, for PQA accuracy)
+        features.set('blockParameter', 'true' if features_row['block_parameter'] else 'false')
         if features_row['data_storage']:
             features.set('dataStorage', 'true')
         if features_row['profile_characteristic']:
@@ -547,6 +547,22 @@ class IODDReconstructor:
                 if item['bit_length']:
                     simple_dt.set('bitLength', str(item['bit_length']))
 
+                # Add SingleValue children for this RecordItem's SimpleDatatype
+                cursor.execute("""
+                    SELECT value, name, name_text_id, order_index
+                    FROM record_item_single_values
+                    WHERE record_item_id = ?
+                    ORDER BY order_index
+                """, (item['id'],))
+                ri_single_values = cursor.fetchall()
+
+                for sv in ri_single_values:
+                    sv_elem = ET.SubElement(simple_dt, 'SingleValue')
+                    sv_elem.set('value', sv['value'])
+                    if sv['name_text_id']:
+                        sv_name_elem = ET.SubElement(sv_elem, 'Name')
+                        sv_name_elem.set('textId', sv['name_text_id'])
+
             # Add Name element with textId
             if item['name']:
                 name_elem = ET.SubElement(record_elem, 'Name')
@@ -618,6 +634,11 @@ class IODDReconstructor:
             ri_info_elem.set('subindex', str(item['subindex']))
             if item['default_value'] is not None:
                 ri_info_elem.set('defaultValue', str(item['default_value']))
+            # Always emit boolean attributes as explicit true/false
+            excluded = item['excluded_from_data_storage'] if 'excluded_from_data_storage' in item.keys() else 0
+            modifies = item['modifies_other_variables'] if 'modifies_other_variables' in item.keys() else 0
+            ri_info_elem.set('excludedFromDataStorage', 'true' if excluded else 'false')
+            ri_info_elem.set('modifiesOtherVariables', 'true' if modifies else 'false')
 
     def _create_datatype_collection(self, conn: sqlite3.Connection,
                                    device_id: int) -> Optional[ET.Element]:
@@ -942,7 +963,7 @@ class IODDReconstructor:
 
         # Query stored StdVariableRef elements in original order
         cursor.execute("""
-            SELECT variable_id, default_value, fixed_length_restriction, excluded_from_data_storage, order_index
+            SELECT id, variable_id, default_value, fixed_length_restriction, excluded_from_data_storage, order_index
             FROM std_variable_refs
             WHERE device_id = ?
             ORDER BY order_index
@@ -953,6 +974,12 @@ class IODDReconstructor:
             # Use stored StdVariableRef data for accurate reconstruction
             for ref in std_var_refs:
                 std_ref = ET.SubElement(collection, 'StdVariableRef')
+
+                # Set excludedFromDataStorage first (attribute ordering matters for PQA)
+                if ref['excluded_from_data_storage'] is not None:
+                    std_ref.set('excludedFromDataStorage', 'true' if ref['excluded_from_data_storage'] else 'false')
+
+                # Set id attribute
                 std_ref.set('id', ref['variable_id'])
 
                 if ref['default_value'] is not None:
@@ -961,19 +988,36 @@ class IODDReconstructor:
                 if ref['fixed_length_restriction'] is not None:
                     std_ref.set('fixedLengthRestriction', str(ref['fixed_length_restriction']))
 
-                if ref['excluded_from_data_storage'] is not None:
-                    std_ref.set('excludedFromDataStorage', 'true' if ref['excluded_from_data_storage'] else 'false')
+                # Add SingleValue and StdSingleValueRef children
+                cursor.execute("""
+                    SELECT value, name_text_id, is_std_ref, order_index
+                    FROM std_variable_ref_single_values
+                    WHERE std_variable_ref_id = ?
+                    ORDER BY order_index
+                """, (ref['id'],))
+                single_values = cursor.fetchall()
+
+                for sv in single_values:
+                    if sv['is_std_ref']:
+                        # StdSingleValueRef - just value attribute
+                        sv_elem = ET.SubElement(std_ref, 'StdSingleValueRef')
+                        sv_elem.set('value', sv['value'])
+                    else:
+                        # SingleValue - with Name child
+                        sv_elem = ET.SubElement(std_ref, 'SingleValue')
+                        sv_elem.set('value', sv['value'])
+                        if sv['name_text_id']:
+                            name_elem = ET.SubElement(sv_elem, 'Name')
+                            name_elem.set('textId', sv['name_text_id'])
         else:
             # Fallback to hardcoded standard IO-Link variables if no stored data
             # This maintains backwards compatibility for older imported devices
             self._add_fallback_std_variable_refs(collection, device, variant_row)
 
-        # Phase 3 Task 9c: Create Variable elements from parameters (indices >= 25)
+        # Phase 3 Task 9c: Create Variable elements from parameters
+        # Note: StdVariableRef elements are handled separately above, so we reconstruct
+        # all Variable elements from the parameters table here
         for param in parameters:
-            # Skip parameters with index < 25 (system/standard variables)
-            if param['param_index'] < 25:
-                continue
-
             # Use stored variable_id if available, otherwise generate from name
             var_id = param['variable_id'] if param['variable_id'] else \
                      'V_' + param['name'].replace(' ', '').replace('"', '').replace('-', '_').replace('/', '_')
@@ -986,15 +1030,18 @@ class IODDReconstructor:
             if param['access_rights']:
                 variable.set('accessRights', param['access_rights'])
 
-            # Dynamic attribute
-            if param['dynamic']:
-                variable.set('dynamic', 'true')
+            # defaultValue attribute
+            if param['default_value'] is not None:
+                variable.set('defaultValue', str(param['default_value']))
 
-            # Excluded from data storage (add attribute if explicitly set to false for StringT vars)
-            if param['data_type'] == 'StringT' and var_id in ('V_CP_FunctionTag', 'V_CP_LocationTag'):
-                variable.set('excludedFromDataStorage', 'false')
-            elif param['excluded_from_data_storage']:
-                variable.set('excludedFromDataStorage', 'true')
+            # Dynamic attribute (always emit explicit true/false)
+            variable.set('dynamic', 'true' if param['dynamic'] else 'false')
+
+            # Excluded from data storage (always emit explicit true/false)
+            variable.set('excludedFromDataStorage', 'true' if param['excluded_from_data_storage'] else 'false')
+
+            # Modifies other variables (always emit explicit true/false)
+            variable.set('modifiesOtherVariables', 'true' if param['modifies_other_variables'] else 'false')
 
             # Determine if we should use DatatypeRef or Datatype based on data type
             # Custom datatypes (like D_Percentage, D_Distance, D_Reference, D_LevelOutput) use DatatypeRef
@@ -1021,55 +1068,88 @@ class IODDReconstructor:
                 datatype_elem = ET.SubElement(variable, 'Datatype')
                 if param['data_type']:
                     datatype_elem.set('{http://www.w3.org/2001/XMLSchema-instance}type', param['data_type'])
-                if param['bit_length']:
-                    datatype_elem.set('bitLength', str(param['bit_length']))
 
-                # Add string encoding/fixedLength for StringT
-                if param['data_type'] == 'StringT':
-                    datatype_elem.set('encoding', 'UTF-8')
-                    # Determine fixedLength based on variable ID
-                    if var_id == 'V_FU_HW_ID_Key':
-                        datatype_elem.set('fixedLength', '16')
-                    else:
-                        datatype_elem.set('fixedLength', '32')
+                # Handle ArrayT specific attributes and SimpleDatatype child
+                if param['data_type'] == 'ArrayT':
+                    # Set subindexAccessSupported attribute
+                    if param['subindex_access_supported'] is not None:
+                        datatype_elem.set('subindexAccessSupported', 'true' if param['subindex_access_supported'] else 'false')
+                    # Set count attribute
+                    if param['array_count']:
+                        datatype_elem.set('count', str(param['array_count']))
+                    # Add SimpleDatatype child element
+                    if param['array_element_type']:
+                        simple_dt = ET.SubElement(datatype_elem, 'SimpleDatatype')
+                        simple_dt.set('{http://www.w3.org/2001/XMLSchema-instance}type', param['array_element_type'])
+                        if param['array_element_bit_length']:
+                            simple_dt.set('bitLength', str(param['array_element_bit_length']))
+                        if param['array_element_fixed_length']:
+                            simple_dt.set('fixedLength', str(param['array_element_fixed_length']))
 
-                # Add RecordItems for RecordT types
-                if param['data_type'] == 'RecordT':
+                # Handle RecordT specific attributes
+                elif param['data_type'] == 'RecordT':
+                    if param['subindex_access_supported'] is not None:
+                        datatype_elem.set('subindexAccessSupported', 'true' if param['subindex_access_supported'] else 'false')
+                    if param['bit_length']:
+                        datatype_elem.set('bitLength', str(param['bit_length']))
+                    # Add RecordItems
                     self._add_variable_record_items(conn, param['id'], datatype_elem, device_id)
 
-                # Add SingleValues for enumerated types
-                self._add_variable_single_values(conn, param['id'], datatype_elem)
+                # Handle other types
+                else:
+                    if param['bit_length']:
+                        datatype_elem.set('bitLength', str(param['bit_length']))
 
-            # Add ValueRange if min/max defined and we created a Datatype element (not DatatypeRef)
-            if var_id not in custom_datatype_map:
-                if param['min_value'] is not None or param['max_value'] is not None:
-                    value_range = ET.SubElement(datatype_elem, 'ValueRange')
-                    if param['min_value'] is not None:
-                        value_range.set('lowerValue', str(param['min_value']))
-                    if param['max_value'] is not None:
-                        value_range.set('upperValue', str(param['max_value']))
+                    # Add string encoding/fixedLength for StringT
+                    if param['data_type'] == 'StringT':
+                        datatype_elem.set('encoding', 'UTF-8')
+                        # Determine fixedLength based on variable ID
+                        if var_id == 'V_FU_HW_ID_Key':
+                            datatype_elem.set('fixedLength', '16')
+                        else:
+                            datatype_elem.set('fixedLength', '32')
 
-            # Look up Name and Description text IDs
-            cursor2 = conn.cursor()
+                    # Add SingleValues for enumerated types
+                    self._add_variable_single_values(conn, param['id'], datatype_elem)
 
-            # Try to find Name text ID
-            cursor2.execute("""
-                SELECT text_id FROM iodd_text
-                WHERE device_id = ? AND text_value = ? AND text_id LIKE 'TN_V_%'
-                LIMIT 1
-            """, (device_id, param['name']))
-            name_text_row = cursor2.fetchone()
+                    # Add ValueRange if min/max defined
+                    if param['min_value'] is not None or param['max_value'] is not None:
+                        value_range = ET.SubElement(datatype_elem, 'ValueRange')
+                        if param['min_value'] is not None:
+                            value_range.set('lowerValue', str(param['min_value']))
+                        if param['max_value'] is not None:
+                            value_range.set('upperValue', str(param['max_value']))
 
-            if name_text_row:
+            # Add Name element using stored textId or fallback to lookup
+            name_text_id = param['name_text_id'] if 'name_text_id' in param.keys() else None
+            if name_text_id:
                 name_elem = ET.SubElement(variable, 'Name')
-                name_elem.set('textId', name_text_row['text_id'])
+                name_elem.set('textId', name_text_id)
             else:
-                # Generate text ID from variable name
-                name_elem = ET.SubElement(variable, 'Name')
-                name_elem.set('textId', f'TN_{var_id}')
+                # Fallback: look up or generate text ID
+                cursor2 = conn.cursor()
+                cursor2.execute("""
+                    SELECT text_id FROM iodd_text
+                    WHERE device_id = ? AND text_value = ? AND text_id LIKE 'TN_V_%'
+                    LIMIT 1
+                """, (device_id, param['name']))
+                name_text_row = cursor2.fetchone()
 
-            # Try to find Description text ID
-            if param['description']:
+                if name_text_row:
+                    name_elem = ET.SubElement(variable, 'Name')
+                    name_elem.set('textId', name_text_row['text_id'])
+                else:
+                    name_elem = ET.SubElement(variable, 'Name')
+                    name_elem.set('textId', f'TN_{var_id}')
+
+            # Add Description element using stored textId or fallback to lookup
+            description_text_id = param['description_text_id'] if 'description_text_id' in param.keys() else None
+            if description_text_id:
+                desc_elem = ET.SubElement(variable, 'Description')
+                desc_elem.set('textId', description_text_id)
+            elif param['description']:
+                # Fallback: look up text ID
+                cursor2 = conn.cursor()
                 cursor2.execute("""
                     SELECT text_id FROM iodd_text
                     WHERE device_id = ? AND text_value LIKE ? AND text_id LIKE 'TD_V_%'

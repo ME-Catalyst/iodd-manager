@@ -23,6 +23,7 @@ class StdVariableRefSaver(BaseSaver):
     - fixedLengthRestriction attribute
     - excludedFromDataStorage attribute
     - Original order in the IODD file
+    - SingleValue and StdSingleValueRef children
     """
 
     def save(self, device_id: int, std_variable_refs: List) -> Optional[int]:
@@ -40,13 +41,19 @@ class StdVariableRefSaver(BaseSaver):
             logger.debug(f"No StdVariableRef data to save for device {device_id}")
             return None
 
-        # Delete existing records for this device
+        # Delete existing records for this device (cascade will delete single values)
         self._delete_existing('std_variable_refs', device_id)
 
-        # Build insert values
-        insert_values = []
+        # Insert each StdVariableRef and its children
         for ref in std_variable_refs:
-            insert_values.append((
+            # Insert the StdVariableRef record
+            query = """
+                INSERT INTO std_variable_refs
+                (device_id, variable_id, default_value, fixed_length_restriction,
+                 excluded_from_data_storage, order_index)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """
+            self.cursor.execute(query, (
                 device_id,
                 ref.variable_id,
                 ref.default_value,
@@ -55,14 +62,21 @@ class StdVariableRefSaver(BaseSaver):
                 ref.order_index
             ))
 
-        # Insert all records
-        query = """
-            INSERT INTO std_variable_refs
-            (device_id, variable_id, default_value, fixed_length_restriction,
-             excluded_from_data_storage, order_index)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """
-        self._execute_many(query, insert_values)
+            # Get the inserted ID
+            std_var_ref_id = self.cursor.lastrowid
 
-        logger.debug(f"Saved {len(insert_values)} StdVariableRef records for device {device_id}")
+            # Insert SingleValue children if any
+            if hasattr(ref, 'single_values') and ref.single_values:
+                sv_query = """
+                    INSERT INTO std_variable_ref_single_values
+                    (std_variable_ref_id, value, name_text_id, is_std_ref, order_index)
+                    VALUES (?, ?, ?, ?, ?)
+                """
+                sv_values = [
+                    (std_var_ref_id, sv.value, sv.name_text_id, 1 if sv.is_std_ref else 0, sv.order_index)
+                    for sv in ref.single_values
+                ]
+                self._execute_many(sv_query, sv_values)
+
+        logger.debug(f"Saved {len(std_variable_refs)} StdVariableRef records for device {device_id}")
         return None

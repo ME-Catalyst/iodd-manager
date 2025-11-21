@@ -134,7 +134,15 @@ class EDSDiffAnalyzer:
 
     def _parse_eds(self, eds_content: str) -> configparser.ConfigParser:
         """Parse EDS file (INI format) into ConfigParser"""
-        config = configparser.ConfigParser(allow_no_value=True, strict=False, comment_prefixes=('$',))
+        # Use RawConfigParser behavior by setting interpolation=None
+        # This prevents '%' characters in EDS values (like %QW, %IW for PLC addressing)
+        # from being interpreted as interpolation syntax
+        config = configparser.ConfigParser(
+            allow_no_value=True,
+            strict=False,
+            comment_prefixes=('$',),
+            interpolation=None  # Disable interpolation to handle % characters
+        )
         config.optionxform = str  # Preserve case sensitivity
 
         try:
@@ -142,7 +150,7 @@ class EDSDiffAnalyzer:
         except configparser.Error as e:
             logger.error(f"EDS parsing error: {e}")
             # Create empty config to continue analysis
-            config = configparser.ConfigParser()
+            config = configparser.ConfigParser(interpolation=None)
 
         return config
 

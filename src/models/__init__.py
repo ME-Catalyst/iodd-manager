@@ -92,6 +92,16 @@ class Parameter:
     unit_code: Optional[str] = None
     value_range_name: Optional[str] = None
     single_values: List[SingleValue] = field(default_factory=list)
+    record_items: List['RecordItem'] = field(default_factory=list)  # For RecordT datatypes
+    # ArrayT specific fields
+    array_count: Optional[int] = None  # ArrayT count attribute
+    array_element_type: Optional[str] = None  # SimpleDatatype xsi:type (e.g., UIntegerT)
+    array_element_bit_length: Optional[int] = None  # SimpleDatatype bitLength
+    array_element_fixed_length: Optional[int] = None  # OctetStringT/StringT fixedLength
+    subindex_access_supported: Optional[bool] = None  # ArrayT/RecordT subindexAccessSupported
+    # PQA reconstruction fields
+    name_text_id: Optional[str] = None  # Original textId for Name element
+    description_text_id: Optional[str] = None  # Original textId for Description element
 
 
 @dataclass
@@ -292,6 +302,15 @@ class CustomDatatype:
 
 
 @dataclass
+class StdVariableRefSingleValue:
+    """SingleValue or StdSingleValueRef child of StdVariableRef"""
+    value: str  # The value attribute
+    name_text_id: Optional[str] = None  # textId for Name element (SingleValue only)
+    is_std_ref: bool = False  # True for StdSingleValueRef, False for SingleValue
+    order_index: int = 0  # Original order
+
+
+@dataclass
 class StdVariableRef:
     """Standard variable reference from VariableCollection"""
     variable_id: str  # e.g., V_VendorName, V_ProductName
@@ -299,6 +318,7 @@ class StdVariableRef:
     fixed_length_restriction: Optional[int] = None
     excluded_from_data_storage: Optional[bool] = None
     order_index: int = 0  # Original order in IODD
+    single_values: List['StdVariableRefSingleValue'] = field(default_factory=list)  # Child elements
 
 
 @dataclass
@@ -375,5 +395,6 @@ __all__ = [
     'DeviceTestConfig',
     'CustomDatatype',
     'StdVariableRef',
+    'StdVariableRefSingleValue',
     'DeviceProfile',
 ]

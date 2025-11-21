@@ -336,7 +336,7 @@ async def get_analyzed_devices():
 
             # Get device name
             if file_type == 'IODD':
-                cursor.execute("SELECT product_name, vendor_name FROM devices WHERE id = ?", (device_id,))
+                cursor.execute("SELECT product_name, manufacturer FROM devices WHERE id = ?", (device_id,))
             else:
                 cursor.execute("SELECT product_name, vendor_name FROM eds_files WHERE id = ?", (device_id,))
 
@@ -351,11 +351,19 @@ async def get_analyzed_devices():
             """, (device_id, file_type))
             count_row = cursor.fetchone()
 
+            # Get vendor name - column name differs between IODD and EDS tables
+            vendor_name = None
+            if device_row:
+                if file_type == 'IODD':
+                    vendor_name = device_row['manufacturer']
+                else:
+                    vendor_name = device_row['vendor_name']
+
             result.append({
                 "id": device_id,
                 "file_type": file_type,
                 "product_name": device_row['product_name'] if device_row else f"Unknown Device {device_id}",
-                "vendor_name": device_row['vendor_name'] if device_row else None,
+                "vendor_name": vendor_name,
                 "latest_analysis": latest['analysis_timestamp'],
                 "analysis_count": count_row['count'] if count_row else 0,
                 "latest_score": latest['overall_score'],

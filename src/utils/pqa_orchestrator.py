@@ -112,8 +112,8 @@ class UnifiedPQAOrchestrator:
             )
             logger.info(f"Saved quality metrics with ID {metric_id}")
 
-            # Step 4.5: Check for existing open tickets and update/close them if quality improved
-            self._update_existing_tickets(file_id, metrics, file_type)
+            # Step 4.5: Delete ALL existing PQA tickets for this device (we only keep one)
+            self._delete_existing_pqa_tickets(file_id, file_type)
 
             # Step 5: Check if ticket generation needed
             logger.info(f"Checking if ticket should be generated for {file_type.value} {file_id}")
@@ -150,7 +150,7 @@ class UnifiedPQAOrchestrator:
                     logger.error(f"Exception type: {type(ticket_err).__name__}")
                     logger.error(f"Metric ID {metric_id} will NOT be marked as ticket_generated")
             else:
-                logger.info(f"Ticket generation not needed for {file_type.value} {file_id}")
+                logger.info(f"Ticket generation not needed for {file_type.value} {file_id} (quality meets threshold)")
 
             return metrics, diff_items
 
@@ -466,9 +466,10 @@ class UnifiedPQAOrchestrator:
                 severity = 'medium'
 
             # Generate ticket number (format: TICKET-0001)
-            cursor.execute("SELECT COUNT(*) FROM tickets")
-            ticket_count = cursor.fetchone()[0]
-            ticket_number = f"TICKET-{str(ticket_count + 1).zfill(4)}"
+            # Use MAX to get the highest ticket number, not COUNT (which can cause conflicts after deletions)
+            cursor.execute("SELECT MAX(CAST(SUBSTR(ticket_number, 8) AS INTEGER)) FROM tickets WHERE ticket_number LIKE 'TICKET-%'")
+            max_num = cursor.fetchone()[0] or 0
+            ticket_number = f"TICKET-{str(max_num + 1).zfill(4)}"
 
             # Determine device_type
             device_type = file_type.value  # 'IODD' or 'EDS'
@@ -539,101 +540,35 @@ class UnifiedPQAOrchestrator:
                 conn.close()
                 logger.info("Database connection closed")
 
-    def _update_existing_tickets(self, file_id: int,
-                                metrics: Union[QualityMetrics, EDSQualityMetrics],
-                                file_type: FileType) -> None:
+    def _delete_existing_pqa_tickets(self, file_id: int, file_type: FileType) -> None:
         """
-        Update or close existing open PQA tickets if quality has improved
+        Delete ALL existing PQA tickets for this device.
 
-        If the new analysis shows:
-        - Score above threshold AND no critical data loss: Close ticket as "resolved"
-        - Score improved but still below threshold: Update ticket with new score
-        - Score worsened: Add comment but keep ticket open
+        We only keep ONE PQA ticket per device at any time - the latest one.
+        When a new PQA analysis runs, we delete any existing tickets and create
+        a fresh one if needed.
         """
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
         try:
-            # Find all open PQA tickets for this device
+            # Find and delete all PQA tickets for this device (any status)
             cursor.execute("""
-                SELECT id, title, description, priority
-                FROM tickets
-                WHERE device_id = ? AND category = 'parser_quality' AND status = 'open'
+                SELECT id FROM tickets
+                WHERE device_id = ? AND category = 'parser_quality'
             """, (file_id,))
-            open_tickets = cursor.fetchall()
+            existing_tickets = cursor.fetchall()
 
-            if not open_tickets:
-                logger.info(f"No open PQA tickets found for {file_type.value} {file_id}")
-                return
-
-            # Get threshold to determine if quality is acceptable now
-            cursor.execute("""
-                SELECT min_overall_score FROM pqa_thresholds WHERE active = 1 LIMIT 1
-            """)
-            threshold_row = cursor.fetchone()
-            min_score = threshold_row[0] if threshold_row else 90.0
-
-            passes_threshold = (metrics.overall_score >= min_score and not metrics.critical_data_loss)
-
-            for ticket in open_tickets:
-                ticket_id = ticket[0]
-                logger.info(f"Processing open ticket {ticket_id} for {file_type.value} {file_id}")
-
-                if passes_threshold:
-                    # Quality is now acceptable - close ticket as resolved
-                    resolution_comment = f"""
-## Quality Analysis Update - Issue Resolved [OK]
-
-**New Analysis Results:**
-- Overall Score: **{metrics.overall_score:.1f}%** (threshold: {min_score}%)
-- Critical Data Loss: **{metrics.critical_data_loss}**
-- Data Loss Percentage: **{metrics.data_loss_percentage:.2f}%**
-
-**Resolution:**
-Parser quality has improved and now meets the required threshold. This ticket has been automatically closed.
-
-*Updated: {datetime.now().isoformat()}*
-*Auto-closed by PQA System*
-"""
-
-                    cursor.execute("""
-                        UPDATE tickets
-                        SET status = 'resolved',
-                            description = description || ?,
-                            updated_at = ?
-                        WHERE id = ?
-                    """, (resolution_comment, datetime.now().isoformat(), ticket_id))
-
-                    logger.info(f"Closed ticket {ticket_id} - quality now passes threshold")
-
-                else:
-                    # Still below threshold - add update comment
-                    update_comment = f"""
-
----
-
-## Quality Analysis Update
-
-**Latest Analysis Results:**
-- Overall Score: **{metrics.overall_score:.1f}%** (threshold: {min_score}%)
-- Critical Data Loss: **{metrics.critical_data_loss}**
-- Data Loss Percentage: **{metrics.data_loss_percentage:.2f}%**
-
-Parser quality still needs improvement to meet the threshold.
-
-*Updated: {datetime.now().isoformat()}*
-"""
-
-                    cursor.execute("""
-                        UPDATE tickets
-                        SET description = description || ?,
-                            updated_at = ?
-                        WHERE id = ?
-                    """, (update_comment, datetime.now().isoformat(), ticket_id))
-
-                    logger.info(f"Updated ticket {ticket_id} with new analysis results")
-
-            conn.commit()
+            if existing_tickets:
+                ticket_ids = [t[0] for t in existing_tickets]
+                cursor.execute(f"""
+                    DELETE FROM tickets
+                    WHERE device_id = ? AND category = 'parser_quality'
+                """, (file_id,))
+                conn.commit()
+                logger.info(f"Deleted {len(ticket_ids)} existing PQA ticket(s) for {file_type.value} {file_id}: {ticket_ids}")
+            else:
+                logger.debug(f"No existing PQA tickets found for {file_type.value} {file_id}")
 
         finally:
             conn.close()

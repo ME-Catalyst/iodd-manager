@@ -1247,84 +1247,6 @@ const VendorDistribution = ({ label, items = [] }) => {
  */
 const DiagnosticsTab = ({ edsDiagnostics, ioddDiagnostics, vendorStats }) => (
   <div className="space-y-6">
-      {/* Quality Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* EDS Quality Score */}
-        <Card className={`bg-card border ${getQualityBgColor(edsDiagnostics?.quality_score || 0)}`}>
-          <CardHeader>
-            <CardTitle className="text-foreground flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <Activity className="w-5 h-5 text-warning" />
-                EDS Parsing Quality
-              </span>
-              <span className={`text-3xl font-bold ${getQualityColor(edsDiagnostics?.quality_score || 0)}`}>
-                {edsDiagnostics?.quality_score || 0}
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div className="p-3 bg-secondary/30 rounded-lg">
-                  <p className="text-2xl font-bold text-success">{edsDiagnostics?.total_files || 0}</p>
-                  <p className="text-xs text-muted-foreground">Total Files</p>
-                </div>
-                <div className="p-3 bg-secondary/30 rounded-lg">
-                  <p className="text-2xl font-bold text-error">{edsDiagnostics?.total_files_with_issues || 0}</p>
-                  <p className="text-xs text-muted-foreground">With Issues</p>
-                </div>
-              </div>
-              {edsDiagnostics?.completeness && (
-                <div className="space-y-3">
-                  <h4 className="text-sm font-semibold text-foreground">Data Completeness</h4>
-                  <DiagnosticsProgressBar value={edsDiagnostics.completeness.product_name_pct} label="Product Names" />
-                  <DiagnosticsProgressBar value={edsDiagnostics.completeness.vendor_name_pct} label="Vendor Names" />
-                  <DiagnosticsProgressBar value={edsDiagnostics.completeness.description_pct} label="Descriptions" />
-                  <DiagnosticsProgressBar value={edsDiagnostics.completeness.icon_pct} label="Icons" />
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* IODD Quality Score */}
-        <Card className={`bg-card border ${getQualityBgColor(ioddDiagnostics?.quality_score || 0)}`}>
-          <CardHeader>
-            <CardTitle className="text-foreground flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-primary" />
-                IODD Parsing Quality
-              </span>
-              <span className={`text-3xl font-bold ${getQualityColor(ioddDiagnostics?.quality_score || 0)}`}>
-                {ioddDiagnostics?.quality_score || 0}
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div className="p-3 bg-secondary/30 rounded-lg">
-                  <p className="text-2xl font-bold text-success">{ioddDiagnostics?.total_files || 0}</p>
-                  <p className="text-xs text-muted-foreground">Total Files</p>
-                </div>
-                <div className="p-3 bg-secondary/30 rounded-lg">
-                  <p className="text-2xl font-bold text-error">{ioddDiagnostics?.total_files_with_issues || 0}</p>
-                  <p className="text-xs text-muted-foreground">With Issues</p>
-                </div>
-              </div>
-              {ioddDiagnostics?.completeness && (
-                <div className="space-y-3">
-                  <h4 className="text-sm font-semibold text-foreground">Data Completeness</h4>
-                  <DiagnosticsProgressBar value={ioddDiagnostics.completeness.product_name_pct} label="Product Names" />
-                  <DiagnosticsProgressBar value={ioddDiagnostics.completeness.manufacturer_pct} label="Manufacturers" />
-                  <DiagnosticsProgressBar value={ioddDiagnostics.completeness.vendor_id_pct} label="Vendor IDs" />
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* PQA (Parser Quality Assurance) Stats Section */}
       <Card className="bg-gradient-to-br from-brand-green/5 to-purple-500/5 border-brand-green/30">
         <CardHeader>
@@ -1493,23 +1415,6 @@ const DiagnosticsTab = ({ edsDiagnostics, ioddDiagnostics, vendorStats }) => (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <VendorDistribution label="IO-Link Devices" items={vendorStats?.iodd || []} />
               <VendorDistribution label="EDS Files" items={vendorStats?.eds || []} />
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Success Message when no issues */}
-      {edsDiagnostics?.total_files_with_issues === 0 && ioddDiagnostics?.total_files_with_issues === 0 && (
-        <Card className="bg-success/10 border-success/50">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3 text-success">
-              <CheckCircle2 className="w-6 h-6" />
-              <div>
-                <p className="font-semibold">Excellent Parsing Quality!</p>
-                <p className="text-sm text-muted-foreground">
-                  All {(edsDiagnostics?.total_files || 0) + (ioddDiagnostics?.total_files || 0)} files parsed successfully with no issues detected.
-                </p>
-              </div>
             </div>
           </CardContent>
         </Card>

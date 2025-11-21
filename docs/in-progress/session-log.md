@@ -169,6 +169,15 @@ Re-import completed successfully with parser shadowing fix applied.
 
 **Expected Impact**: ~1,700+ issues resolved (ProcessDataIn/Out Name + subindexAccessSupported)
 
+#### FIX #3: StdErrorTypeRef code attribute
+
+**Problem**: StdErrorTypeRef elements missing `code` attribute (always 128/0x80).
+
+**Changes Made**:
+- `src/utils/forensic_reconstruction_v2.py` - Add `code` attribute to StdErrorTypeRef output
+
+**Expected Impact**: ~313 issues resolved
+
 ---
 
 ### Known Issues (Future Work)

@@ -1373,8 +1373,9 @@ class IODDReconstructor:
         collection = ET.Element('ErrorTypeCollection')
 
         for error in error_types:
-            # StdErrorTypeRef only has additionalCode attribute (code is always 0x80 = 128)
+            # StdErrorTypeRef has code (always 0x80 = 128 for standard errors) and additionalCode
             error_ref = ET.SubElement(collection, 'StdErrorTypeRef')
+            error_ref.set('code', str(error['code']))  # Usually 128 (0x80)
             error_ref.set('additionalCode', str(error['additional_code']))
 
         return collection

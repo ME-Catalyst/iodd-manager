@@ -123,6 +123,10 @@ class RecordItem:
     name_text_id: Optional[str] = None  # Original textId for Name element (PQA)
     description: Optional[str] = None  # Description text (PQA)
     description_text_id: Optional[str] = None  # Original textId for Description element (PQA)
+    # ValueRange inside SimpleDatatype (PQA reconstruction)
+    min_value: Optional[str] = None
+    max_value: Optional[str] = None
+    value_range_xsi_type: Optional[str] = None
 
 
 @dataclass

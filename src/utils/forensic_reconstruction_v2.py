@@ -655,6 +655,19 @@ class IODDReconstructor:
                             if tid_row:
                                 sv_name_elem = ET.SubElement(sv_elem, 'Name')
                                 sv_name_elem.set('textId', tid_row['text_id'])
+
+                    # Add ValueRange element if present (PQA reconstruction)
+                    min_val = item['min_value'] if 'min_value' in item.keys() else None
+                    max_val = item['max_value'] if 'max_value' in item.keys() else None
+                    if min_val is not None or max_val is not None:
+                        vr_elem = ET.SubElement(simple_dt, 'ValueRange')
+                        vr_xsi_type = item['value_range_xsi_type'] if 'value_range_xsi_type' in item.keys() else None
+                        if vr_xsi_type:
+                            vr_elem.set('{http://www.w3.org/2001/XMLSchema-instance}type', vr_xsi_type)
+                        if min_val is not None:
+                            vr_elem.set('lowerValue', str(min_val))
+                        if max_val is not None:
+                            vr_elem.set('upperValue', str(max_val))
                 else:
                     # Custom datatype reference
                     dt_ref = ET.SubElement(record_elem, 'DatatypeRef')
@@ -736,6 +749,19 @@ class IODDReconstructor:
                     if sv['name_text_id']:
                         sv_name_elem = ET.SubElement(sv_elem, 'Name')
                         sv_name_elem.set('textId', sv['name_text_id'])
+
+                # Add ValueRange element if present (PQA reconstruction)
+                min_val = item['min_value'] if 'min_value' in item.keys() else None
+                max_val = item['max_value'] if 'max_value' in item.keys() else None
+                if min_val is not None or max_val is not None:
+                    vr_elem = ET.SubElement(simple_dt, 'ValueRange')
+                    vr_xsi_type = item['value_range_xsi_type'] if 'value_range_xsi_type' in item.keys() else None
+                    if vr_xsi_type:
+                        vr_elem.set('{http://www.w3.org/2001/XMLSchema-instance}type', vr_xsi_type)
+                    if min_val is not None:
+                        vr_elem.set('lowerValue', str(min_val))
+                    if max_val is not None:
+                        vr_elem.set('upperValue', str(max_val))
 
             # Add Name element with textId
             if item['name']:
@@ -978,6 +1004,18 @@ class IODDReconstructor:
                     datatype.set('{http://www.w3.org/2001/XMLSchema-instance}type', item['datatype_ref'])
                     if item['bit_length']:
                         datatype.set('bitLength', str(item['bit_length']))
+                    # Add ValueRange element if present (PQA reconstruction)
+                    min_val = item['min_value'] if 'min_value' in item.keys() else None
+                    max_val = item['max_value'] if 'max_value' in item.keys() else None
+                    if min_val is not None or max_val is not None:
+                        vr_elem = ET.SubElement(datatype, 'ValueRange')
+                        vr_xsi_type = item['value_range_xsi_type'] if 'value_range_xsi_type' in item.keys() else None
+                        if vr_xsi_type:
+                            vr_elem.set('{http://www.w3.org/2001/XMLSchema-instance}type', vr_xsi_type)
+                        if min_val is not None:
+                            vr_elem.set('lowerValue', str(min_val))
+                        if max_val is not None:
+                            vr_elem.set('upperValue', str(max_val))
                 else:
                     # Custom datatype reference - use DatatypeRef
                     datatype = ET.SubElement(record_elem, 'DatatypeRef')
@@ -990,6 +1028,18 @@ class IODDReconstructor:
                 xsi_type = item['xsi_type'] if 'xsi_type' in item.keys() else None
                 if xsi_type:
                     datatype.set('{http://www.w3.org/2001/XMLSchema-instance}type', xsi_type)
+                # Add ValueRange element if present (PQA reconstruction)
+                min_val = item['min_value'] if 'min_value' in item.keys() else None
+                max_val = item['max_value'] if 'max_value' in item.keys() else None
+                if min_val is not None or max_val is not None:
+                    vr_elem = ET.SubElement(datatype, 'ValueRange')
+                    vr_xsi_type = item['value_range_xsi_type'] if 'value_range_xsi_type' in item.keys() else None
+                    if vr_xsi_type:
+                        vr_elem.set('{http://www.w3.org/2001/XMLSchema-instance}type', vr_xsi_type)
+                    if min_val is not None:
+                        vr_elem.set('lowerValue', str(min_val))
+                    if max_val is not None:
+                        vr_elem.set('upperValue', str(max_val))
 
     def _create_user_interface(self, conn: sqlite3.Connection,
                               device_id: int) -> Optional[ET.Element]:

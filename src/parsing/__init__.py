@@ -678,6 +678,11 @@ class IODDParser:
             simple_dt = ri_elem.find('iodd:SimpleDatatype', self.NAMESPACES)
             single_values = []
 
+            # ValueRange info (PQA reconstruction)
+            min_value = None
+            max_value = None
+            value_range_xsi_type = None
+
             if datatype_ref is not None:
                 data_type = datatype_ref.get('datatypeId', 'Unknown')
                 bit_length = None
@@ -699,6 +704,13 @@ class IODDParser:
                             name=sv_name,
                             text_id=sv_name_text_id,
                         ))
+
+                # Extract ValueRange from SimpleDatatype (PQA reconstruction)
+                vr_elem = simple_dt.find('iodd:ValueRange', self.NAMESPACES)
+                if vr_elem is not None:
+                    min_value = vr_elem.get('lowerValue')
+                    max_value = vr_elem.get('upperValue')
+                    value_range_xsi_type = vr_elem.get('{http://www.w3.org/2001/XMLSchema-instance}type')
             else:
                 data_type = 'Unknown'
                 bit_length = None  # PQA: Don't assume bitLength when not in original
@@ -713,6 +725,9 @@ class IODDParser:
                 single_values=single_values,
                 description=description,
                 description_text_id=description_text_id,
+                min_value=min_value,
+                max_value=max_value,
+                value_range_xsi_type=value_range_xsi_type,
             ))
 
         return record_items
@@ -799,6 +814,10 @@ class IODDParser:
                     item_type = 'Unknown'
                     item_bit_length = None  # PQA: Don't default, track if present
                     single_values = []
+                    # ValueRange info (PQA reconstruction)
+                    item_min_value = None
+                    item_max_value = None
+                    item_vr_xsi_type = None
 
                     simple_dt = record_item.find('.//iodd:SimpleDatatype', self.NAMESPACES)
                     if simple_dt is not None:
@@ -823,6 +842,13 @@ class IODDParser:
                                         description=description,
                                         text_id=text_id  # PQA: Store original textId for reconstruction
                                     ))
+
+                        # Extract ValueRange from SimpleDatatype (PQA reconstruction)
+                        vr_elem = simple_dt.find('iodd:ValueRange', self.NAMESPACES)
+                        if vr_elem is not None:
+                            item_min_value = vr_elem.get('lowerValue')
+                            item_max_value = vr_elem.get('upperValue')
+                            item_vr_xsi_type = vr_elem.get('{http://www.w3.org/2001/XMLSchema-instance}type')
                     else:
                         # Check for DatatypeRef
                         dt_ref = record_item.find('.//iodd:DatatypeRef', self.NAMESPACES)
@@ -859,7 +885,10 @@ class IODDParser:
                         single_values=single_values,
                         name_text_id=item_name_id,  # Preserve original textId for PQA
                         description=item_description,
-                        description_text_id=item_desc_id  # PQA reconstruction
+                        description_text_id=item_desc_id,  # PQA reconstruction
+                        min_value=item_min_value,
+                        max_value=item_max_value,
+                        value_range_xsi_type=item_vr_xsi_type,
                     ))
 
             process_data = ProcessData(
@@ -919,6 +948,10 @@ class IODDParser:
                     item_type = 'Unknown'
                     item_bit_length = None  # PQA: Don't default, track if present
                     single_values = []
+                    # ValueRange info (PQA reconstruction)
+                    item_min_value = None
+                    item_max_value = None
+                    item_vr_xsi_type = None
 
                     simple_dt = record_item.find('.//iodd:SimpleDatatype', self.NAMESPACES)
                     if simple_dt is not None:
@@ -943,6 +976,13 @@ class IODDParser:
                                         description=description,
                                         text_id=text_id  # PQA: Store original textId for reconstruction
                                     ))
+
+                        # Extract ValueRange from SimpleDatatype (PQA reconstruction)
+                        vr_elem = simple_dt.find('iodd:ValueRange', self.NAMESPACES)
+                        if vr_elem is not None:
+                            item_min_value = vr_elem.get('lowerValue')
+                            item_max_value = vr_elem.get('upperValue')
+                            item_vr_xsi_type = vr_elem.get('{http://www.w3.org/2001/XMLSchema-instance}type')
                     else:
                         # Check for DatatypeRef
                         dt_ref = record_item.find('.//iodd:DatatypeRef', self.NAMESPACES)
@@ -979,7 +1019,10 @@ class IODDParser:
                         single_values=single_values,
                         name_text_id=item_name_id,  # Preserve original textId for PQA
                         description=item_description,
-                        description_text_id=item_desc_id  # PQA reconstruction
+                        description_text_id=item_desc_id,  # PQA reconstruction
+                        min_value=item_min_value,
+                        max_value=item_max_value,
+                        value_range_xsi_type=item_vr_xsi_type,
                     ))
 
             process_data = ProcessData(
@@ -1830,6 +1873,10 @@ class IODDParser:
                 datatype_ref_elem = record_item_elem.find('.//iodd:DatatypeRef', self.NAMESPACES)
                 simple_datatype_elem = record_item_elem.find('.//iodd:SimpleDatatype', self.NAMESPACES)
                 item_bit_length = None  # PQA: Track if explicitly present
+                # ValueRange info (PQA reconstruction)
+                item_min_value = None
+                item_max_value = None
+                item_vr_xsi_type = None
 
                 if datatype_ref_elem is not None:
                     datatype_ref = datatype_ref_elem.get('datatypeId')
@@ -1839,6 +1886,12 @@ class IODDParser:
                     # PQA: Only store bitLength if explicitly present in SimpleDatatype
                     if simple_datatype_elem.get('bitLength'):
                         item_bit_length = int(simple_datatype_elem.get('bitLength'))
+                    # Extract ValueRange from SimpleDatatype (PQA reconstruction)
+                    vr_elem = simple_datatype_elem.find('iodd:ValueRange', self.NAMESPACES)
+                    if vr_elem is not None:
+                        item_min_value = vr_elem.get('lowerValue')
+                        item_max_value = vr_elem.get('upperValue')
+                        item_vr_xsi_type = vr_elem.get('{http://www.w3.org/2001/XMLSchema-instance}type')
                 else:
                     datatype_ref = 'Unknown'
 
@@ -1851,7 +1904,10 @@ class IODDParser:
                         data_type=datatype_ref or 'Unknown',
                         name_text_id=name_text_id,  # Preserve original textId for PQA
                         description=description,
-                        description_text_id=description_text_id  # PQA reconstruction
+                        description_text_id=description_text_id,  # PQA reconstruction
+                        min_value=item_min_value,
+                        max_value=item_max_value,
+                        value_range_xsi_type=item_vr_xsi_type,
                     ))
 
             datatypes.append(CustomDatatype(

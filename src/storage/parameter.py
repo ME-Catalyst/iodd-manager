@@ -141,14 +141,15 @@ class ParameterSaver(BaseSaver):
                 INSERT INTO parameter_record_items (
                     parameter_id, subindex, bit_offset, bit_length,
                     datatype_ref, simple_datatype, name, name_text_id,
-                    description, description_text_id, default_value, order_index
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    description, description_text_id, default_value, order_index,
+                    min_value, max_value, value_range_xsi_type
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
             self._execute(query, (
                 parameter_id,
                 getattr(ri, 'subindex', 0),
                 getattr(ri, 'bit_offset', 0),
-                getattr(ri, 'bit_length', 8),
+                getattr(ri, 'bit_length', None),  # PQA: None if not in original
                 datatype_ref,
                 simple_datatype,
                 getattr(ri, 'name', None),
@@ -156,7 +157,10 @@ class ParameterSaver(BaseSaver):
                 getattr(ri, 'description', None),
                 getattr(ri, 'description_text_id', None),  # PQA reconstruction
                 getattr(ri, 'default_value', None),
-                idx  # order_index
+                idx,  # order_index
+                getattr(ri, 'min_value', None),  # PQA: ValueRange
+                getattr(ri, 'max_value', None),  # PQA: ValueRange
+                getattr(ri, 'value_range_xsi_type', None),  # PQA: ValueRange
             ))
 
             record_item_id = self._get_lastrowid()

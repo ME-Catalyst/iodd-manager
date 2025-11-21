@@ -106,6 +106,34 @@ Reconstruction then output bitLength for all RecordItems, even when not in origi
 
 ---
 
+### Fix #5: RecordItem/SimpleDatatype/ValueRange Missing (271 issues) - COMMITTED
+
+**Commit**: `TBD` feat(pqa): add ValueRange extraction and reconstruction for RecordItems
+
+**Problem**: `ValueRange` elements inside `RecordItem/SimpleDatatype` were not being extracted,
+stored, or reconstructed. This affected ~271 issues across:
+- VariableCollection: 201 issues
+- ProcessDataCollection: 25 issues
+- DatatypeCollection: 15 issues
+
+**Changes Made**:
+1. `src/models/__init__.py` - Added `min_value`, `max_value`, `value_range_xsi_type` to RecordItem
+2. `src/parsing/__init__.py` - Extract ValueRange from RecordItem/SimpleDatatype in:
+   - `_extract_variable_record_items()` (Variable RecordItems)
+   - ProcessDataIn/Out RecordItem parsing
+   - `_extract_custom_datatypes()` (Custom Datatype RecordItems)
+3. `src/storage/parameter.py` - Save ValueRange fields for parameter_record_items
+4. `src/storage/process_data.py` - Save ValueRange fields for process_data_record_items
+5. `src/storage/custom_datatype.py` - Save ValueRange fields for custom_datatype_record_items
+6. `src/utils/forensic_reconstruction_v2.py` - Generate ValueRange elements in all three contexts
+7. `alembic/versions/048_add_record_item_value_range.py` - Add ValueRange columns to all tables
+
+**Expected Impact**: ~241 issues resolved (requires re-import)
+
+**Status**: COMMITTED - Requires re-import to populate data
+
+---
+
 ## POST-REIMPORT RESULTS (CURRENT STATE)
 
 Re-import completed successfully with parser shadowing fix applied.

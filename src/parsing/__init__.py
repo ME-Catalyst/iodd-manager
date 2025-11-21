@@ -665,6 +665,7 @@ class IODDParser:
         for idx, ri_elem in enumerate(datatype_elem.findall('iodd:RecordItem', self.NAMESPACES)):
             subindex = int(ri_elem.get('subindex', 0))
             bit_offset = int(ri_elem.get('bitOffset', 0))
+            access_right_restriction = ri_elem.get('accessRightRestriction')  # PQA: extract attribute
 
             # Get name from textId
             name_elem = ri_elem.find('iodd:Name', self.NAMESPACES)
@@ -731,6 +732,7 @@ class IODDParser:
                 min_value=min_value,
                 max_value=max_value,
                 value_range_xsi_type=value_range_xsi_type,
+                access_right_restriction=access_right_restriction,  # PQA
             ))
 
         return record_items
@@ -802,6 +804,7 @@ class IODDParser:
                 for record_item in datatype_elem.findall('.//iodd:RecordItem', self.NAMESPACES):
                     subindex = int(record_item.get('subindex', 0))
                     bit_offset = int(record_item.get('bitOffset', 0))
+                    item_access_right_restriction = record_item.get('accessRightRestriction')  # PQA
 
                     # Get record item name (direct child only, not SingleValue/Name)
                     item_name_elem = record_item.find('iodd:Name', self.NAMESPACES)
@@ -892,6 +895,7 @@ class IODDParser:
                         min_value=item_min_value,
                         max_value=item_max_value,
                         value_range_xsi_type=item_vr_xsi_type,
+                        access_right_restriction=item_access_right_restriction,  # PQA
                     ))
 
             process_data = ProcessData(
@@ -936,6 +940,7 @@ class IODDParser:
                 for record_item in datatype_elem.findall('.//iodd:RecordItem', self.NAMESPACES):
                     subindex = int(record_item.get('subindex', 0))
                     bit_offset = int(record_item.get('bitOffset', 0))
+                    item_access_right_restriction = record_item.get('accessRightRestriction')  # PQA
 
                     # Get record item name (direct child only, not SingleValue/Name)
                     item_name_elem = record_item.find('iodd:Name', self.NAMESPACES)
@@ -1026,6 +1031,7 @@ class IODDParser:
                         min_value=item_min_value,
                         max_value=item_max_value,
                         value_range_xsi_type=item_vr_xsi_type,
+                        access_right_restriction=item_access_right_restriction,  # PQA
                     ))
 
             process_data = ProcessData(
@@ -1872,6 +1878,9 @@ class IODDParser:
                 description_text_id = desc_elem.get('textId') if desc_elem is not None else None
                 description = self._resolve_text(description_text_id) if description_text_id else None
 
+                # PQA: Extract accessRightRestriction attribute
+                item_access_right_restriction = record_item_elem.get('accessRightRestriction')
+
                 # Get datatype reference or inline datatype
                 datatype_ref_elem = record_item_elem.find('.//iodd:DatatypeRef', self.NAMESPACES)
                 simple_datatype_elem = record_item_elem.find('.//iodd:SimpleDatatype', self.NAMESPACES)
@@ -1911,6 +1920,7 @@ class IODDParser:
                         min_value=item_min_value,
                         max_value=item_max_value,
                         value_range_xsi_type=item_vr_xsi_type,
+                        access_right_restriction=item_access_right_restriction,  # PQA
                     ))
 
             datatypes.append(CustomDatatype(

@@ -91,8 +91,8 @@ class CustomDatatypeSaver(BaseSaver):
             INSERT INTO custom_datatype_record_items (
                 datatype_id, subindex, bit_offset, bit_length,
                 datatype_ref, name, name_text_id, description_text_id,
-                min_value, max_value, value_range_xsi_type
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                min_value, max_value, value_range_xsi_type, access_right_restriction
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
 
         params_list = []
@@ -109,6 +109,7 @@ class CustomDatatypeSaver(BaseSaver):
                 getattr(record_item, 'min_value', None),  # PQA: ValueRange
                 getattr(record_item, 'max_value', None),  # PQA: ValueRange
                 getattr(record_item, 'value_range_xsi_type', None),  # PQA: ValueRange
+                getattr(record_item, 'access_right_restriction', None),  # PQA: RecordItem attribute
             ))
 
         if params_list:

@@ -618,6 +618,10 @@ class IODDReconstructor:
             record_elem.set('subindex', str(item['subindex']))
             if item['bit_offset'] is not None:
                 record_elem.set('bitOffset', str(item['bit_offset']))
+            # PQA: Add accessRightRestriction attribute if present
+            access_right = item['access_right_restriction'] if 'access_right_restriction' in item.keys() else None
+            if access_right:
+                record_elem.set('accessRightRestriction', access_right)
 
             # Add SimpleDatatype or DatatypeRef based on data_type
             if item['data_type']:
@@ -721,6 +725,10 @@ class IODDReconstructor:
             record_elem.set('subindex', str(item['subindex']))
             if item['bit_offset'] is not None:
                 record_elem.set('bitOffset', str(item['bit_offset']))
+            # PQA: Add accessRightRestriction attribute if present
+            access_right = item['access_right_restriction'] if 'access_right_restriction' in item.keys() else None
+            if access_right:
+                record_elem.set('accessRightRestriction', access_right)
 
             # Add SimpleDatatype or DatatypeRef based on stored data
             if item['datatype_ref']:
@@ -962,6 +970,10 @@ class IODDReconstructor:
             record_elem.set('subindex', str(item['subindex']))
             if item['bit_offset'] is not None:
                 record_elem.set('bitOffset', str(item['bit_offset']))
+            # PQA: Add accessRightRestriction attribute if present
+            access_right = item['access_right_restriction'] if 'access_right_restriction' in item.keys() else None
+            if access_right:
+                record_elem.set('accessRightRestriction', access_right)
 
             if item['name']:
                 name = ET.SubElement(record_elem, 'Name')

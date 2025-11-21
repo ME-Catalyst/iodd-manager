@@ -103,13 +103,13 @@ class ProcessDataSaver(BaseSaver):
             return
 
         for item in pd.record_items:
-            # Save record item with name_text_id, description_text_id, and ValueRange for PQA reconstruction
+            # Save record item with name_text_id, description_text_id, ValueRange and accessRightRestriction for PQA
             query = """
                 INSERT INTO process_data_record_items (
                     process_data_id, subindex, name,
                     bit_offset, bit_length, data_type, default_value, name_text_id, description_text_id,
-                    min_value, max_value, value_range_xsi_type
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    min_value, max_value, value_range_xsi_type, access_right_restriction
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
 
             params = (
@@ -125,6 +125,7 @@ class ProcessDataSaver(BaseSaver):
                 getattr(item, 'min_value', None),  # PQA: ValueRange
                 getattr(item, 'max_value', None),  # PQA: ValueRange
                 getattr(item, 'value_range_xsi_type', None),  # PQA: ValueRange
+                getattr(item, 'access_right_restriction', None),  # PQA: RecordItem attribute
             )
 
             self._execute(query, params)

@@ -143,8 +143,8 @@ class ParameterSaver(BaseSaver):
                     parameter_id, subindex, bit_offset, bit_length,
                     datatype_ref, simple_datatype, name, name_text_id,
                     description, description_text_id, default_value, order_index,
-                    min_value, max_value, value_range_xsi_type
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    min_value, max_value, value_range_xsi_type, access_right_restriction
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
             self._execute(query, (
                 parameter_id,
@@ -162,6 +162,7 @@ class ParameterSaver(BaseSaver):
                 getattr(ri, 'min_value', None),  # PQA: ValueRange
                 getattr(ri, 'max_value', None),  # PQA: ValueRange
                 getattr(ri, 'value_range_xsi_type', None),  # PQA: ValueRange
+                getattr(ri, 'access_right_restriction', None),  # PQA: RecordItem attribute
             ))
 
             record_item_id = self._get_lastrowid()

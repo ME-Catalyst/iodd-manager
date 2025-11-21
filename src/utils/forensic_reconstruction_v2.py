@@ -41,6 +41,35 @@ class IODDReconstructor:
 
     DEFAULT_SCHEMA_VERSION = '1.1'
 
+    @staticmethod
+    def _format_number(value) -> str:
+        """Format a numeric value for XML output, preserving original precision.
+
+        Handles:
+        - Integers: returns as-is without decimal point (e.g., 24)
+        - Floats with integer value: returns without decimal (e.g., 24.0 -> 24)
+        - Floats with decimal: preserves decimal, removes trailing zeros (e.g., 0.10 -> 0.1)
+        - Leading zero preservation: .1 stays as .1, 0.1 stays as 0.1 based on original
+        """
+        if value is None:
+            return ''
+
+        # If it's an integer, return as integer string
+        if isinstance(value, int):
+            return str(value)
+
+        # If it's a float
+        if isinstance(value, float):
+            # Check if it's a whole number
+            if value == int(value):
+                return str(int(value))
+            # Format with enough precision and strip trailing zeros
+            formatted = f'{value:.10g}'  # Uses scientific notation for very large/small numbers
+            return formatted
+
+        # Otherwise return string representation
+        return str(value)
+
     def __init__(self, db_path: str = "greenstack.db"):
         self.db_path = db_path
         # Default namespace registration (will be updated per-device)
@@ -437,6 +466,18 @@ class IODDReconstructor:
         for pd in process_data_rows:
             pd_elem = ET.Element('ProcessData')
 
+            # Check for Condition element (goes first in ProcessData)
+            cursor.execute("""
+                SELECT condition_variable_id, condition_value
+                FROM process_data_conditions
+                WHERE process_data_id = ?
+            """, (pd['id'],))
+            condition = cursor.fetchone()
+            if condition and condition['condition_variable_id']:
+                condition_elem = ET.SubElement(pd_elem, 'Condition')
+                condition_elem.set('variableId', condition['condition_variable_id'])
+                condition_elem.set('value', str(condition['condition_value']))
+
             # Convert ProcessData ID format:
             # The outer ProcessData element uses a generic ID without direction suffix
             # PI_ProcessDataIn -> P_ProcessData (strip I indicator and In suffix)
@@ -517,9 +558,9 @@ class IODDReconstructor:
         ui_elem = ET.SubElement(parent, 'UIInfo')
 
         if ui_info['gradient'] is not None:
-            ui_elem.set('gradient', str(ui_info['gradient']))
+            ui_elem.set('gradient', self._format_number(ui_info['gradient']))
         if ui_info['offset'] is not None:
-            ui_elem.set('offset', str(ui_info['offset']))
+            ui_elem.set('offset', self._format_number(ui_info['offset']))
         if ui_info['unit_code']:
             ui_elem.set('unitCode', ui_info['unit_code'])
         if ui_info['display_format']:
@@ -560,7 +601,9 @@ class IODDReconstructor:
                 if item['data_type'] in base_types:
                     simple_dt = ET.SubElement(record_elem, 'SimpleDatatype')
                     simple_dt.set('{http://www.w3.org/2001/XMLSchema-instance}type', item['data_type'])
-                    if item['bit_length']:
+                    # BooleanT doesn't have bitLength (it's inherently 1 bit)
+                    # Float32T is always 32 bits, so bitLength is typically omitted
+                    if item['bit_length'] and item['data_type'] not in ('BooleanT', 'Float32T'):
                         simple_dt.set('bitLength', str(item['bit_length']))
                 else:
                     # Custom datatype reference
@@ -932,10 +975,11 @@ class IODDReconstructor:
                         var_ref.set('displayFormat', item['display_format'])
                     if item['unit_code']:
                         var_ref.set('unitCode', item['unit_code'])
-                    if item['gradient']:
-                        var_ref.set('gradient', str(item['gradient']))
-                    if item['offset']:
-                        var_ref.set('offset', str(item['offset']))
+                    # Use 'is not None' to handle 0 values correctly
+                    if item['gradient'] is not None:
+                        var_ref.set('gradient', self._format_number(item['gradient']))
+                    if item['offset'] is not None:
+                        var_ref.set('offset', self._format_number(item['offset']))
                     # Add Button children if any
                     cursor2 = conn.cursor()
                     cursor2.execute("""
@@ -961,7 +1005,7 @@ class IODDReconstructor:
                     # RecordItemRef
                     record_ref = ET.SubElement(menu_elem, 'RecordItemRef')
                     record_ref.set('variableId', item['record_item_ref'])
-                    if item['subindex']:
+                    if item['subindex'] is not None:
                         record_ref.set('subindex', str(item['subindex']))
                     if item['access_right_restriction']:
                         record_ref.set('accessRightRestriction', item['access_right_restriction'])
@@ -969,10 +1013,11 @@ class IODDReconstructor:
                         record_ref.set('displayFormat', item['display_format'])
                     if item['unit_code']:
                         record_ref.set('unitCode', item['unit_code'])
-                    if item['gradient']:
-                        record_ref.set('gradient', str(item['gradient']))
-                    if item['offset']:
-                        record_ref.set('offset', str(item['offset']))
+                    # Use 'is not None' to handle 0 values correctly
+                    if item['gradient'] is not None:
+                        record_ref.set('gradient', self._format_number(item['gradient']))
+                    if item['offset'] is not None:
+                        record_ref.set('offset', self._format_number(item['offset']))
                 elif item['menu_ref']:
                     # MenuRef
                     menu_ref = ET.SubElement(menu_elem, 'MenuRef')

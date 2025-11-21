@@ -255,6 +255,31 @@ but IODD schema requires them to be direct children of `/IODevice/`. This caused
 
 ---
 
+### Fix #11: Gradient/Offset Float Formatting (1,782 issues) - COMMITTED
+
+**Commit**: `a93ea3c` feat(pqa): preserve original string format for gradient/offset attributes
+
+**Problem**: RecordItemRef and VariableRef gradient/offset attributes losing original format:
+- Original "0.0" becoming "0" (886 gradient issues)
+- Original "4.0" becoming "4" (257 offset issues)
+- Total ~1,782 issues (RecordItemRef + VariableRef)
+
+**Root Cause**: `_format_number()` converts floats to integers when they're whole numbers,
+losing the ".0" suffix that was in the original IODD.
+
+**Changes Made**:
+1. `src/models/__init__.py` - Add `gradient_str`, `offset_str` fields to MenuItem
+2. `src/parsing/__init__.py` - Store original string values for VariableRef and RecordItemRef
+3. `src/storage/menu.py` - Save gradient_str, offset_str to ui_menu_items table
+4. `src/utils/forensic_reconstruction_v2.py` - Use string values when available
+5. `alembic/versions/051_add_gradient_offset_str.py` - Add new columns
+
+**Expected Impact**: ~1,782 issues resolved (requires re-import)
+
+**Status**: COMMITTED & PUSHED - Requires re-import to populate data
+
+---
+
 ## POST-REIMPORT RESULTS (CURRENT STATE)
 
 Re-import completed successfully with parser shadowing fix applied.

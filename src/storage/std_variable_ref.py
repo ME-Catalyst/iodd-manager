@@ -78,5 +78,18 @@ class StdVariableRefSaver(BaseSaver):
                 ]
                 self._execute_many(sv_query, sv_values)
 
+            # Insert StdRecordItemRef children if any
+            if hasattr(ref, 'record_item_refs') and ref.record_item_refs:
+                ri_query = """
+                    INSERT INTO std_record_item_refs
+                    (std_variable_ref_id, subindex, default_value, order_index)
+                    VALUES (?, ?, ?, ?)
+                """
+                ri_values = [
+                    (std_var_ref_id, ri.subindex, ri.default_value, idx)
+                    for idx, ri in enumerate(ref.record_item_refs)
+                ]
+                self._execute_many(ri_query, ri_values)
+
         logger.debug(f"Saved {len(std_variable_refs)} StdVariableRef records for device {device_id}")
         return None

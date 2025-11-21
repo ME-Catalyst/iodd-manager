@@ -102,6 +102,9 @@ class Parameter:
     # PQA reconstruction fields
     name_text_id: Optional[str] = None  # Original textId for Name element
     description_text_id: Optional[str] = None  # Original textId for Description element
+    datatype_ref: Optional[str] = None  # DatatypeRef datatypeId (e.g., D_Colors) for PQA reconstruction
+    value_range_xsi_type: Optional[str] = None  # ValueRange xsi:type (e.g., UIntegerValueRangeT)
+    value_range_name_text_id: Optional[str] = None  # ValueRange Name textId
 
 
 @dataclass
@@ -203,6 +206,9 @@ class MenuButton:
     button_value: str
     description: Optional[str] = None
     action_started_message: Optional[str] = None
+    # PQA reconstruction fields
+    description_text_id: Optional[str] = None  # Original textId for Description element
+    action_started_message_text_id: Optional[str] = None  # Original textId for ActionStartedMessage
 
 
 @dataclass
@@ -311,6 +317,13 @@ class StdVariableRefSingleValue:
 
 
 @dataclass
+class StdRecordItemRef:
+    """StdRecordItemRef child of StdVariableRef - specifies default values for record items"""
+    subindex: int
+    default_value: Optional[str] = None
+
+
+@dataclass
 class StdVariableRef:
     """Standard variable reference from VariableCollection"""
     variable_id: str  # e.g., V_VendorName, V_ProductName
@@ -319,6 +332,7 @@ class StdVariableRef:
     excluded_from_data_storage: Optional[bool] = None
     order_index: int = 0  # Original order in IODD
     single_values: List['StdVariableRefSingleValue'] = field(default_factory=list)  # Child elements
+    record_item_refs: List['StdRecordItemRef'] = field(default_factory=list)  # StdRecordItemRef children
 
 
 @dataclass
@@ -396,5 +410,6 @@ __all__ = [
     'CustomDatatype',
     'StdVariableRef',
     'StdVariableRefSingleValue',
+    'StdRecordItemRef',
     'DeviceProfile',
 ]

@@ -866,6 +866,27 @@ class IODDReconstructor:
                         var_ref.set('gradient', str(item['gradient']))
                     if item['offset']:
                         var_ref.set('offset', str(item['offset']))
+                    # Add Button children if any
+                    cursor2 = conn.cursor()
+                    cursor2.execute("""
+                        SELECT * FROM ui_menu_buttons
+                        WHERE menu_item_id = ?
+                        ORDER BY id
+                    """, (item['id'],))
+                    button_rows = cursor2.fetchall()
+                    for btn in button_rows:
+                        button_elem = ET.SubElement(var_ref, 'Button')
+                        button_elem.set('buttonValue', str(btn['button_value']))
+                        # Use description_text_id for PQA reconstruction
+                        desc_text_id = btn['description_text_id'] if 'description_text_id' in btn.keys() else None
+                        if desc_text_id:
+                            desc_elem = ET.SubElement(button_elem, 'Description')
+                            desc_elem.set('textId', desc_text_id)
+                        # Use action_started_message_text_id for PQA reconstruction
+                        action_text_id = btn['action_started_message_text_id'] if 'action_started_message_text_id' in btn.keys() else None
+                        if action_text_id:
+                            action_elem = ET.SubElement(button_elem, 'ActionStartedMessage')
+                            action_elem.set('textId', action_text_id)
                 elif item['record_item_ref']:
                     # RecordItemRef
                     record_ref = ET.SubElement(menu_elem, 'RecordItemRef')
@@ -882,12 +903,6 @@ class IODDReconstructor:
                         record_ref.set('gradient', str(item['gradient']))
                     if item['offset']:
                         record_ref.set('offset', str(item['offset']))
-                elif item['button_value']:
-                    # Button
-                    button = ET.SubElement(menu_elem, 'Button')
-                    button.set('buttonValue', item['button_value'])
-                    if item['access_right_restriction']:
-                        button.set('accessRightRestriction', item['access_right_restriction'])
                 elif item['menu_ref']:
                     # MenuRef
                     menu_ref = ET.SubElement(menu_elem, 'MenuRef')
@@ -1017,6 +1032,22 @@ class IODDReconstructor:
                         if sv['name_text_id']:
                             name_elem = ET.SubElement(sv_elem, 'Name')
                             name_elem.set('textId', sv['name_text_id'])
+
+                # Add StdRecordItemRef children
+                cursor2 = conn.cursor()
+                cursor2.execute("""
+                    SELECT subindex, default_value, order_index
+                    FROM std_record_item_refs
+                    WHERE std_variable_ref_id = ?
+                    ORDER BY order_index
+                """, (ref['id'],))
+                record_item_refs = cursor2.fetchall()
+
+                for ri in record_item_refs:
+                    ri_elem = ET.SubElement(std_ref, 'StdRecordItemRef')
+                    ri_elem.set('subindex', str(ri['subindex']))
+                    if ri['default_value'] is not None:
+                        ri_elem.set('defaultValue', ri['default_value'])
         else:
             # Fallback to hardcoded standard IO-Link variables if no stored data
             # This maintains backwards compatibility for older imported devices
@@ -1051,26 +1082,15 @@ class IODDReconstructor:
             # Modifies other variables (always emit explicit true/false)
             variable.set('modifiesOtherVariables', 'true' if param['modifies_other_variables'] else 'false')
 
-            # Determine if we should use DatatypeRef or Datatype based on data type
-            # Custom datatypes (like D_Percentage, D_Distance, D_Reference, D_LevelOutput) use DatatypeRef
+            # Determine if we should use DatatypeRef or Datatype based on datatype_ref column
+            # Variables with datatype_ref use DatatypeRef element (e.g., D_Percentage, D_Colors)
             # Base types (UIntegerT, IntegerT, StringT, etc.) use Datatype element
-            custom_datatype_map = {
-                'V_ContainerLowLevel': 'D_Percentage',
-                'V_ContainerHighLevel': 'D_Percentage',
-                'V_SensorLowLevel': 'D_Distance',
-                'V_SensorHighLevel': 'D_Distance',
-                'V_LevelOutput_Pin4': 'D_LevelOutput',
-                'V_AdditionalReference0': 'D_Reference',
-                'V_AdditionalReference1': 'D_Reference',
-                'V_AdditionalReference2': 'D_Reference',
-                'V_AdditionalReference3': 'D_Reference',
-                'V_ValidRange': 'D_Distance',
-            }
+            datatype_ref = param['datatype_ref'] if 'datatype_ref' in param.keys() else None
 
-            if var_id in custom_datatype_map:
+            if datatype_ref:
                 # Use DatatypeRef for variables that reference custom datatypes
                 datatyperef_elem = ET.SubElement(variable, 'DatatypeRef')
-                datatyperef_elem.set('datatypeId', custom_datatype_map[var_id])
+                datatyperef_elem.set('datatypeId', datatype_ref)
             else:
                 # Create Datatype element for base types
                 datatype_elem = ET.SubElement(variable, 'Datatype')
@@ -1123,10 +1143,19 @@ class IODDReconstructor:
                     # Add ValueRange if min/max defined
                     if param['min_value'] is not None or param['max_value'] is not None:
                         value_range = ET.SubElement(datatype_elem, 'ValueRange')
+                        # Add xsi:type attribute (e.g., UIntegerValueRangeT)
+                        vr_xsi_type = param['value_range_xsi_type'] if 'value_range_xsi_type' in param.keys() else None
+                        if vr_xsi_type:
+                            value_range.set('{http://www.w3.org/2001/XMLSchema-instance}type', vr_xsi_type)
                         if param['min_value'] is not None:
                             value_range.set('lowerValue', str(param['min_value']))
                         if param['max_value'] is not None:
                             value_range.set('upperValue', str(param['max_value']))
+                        # Add Name child element with textId
+                        vr_name_text_id = param['value_range_name_text_id'] if 'value_range_name_text_id' in param.keys() else None
+                        if vr_name_text_id:
+                            vr_name_elem = ET.SubElement(value_range, 'Name')
+                            vr_name_elem.set('textId', vr_name_text_id)
 
             # Add Name element using stored textId or fallback to lookup
             name_text_id = param['name_text_id'] if 'name_text_id' in param.keys() else None

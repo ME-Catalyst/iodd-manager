@@ -94,8 +94,9 @@ class MenuSaver(BaseSaver):
         """Save button configurations for a menu item"""
         query = """
             INSERT INTO ui_menu_buttons (
-                menu_item_id, button_value, description, action_started_message
-            ) VALUES (?, ?, ?, ?)
+                menu_item_id, button_value, description, action_started_message,
+                description_text_id, action_started_message_text_id
+            ) VALUES (?, ?, ?, ?, ?, ?)
         """
 
         params_list = []
@@ -105,6 +106,8 @@ class MenuSaver(BaseSaver):
                 getattr(button, 'button_value', None),
                 getattr(button, 'description', None),
                 getattr(button, 'action_started_message', None),
+                getattr(button, 'description_text_id', None),  # PQA reconstruction
+                getattr(button, 'action_started_message_text_id', None),  # PQA reconstruction
             ))
 
         if params_list:

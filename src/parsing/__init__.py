@@ -356,6 +356,9 @@ class IODDParser:
             # PQA reconstruction fields
             name_text_id=name_text_id,
             description_text_id=description_text_id,
+            datatype_ref=datatype_info.get('datatype_ref'),  # DatatypeRef datatypeId
+            value_range_xsi_type=datatype_info.get('value_range_xsi_type'),  # ValueRange xsi:type
+            value_range_name_text_id=datatype_info.get('value_range_name_text_id'),  # ValueRange Name textId
         )
 
         # Store RecordItemInfo as an attribute (not in Parameter model, will be saved separately)
@@ -532,6 +535,12 @@ class IODDParser:
             if value_range is not None:
                 result['min_value'] = value_range.get('lowerValue')
                 result['max_value'] = value_range.get('upperValue')
+                # Extract xsi:type (e.g., UIntegerValueRangeT) for PQA reconstruction
+                result['value_range_xsi_type'] = value_range.get('{http://www.w3.org/2001/XMLSchema-instance}type')
+                # Extract Name textId for PQA reconstruction
+                vr_name_elem = value_range.find('iodd:Name', self.NAMESPACES)
+                if vr_name_elem is not None:
+                    result['value_range_name_text_id'] = vr_name_elem.get('textId')
 
             # Extract RecordItems for RecordT types
             if type_str == 'RecordT':
@@ -574,6 +583,9 @@ class IODDParser:
         datatype_ref = var_elem.find('iodd:DatatypeRef', self.NAMESPACES)
         if datatype_ref is not None:
             datatype_id = datatype_ref.get('datatypeId')
+            # Store the datatype reference ID for reconstruction
+            result['datatype_ref'] = datatype_id
+
             if datatype_id and datatype_id in self.datatype_lookup:
                 custom_dt = self.datatype_lookup[datatype_id]
 
@@ -1413,7 +1425,9 @@ class IODDParser:
                         buttons.append(MenuButton(
                             button_value=button_value,
                             description=description,
-                            action_started_message=action_started_message
+                            action_started_message=action_started_message,
+                            description_text_id=desc_text_id,  # PQA reconstruction
+                            action_started_message_text_id=action_msg_text_id,  # PQA reconstruction
                         ))
 
                 items.append(MenuItem(
@@ -1784,13 +1798,26 @@ class IODDParser:
                 ))
                 sv_idx += 1
 
+            # Extract StdRecordItemRef children (for record variables like V_DeviceAccessLocks)
+            record_item_refs = []
+            for ri_ref_elem in std_ref.findall('iodd:StdRecordItemRef', self.NAMESPACES):
+                subindex = ri_ref_elem.get('subindex')
+                ri_default = ri_ref_elem.get('defaultValue')
+                if subindex is not None:
+                    from models import StdRecordItemRef
+                    record_item_refs.append(StdRecordItemRef(
+                        subindex=int(subindex),
+                        default_value=ri_default
+                    ))
+
             refs.append(StdVariableRef(
                 variable_id=var_id,
                 default_value=default_val,
                 fixed_length_restriction=int(fixed_len) if fixed_len else None,
                 excluded_from_data_storage=excluded.lower() == 'true' if excluded else None,
                 order_index=idx,
-                single_values=single_values
+                single_values=single_values,
+                record_item_refs=record_item_refs
             ))
 
         logger.info(f"Extracted {len(refs)} StdVariableRef elements")

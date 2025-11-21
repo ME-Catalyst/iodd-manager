@@ -1,19 +1,19 @@
 {
-  "generated_at": "2025-11-20T15:49:51.358673",
+  "generated_at": "2025-11-21T09:59:03.155332",
   "project_name": "GreenStack",
   "language_stats": {
     "Python": {
-      "files": 127,
-      "lines": 37244,
-      "blank": 6232,
-      "comments": 2497,
+      "files": 169,
+      "lines": 43925,
+      "blank": 7215,
+      "comments": 2995,
       "is_doc": false
     },
     "JSX": {
-      "files": 116,
-      "lines": 48636,
-      "blank": 3784,
-      "comments": 494,
+      "files": 117,
+      "lines": 49400,
+      "blank": 3825,
+      "comments": 496,
       "is_doc": false
     },
     "JavaScript": {
@@ -32,15 +32,15 @@
     },
     "JSON": {
       "files": 10,
-      "lines": 14924,
+      "lines": 14935,
       "blank": 0,
       "comments": 0,
       "is_doc": false
     },
     "Markdown": {
-      "files": 84,
-      "lines": 56874,
-      "blank": 12383,
+      "files": 90,
+      "lines": 59325,
+      "blank": 12964,
       "comments": 0,
       "is_doc": true
     },
@@ -60,8 +60,8 @@
     },
     "Batch": {
       "files": 2,
-      "lines": 223,
-      "blank": 26,
+      "lines": 233,
+      "blank": 27,
       "comments": 0,
       "is_doc": false
     },
@@ -74,93 +74,93 @@
     }
   },
   "git_stats": {
-    "total_commits": 228,
+    "total_commits": 241,
     "contributors": 3,
     "branches": 4,
-    "days_active": 1,
-    "recent_commits_30d": 228,
+    "days_active": 10,
+    "recent_commits_30d": 241,
     "recent_commit_details": [
       {
-        "hash": "4c49eb5",
+        "hash": "5e8b940",
         "author": "sys_eng",
         "email": "sys_eng@example.com",
-        "timestamp": 1763669043,
-        "message": "in-progress_PQA-improvements"
+        "timestamp": 1763736748,
+        "message": "feat: enhance PQA reconstruction with improved enum and RecordT support"
       },
       {
-        "hash": "0fe3958",
+        "hash": "4eb018e",
         "author": "sys_eng",
         "email": "sys_eng@example.com",
-        "timestamp": 1763664682,
-        "message": "fix: remove react-router-dom dependency from GlobalTicketButton"
+        "timestamp": 1763730545,
+        "message": "fix: replace existing PQA analysis instead of creating duplicates"
       },
       {
-        "hash": "444c860",
+        "hash": "1e93324",
         "author": "sys_eng",
         "email": "sys_eng@example.com",
-        "timestamp": 1763664506,
-        "message": "feat: enhance ticket system with global button, auto-context, screenshots, and multi-file uploads"
+        "timestamp": 1763730396,
+        "message": "fix: prevent duplicate PQA analyses"
       },
       {
-        "hash": "b81085b",
+        "hash": "989efdb",
         "author": "sys_eng",
         "email": "sys_eng@example.com",
-        "timestamp": 1763663978,
-        "message": "fix: resolve Menu API bugs (device_id null, role_sets empty)"
+        "timestamp": 1763729692,
+        "message": "feat: improve IODD PQA reconstruction with RecordT support"
       },
       {
-        "hash": "7544013",
+        "hash": "f93d8a0",
         "author": "sys_eng",
         "email": "sys_eng@example.com",
-        "timestamp": 1763663223,
-        "message": "fix: API fixes for IODD menu endpoint"
+        "timestamp": 1763701556,
+        "message": "docs: finalize PQA improvement log with results"
       },
       {
-        "hash": "319376c",
+        "hash": "ec6b884",
         "author": "sys_eng",
         "email": "sys_eng@example.com",
-        "timestamp": 1763662825,
-        "message": "feat: Add IODD Menu GUI renderer component"
+        "timestamp": 1763701503,
+        "message": "feat: improve IODD PQA reconstruction accuracy"
       },
       {
-        "hash": "217e373",
+        "hash": "9452609",
         "author": "sys_eng",
         "email": "sys_eng@example.com",
-        "timestamp": 1763662532,
-        "message": "feat: Add backend API for IODD menu structure"
+        "timestamp": 1763701002,
+        "message": "fix: correct PrimaryLanguage/Language structure in text collection"
       },
       {
-        "hash": "1efd852",
+        "hash": "0f48aae",
         "author": "sys_eng",
         "email": "sys_eng@example.com",
-        "timestamp": 1763662387,
-        "message": "feat: Initialize IODD Menu GUI implementation plan"
+        "timestamp": 1763700867,
+        "message": "feat: add StdVariableRef storage for accurate PQA reconstruction"
       },
       {
-        "hash": "6623a66",
+        "hash": "127dc05",
         "author": "sys_eng",
         "email": "sys_eng@example.com",
-        "timestamp": 1763657368,
-        "message": "docs: Add comprehensive PQA improvement plan for 100% score"
+        "timestamp": 1763700064,
+        "message": "feat: preserve original textId and xsi:type for PQA accuracy"
       },
       {
-        "hash": "24d5507",
+        "hash": "9555e63",
         "author": "sys_eng",
         "email": "sys_eng@example.com",
-        "timestamp": 1763657237,
-        "message": "feat: Add Analysis History list view and Device #56 investigation"
+        "timestamp": 1763696060,
+        "message": "feat: improve IODD PQA reconstruction from 85.7% to 89.4%"
       }
     ]
   },
   "file_counts": {
-    "total_files": 431,
+    "total_files": 494,
     "total_directories": 84
   },
   "project_structure": {
-    "backend": 61,
-    "frontend": 136,
-    "docs": 85,
-    "tests": 23,
+    "backend": 63,
+    "frontend": 137,
+    "docs": 91,
+    "tests": 31,
     "scripts": 17,
     "config": 28
   },
@@ -171,22 +171,22 @@
     "npm_dev_dependencies": 10
   },
   "database_stats": {
-    "iodd_devices": 56,
-    "iodd_files": 56,
-    "eds_files": 73,
-    "eds_variants": 43,
-    "total_parameters": 11977,
-    "total_assemblies": 1375,
-    "pqa_analyses": 155
+    "iodd_devices": 0,
+    "iodd_files": 0,
+    "eds_files": 0,
+    "eds_variants": 0,
+    "total_parameters": 0,
+    "total_assemblies": 0,
+    "pqa_analyses": 0
   },
   "totals": {
-    "total_code_lines": 96656,
-    "total_doc_lines": 44491,
-    "total_lines": 141147,
-    "total_code_files": 302,
-    "total_doc_files": 84,
-    "total_files_counted": 386,
-    "total_blank_lines": 23590,
-    "total_comment_lines": 3200
+    "total_code_lines": 102597,
+    "total_doc_lines": 46361,
+    "total_lines": 148958,
+    "total_code_files": 345,
+    "total_doc_files": 90,
+    "total_files_counted": 435,
+    "total_blank_lines": 25196,
+    "total_comment_lines": 3700
   }
 }

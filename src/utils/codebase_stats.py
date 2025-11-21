@@ -104,18 +104,29 @@ class CodebaseStats:
             )
             branches = len([l for l in result.stdout.strip().split('\n') if l.strip()]) if result.returncode == 0 else 0
 
-            # Days since first commit
+            # Days since first commit - get root commit hash first
             result = subprocess.run(
-                ['git', 'log', '--reverse', '--format=%ct', '--max-count=1'],
+                ['git', 'rev-list', '--max-parents=0', 'HEAD'],
                 capture_output=True,
                 text=True,
                 cwd=self.project_root
             )
             if result.returncode == 0 and result.stdout.strip():
-                first_commit_timestamp = int(result.stdout.strip())
-                days_active = (datetime.now().timestamp() - first_commit_timestamp) / 86400
-                # Show at least 1 day if there are commits
-                days_active = max(1, int(days_active))
+                root_commit = result.stdout.strip().split('\n')[0]  # First root commit
+                # Get timestamp of that commit
+                result = subprocess.run(
+                    ['git', 'log', '--format=%ct', '-1', root_commit],
+                    capture_output=True,
+                    text=True,
+                    cwd=self.project_root
+                )
+                if result.returncode == 0 and result.stdout.strip():
+                    first_commit_timestamp = int(result.stdout.strip())
+                    days_active = (datetime.now().timestamp() - first_commit_timestamp) / 86400
+                    # Show at least 1 day if there are commits
+                    days_active = max(1, int(days_active))
+                else:
+                    days_active = 0
             else:
                 days_active = 0
 

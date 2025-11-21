@@ -328,10 +328,16 @@ class IODDParser:
         access_rights_str = var_elem.get('accessRights', 'rw')
         default_value = var_elem.get('defaultValue')
 
-        # Get additional attributes
-        dynamic = var_elem.get('dynamic', 'false').lower() == 'true'
-        excluded_from_data_storage = var_elem.get('excludedFromDataStorage', 'false').lower() == 'true'
-        modifies_other_variables = var_elem.get('modifiesOtherVariables', 'false').lower() == 'true'
+        # Get additional attributes - use None when not present to distinguish from explicit false
+        # This allows reconstruction to only output attributes that were in the original IODD
+        dynamic_attr = var_elem.get('dynamic')
+        dynamic = dynamic_attr.lower() == 'true' if dynamic_attr is not None else None
+
+        excluded_attr = var_elem.get('excludedFromDataStorage')
+        excluded_from_data_storage = excluded_attr.lower() == 'true' if excluded_attr is not None else None
+
+        modifies_attr = var_elem.get('modifiesOtherVariables')
+        modifies_other_variables = modifies_attr.lower() == 'true' if modifies_attr is not None else None
 
         # Get name from textId reference (store textId for PQA reconstruction)
         name_elem = var_elem.find('iodd:Name', self.NAMESPACES)  # Direct child only
@@ -1380,7 +1386,8 @@ class IODDParser:
             access_locks_data_storage=access_locks_elem.get('dataStorage', 'false').lower() == 'true' if access_locks_elem is not None else False,
             access_locks_local_parameterization=access_locks_elem.get('localParameterization', 'false').lower() == 'true' if access_locks_elem is not None else False,
             access_locks_local_user_interface=access_locks_elem.get('localUserInterface', 'false').lower() == 'true' if access_locks_elem is not None else False,
-            access_locks_parameter=access_locks_elem.get('parameter', 'false').lower() == 'true' if access_locks_elem is not None else False
+            access_locks_parameter=access_locks_elem.get('parameter', 'false').lower() == 'true' if access_locks_elem is not None else False,
+            has_supported_access_locks=access_locks_elem is not None  # Track if element was present
         )
 
     def _extract_communication_profile(self) -> Optional[CommunicationProfile]:

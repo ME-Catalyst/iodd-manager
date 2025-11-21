@@ -409,12 +409,14 @@ class IODDReconstructor:
         if features_row['profile_characteristic']:
             features.set('profileCharacteristic', str(features_row['profile_characteristic']))
 
-        # Add SupportedAccessLocks (Phase 3 Task 9b)
-        access_locks = ET.SubElement(features, 'SupportedAccessLocks')
-        access_locks.set('localUserInterface', 'false' if not features_row['access_locks_local_user_interface'] else 'true')
-        access_locks.set('dataStorage', 'false' if not features_row['access_locks_data_storage'] else 'true')
-        access_locks.set('parameter', 'false' if not features_row['access_locks_parameter'] else 'true')
-        access_locks.set('localParameterization', 'false' if not features_row['access_locks_local_parameterization'] else 'true')
+        # Only add SupportedAccessLocks if it was present in the original IODD
+        has_access_locks = features_row['has_supported_access_locks'] if 'has_supported_access_locks' in features_row.keys() else None
+        if has_access_locks:
+            access_locks = ET.SubElement(features, 'SupportedAccessLocks')
+            access_locks.set('localUserInterface', 'false' if not features_row['access_locks_local_user_interface'] else 'true')
+            access_locks.set('dataStorage', 'false' if not features_row['access_locks_data_storage'] else 'true')
+            access_locks.set('parameter', 'false' if not features_row['access_locks_parameter'] else 'true')
+            access_locks.set('localParameterization', 'false' if not features_row['access_locks_local_parameterization'] else 'true')
 
         return features
 
@@ -493,8 +495,8 @@ class IODDReconstructor:
                         if pd['data_type'] == 'RecordT':
                             self._add_process_data_record_items(conn, datatype, pd['id'])
 
-            # Add UI info if available
-            self._add_ui_info(conn, pd_elem, pd['id'])
+            # Note: UIInfo for ProcessData is stored in UserInterface/ProcessDataRefCollection,
+            # NOT as a direct child of ProcessData. Do not add UIInfo here.
 
             collection.append(pd_elem)
 
@@ -1112,10 +1114,7 @@ class IODDReconstructor:
                     ri_elem.set('subindex', str(ri['subindex']))
                     if ri['default_value'] is not None:
                         ri_elem.set('defaultValue', ri['default_value'])
-        else:
-            # Fallback to hardcoded standard IO-Link variables if no stored data
-            # This maintains backwards compatibility for older imported devices
-            self._add_fallback_std_variable_refs(collection, device, variant_row)
+        # No fallback - devices must be re-imported if std_variable_refs is empty
 
         # Phase 3 Task 9c: Create Variable elements from parameters
         # Note: StdVariableRef elements are handled separately above, so we reconstruct
@@ -1137,14 +1136,20 @@ class IODDReconstructor:
             if param['default_value'] is not None:
                 variable.set('defaultValue', str(param['default_value']))
 
-            # Dynamic attribute (always emit explicit true/false)
-            variable.set('dynamic', 'true' if param['dynamic'] else 'false')
+            # Dynamic attribute - only output if explicitly set in original IODD (not NULL)
+            dynamic_val = param['dynamic'] if 'dynamic' in param.keys() else None
+            if dynamic_val is not None:
+                variable.set('dynamic', 'true' if dynamic_val else 'false')
 
-            # Excluded from data storage (always emit explicit true/false)
-            variable.set('excludedFromDataStorage', 'true' if param['excluded_from_data_storage'] else 'false')
+            # Excluded from data storage - only output if explicitly set in original IODD (not NULL)
+            excluded_val = param['excluded_from_data_storage'] if 'excluded_from_data_storage' in param.keys() else None
+            if excluded_val is not None:
+                variable.set('excludedFromDataStorage', 'true' if excluded_val else 'false')
 
-            # Modifies other variables (always emit explicit true/false)
-            variable.set('modifiesOtherVariables', 'true' if param['modifies_other_variables'] else 'false')
+            # Modifies other variables - only output if explicitly set in original IODD (not NULL)
+            modifies_val = param['modifies_other_variables'] if 'modifies_other_variables' in param.keys() else None
+            if modifies_val is not None:
+                variable.set('modifiesOtherVariables', 'true' if modifies_val else 'false')
 
             # Determine if we should use DatatypeRef or Datatype based on datatype_ref column
             # Variables with datatype_ref use DatatypeRef element (e.g., D_Percentage, D_Colors)
@@ -1418,71 +1423,6 @@ class IODDReconstructor:
                 text_elem.set('value', text['text_value'] or '')
 
         return collection
-
-    def _add_fallback_std_variable_refs(self, collection: ET.Element, device, variant_row):
-        """Add hardcoded standard IO-Link variables as fallback
-
-        This is used when no StdVariableRef data is stored in the database
-        (for backwards compatibility with older imports).
-        """
-        # V_DirectParameters_1 - standard IO-Link variable
-        direct_params_ref = ET.SubElement(collection, 'StdVariableRef')
-        direct_params_ref.set('id', 'V_DirectParameters_1')
-
-        # V_SystemCommand - standard IO-Link variable
-        sys_cmd_ref = ET.SubElement(collection, 'StdVariableRef')
-        sys_cmd_ref.set('id', 'V_SystemCommand')
-
-        # V_VendorName - defaultValue from manufacturer
-        vendor_name_ref = ET.SubElement(collection, 'StdVariableRef')
-        vendor_name_ref.set('id', 'V_VendorName')
-        if device and device['manufacturer']:
-            vendor_name_ref.set('defaultValue', device['manufacturer'])
-
-        # V_ProductName - defaultValue from product name
-        product_name_ref = ET.SubElement(collection, 'StdVariableRef')
-        product_name_ref.set('id', 'V_ProductName')
-        if device and device['product_name']:
-            short_name = device['product_name'].split()[0] if device['product_name'] else None
-            if short_name:
-                product_name_ref.set('defaultValue', short_name)
-
-        # V_ProductText - standard IO-Link variable (no default)
-        product_text_ref = ET.SubElement(collection, 'StdVariableRef')
-        product_text_ref.set('id', 'V_ProductText')
-
-        # V_ProductID - defaultValue from variant product_id
-        product_id_ref = ET.SubElement(collection, 'StdVariableRef')
-        product_id_ref.set('id', 'V_ProductID')
-        if variant_row and variant_row['product_id']:
-            product_id_ref.set('defaultValue', variant_row['product_id'])
-
-        # V_SerialNumber - standard IO-Link variable (no default)
-        serial_ref = ET.SubElement(collection, 'StdVariableRef')
-        serial_ref.set('id', 'V_SerialNumber')
-
-        # V_HardwareRevision - standard IO-Link variable (no default)
-        hw_rev_ref = ET.SubElement(collection, 'StdVariableRef')
-        hw_rev_ref.set('id', 'V_HardwareRevision')
-
-        # V_FirmwareRevision - standard IO-Link variable (no default)
-        fw_rev_ref = ET.SubElement(collection, 'StdVariableRef')
-        fw_rev_ref.set('id', 'V_FirmwareRevision')
-
-        # V_ApplicationSpecificTag - standard IO-Link variable (no default)
-        app_tag_ref = ET.SubElement(collection, 'StdVariableRef')
-        app_tag_ref.set('id', 'V_ApplicationSpecificTag')
-        app_tag_ref.set('excludedFromDataStorage', 'false')
-
-        # V_DeviceStatus - standard IO-Link variable (defaultValue="0")
-        device_status_ref = ET.SubElement(collection, 'StdVariableRef')
-        device_status_ref.set('id', 'V_DeviceStatus')
-        device_status_ref.set('defaultValue', '0')
-
-        # V_DetailedDeviceStatus - standard IO-Link variable (with fixedLengthRestriction)
-        detailed_status_ref = ET.SubElement(collection, 'StdVariableRef')
-        detailed_status_ref.set('id', 'V_DetailedDeviceStatus')
-        detailed_status_ref.set('fixedLengthRestriction', '8')
 
     def _prettify_xml(self, elem: ET.Element) -> str:
         """Convert XML element to pretty-printed string"""

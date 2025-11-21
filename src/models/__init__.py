@@ -86,9 +86,12 @@ class Parameter:
     constraints: List[Constraint] = field(default_factory=list)
     enumeration_values: Dict[str, str] = field(default_factory=dict)  # value -> label mapping
     bit_length: Optional[int] = None
-    dynamic: bool = False
-    excluded_from_data_storage: bool = False
-    modifies_other_variables: bool = False
+    # These attributes are Optional[bool] to distinguish between:
+    # - None: attribute was not present in original IODD (don't output in reconstruction)
+    # - True/False: attribute was explicitly set in original IODD (output in reconstruction)
+    dynamic: Optional[bool] = None
+    excluded_from_data_storage: Optional[bool] = None
+    modifies_other_variables: Optional[bool] = None
     unit_code: Optional[str] = None
     value_range_name: Optional[str] = None
     single_values: List[SingleValue] = field(default_factory=list)
@@ -185,6 +188,8 @@ class DeviceFeatures:
     access_locks_local_parameterization: bool = False
     access_locks_local_user_interface: bool = False
     access_locks_parameter: bool = False
+    # Track whether SupportedAccessLocks element was present in original IODD
+    has_supported_access_locks: bool = False
 
 
 @dataclass

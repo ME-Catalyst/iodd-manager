@@ -67,9 +67,11 @@ class ParameterSaver(BaseSaver):
                 getattr(param, 'description', None),
                 enum_json,
                 getattr(param, 'bit_length', None),
-                1 if getattr(param, 'dynamic', False) else 0,
-                1 if getattr(param, 'excluded_from_data_storage', False) else 0,
-                1 if getattr(param, 'modifies_other_variables', False) else 0,
+                # Store NULL when attribute was not present, 1/0 when explicitly set
+                # This allows reconstruction to only output attributes that were in the original
+                1 if getattr(param, 'dynamic', None) is True else (0 if getattr(param, 'dynamic', None) is False else None),
+                1 if getattr(param, 'excluded_from_data_storage', None) is True else (0 if getattr(param, 'excluded_from_data_storage', None) is False else None),
+                1 if getattr(param, 'modifies_other_variables', None) is True else (0 if getattr(param, 'modifies_other_variables', None) is False else None),
                 getattr(param, 'unit_code', None),
                 getattr(param, 'value_range_name', None),
                 getattr(param, 'id', None),  # variable_id is stored as param.id

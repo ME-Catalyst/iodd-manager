@@ -423,6 +423,11 @@ class IODDReconstructor:
         if comm_network_profile is not None:
             profile_body.append(comm_network_profile)
 
+        # Stamp (contains CRC and Checker info)
+        stamp = self._create_stamp(conn, device_id)
+        if stamp is not None:
+            profile_body.append(stamp)
+
         return profile_body
 
     def _create_features(self, conn: sqlite3.Connection, device_id: int) -> Optional[ET.Element]:
@@ -1319,6 +1324,44 @@ class IODDReconstructor:
                     trigger_elem.set('disappearValue', trigger['disappear_value'])
 
         return comm_elem
+
+    def _create_stamp(self, conn: sqlite3.Connection,
+                      device_id: int) -> Optional[ET.Element]:
+        """Create Stamp element with CRC and Checker info"""
+        cursor = conn.cursor()
+
+        # Get stamp data from iodd_files table
+        cursor.execute("""
+            SELECT stamp_crc, checker_name, checker_version
+            FROM iodd_files WHERE device_id = ?
+        """, (device_id,))
+        row = cursor.fetchone()
+
+        if not row:
+            return None
+
+        stamp_crc = row['stamp_crc'] if 'stamp_crc' in row.keys() else None
+        checker_name = row['checker_name'] if 'checker_name' in row.keys() else None
+        checker_version = row['checker_version'] if 'checker_version' in row.keys() else None
+
+        # Only create Stamp if there's any data
+        if not stamp_crc and not checker_name:
+            return None
+
+        stamp = ET.Element('Stamp')
+
+        if stamp_crc:
+            stamp.set('crc', str(stamp_crc))
+
+        # Add Checker element if checker info exists
+        if checker_name or checker_version:
+            checker = ET.SubElement(stamp, 'Checker')
+            if checker_name:
+                checker.set('name', checker_name)
+            if checker_version:
+                checker.set('version', checker_version)
+
+        return stamp
 
     def _create_variable_collection(self, conn: sqlite3.Connection,
                                     device_id: int) -> Optional[ET.Element]:

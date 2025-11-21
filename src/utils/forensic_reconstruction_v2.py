@@ -418,6 +418,11 @@ class IODDReconstructor:
         if user_interface is not None:
             device_function.append(user_interface)
 
+        # CommNetworkProfile (outside DeviceFunction, direct child of ProfileBody)
+        comm_network_profile = self._create_comm_network_profile(conn, device_id)
+        if comm_network_profile is not None:
+            profile_body.append(comm_network_profile)
+
         return profile_body
 
     def _create_features(self, conn: sqlite3.Connection, device_id: int) -> Optional[ET.Element]:
@@ -1213,6 +1218,107 @@ class IODDReconstructor:
                     diag_menu.set('menuId', menu_id)
 
         return user_interface
+
+    def _create_comm_network_profile(self, conn: sqlite3.Connection,
+                                      device_id: int) -> Optional[ET.Element]:
+        """Create CommNetworkProfile element with TransportLayers and Test sections"""
+        cursor = conn.cursor()
+
+        # Get communication profile data
+        cursor.execute("SELECT * FROM communication_profile WHERE device_id = ?", (device_id,))
+        comm_profile = cursor.fetchone()
+
+        if not comm_profile:
+            return None
+
+        # Create CommNetworkProfile element
+        comm_elem = ET.Element('CommNetworkProfile')
+        comm_elem.set('{http://www.w3.org/2001/XMLSchema-instance}type', 'IOLinkCommNetworkProfileT')
+
+        if comm_profile['iolink_revision']:
+            comm_elem.set('iolinkRevision', comm_profile['iolink_revision'])
+
+        # Create TransportLayers
+        transport_layers = ET.SubElement(comm_elem, 'TransportLayers')
+
+        # Create PhysicalLayer
+        physical_layer = ET.SubElement(transport_layers, 'PhysicalLayer')
+
+        if comm_profile['bitrate']:
+            physical_layer.set('bitrate', comm_profile['bitrate'])
+        if comm_profile['min_cycle_time']:
+            physical_layer.set('minCycleTime', str(comm_profile['min_cycle_time']))
+        if comm_profile['sio_supported'] is not None:
+            physical_layer.set('sioSupported', 'true' if comm_profile['sio_supported'] else 'false')
+        if comm_profile['msequence_capability']:
+            physical_layer.set('mSequenceCapability', str(comm_profile['msequence_capability']))
+
+        # Get wire configurations for Connection element
+        cursor.execute("""
+            SELECT * FROM wire_configurations
+            WHERE device_id = ?
+            ORDER BY wire_number
+        """, (device_id,))
+        wire_configs = cursor.fetchall()
+
+        if wire_configs or comm_profile['connection_type']:
+            connection = ET.SubElement(physical_layer, 'Connection')
+
+            # Get connection type from wire_configurations if available, else from comm_profile
+            conn_type = wire_configs[0]['connection_type'] if wire_configs and wire_configs[0]['connection_type'] else comm_profile['connection_type']
+            if conn_type:
+                # Add 'T' suffix if not present (e.g., M12-4Connection -> M12-4ConnectionT)
+                if not conn_type.endswith('T'):
+                    conn_type = conn_type + 'T'
+                connection.set('{http://www.w3.org/2001/XMLSchema-instance}type', conn_type)
+
+            # Get device variant for ProductRef
+            cursor.execute("SELECT product_id FROM device_variants WHERE device_id = ? LIMIT 1", (device_id,))
+            variant_row = cursor.fetchone()
+            if variant_row and variant_row['product_id']:
+                product_ref = ET.SubElement(connection, 'ProductRef')
+                product_ref.set('productId', variant_row['product_id'])
+
+            # Add wire elements
+            for wire in wire_configs:
+                wire_elem_name = f"Wire{wire['wire_number']}"
+                wire_elem = ET.SubElement(connection, wire_elem_name)
+                if wire['wire_color']:
+                    wire_elem.set('color', wire['wire_color'])
+                if wire['wire_function']:
+                    wire_elem.set('function', wire['wire_function'])
+
+        # Create Test section
+        cursor.execute("""
+            SELECT * FROM device_test_config
+            WHERE device_id = ?
+            ORDER BY config_type
+        """, (device_id,))
+        test_configs = cursor.fetchall()
+
+        if test_configs:
+            test_elem = ET.SubElement(comm_elem, 'Test')
+            test_elem.set('{http://www.w3.org/2001/XMLSchema-instance}type', 'IOLinkTestT')
+
+            for config in test_configs:
+                config_elem = ET.SubElement(test_elem, config['config_type'])
+                config_elem.set('index', str(config['param_index']))
+                if config['test_value']:
+                    config_elem.set('testValue', config['test_value'])
+
+                # Get event triggers for this config (for Config7)
+                cursor.execute("""
+                    SELECT * FROM device_test_event_triggers
+                    WHERE test_config_id = ?
+                """, (config['id'],))
+                event_triggers = cursor.fetchall()
+
+                for trigger in event_triggers:
+                    trigger_elem = ET.SubElement(config_elem, 'EventTrigger')
+                    trigger_elem.set('appearValue', trigger['appear_value'])
+                    trigger_elem.set('disappearValue', trigger['disappear_value'])
+
+        return comm_elem
 
     def _create_variable_collection(self, conn: sqlite3.Connection,
                                     device_id: int) -> Optional[ET.Element]:

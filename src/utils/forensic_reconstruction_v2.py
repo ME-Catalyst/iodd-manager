@@ -151,6 +151,16 @@ class IODDReconstructor:
             if profile_body is not None:
                 root.append(profile_body)
 
+            # Add CommNetworkProfile (direct child of IODevice, not ProfileBody)
+            comm_network_profile = self._create_comm_network_profile(conn, device_id)
+            if comm_network_profile is not None:
+                root.append(comm_network_profile)
+
+            # Add Stamp (direct child of IODevice, contains CRC and Checker info)
+            stamp = self._create_stamp(conn, device_id)
+            if stamp is not None:
+                root.append(stamp)
+
             # Add ExternalTextCollection
             text_collection = self._create_text_collection(conn, device_id)
             if text_collection is not None:
@@ -417,16 +427,6 @@ class IODDReconstructor:
         user_interface = self._create_user_interface(conn, device_id)
         if user_interface is not None:
             device_function.append(user_interface)
-
-        # CommNetworkProfile (outside DeviceFunction, direct child of ProfileBody)
-        comm_network_profile = self._create_comm_network_profile(conn, device_id)
-        if comm_network_profile is not None:
-            profile_body.append(comm_network_profile)
-
-        # Stamp (contains CRC and Checker info)
-        stamp = self._create_stamp(conn, device_id)
-        if stamp is not None:
-            profile_body.append(stamp)
 
         return profile_body
 

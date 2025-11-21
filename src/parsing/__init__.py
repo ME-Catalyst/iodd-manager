@@ -490,28 +490,12 @@ class IODDParser:
             'subindex_access_supported': None,
         }
 
-        # Check for DatatypeRef (reference to custom datatype)
-        datatype_ref = var_elem.find('.//iodd:DatatypeRef', self.NAMESPACES)
-        if datatype_ref is not None:
-            datatype_id = datatype_ref.get('datatypeId')
-            if datatype_id and datatype_id in self.datatype_lookup:
-                custom_dt = self.datatype_lookup[datatype_id]
-
-                # Map custom type to IODDDataType
-                type_str = custom_dt['type']
-                result['data_type'] = self._map_xsi_type_to_iodd_type(type_str)
-                result['bit_length'] = custom_dt.get('bitLength')
-                result['enumeration_values'] = custom_dt.get('singleValues', {})
-
-                # Handle value range
-                if custom_dt.get('valueRange'):
-                    result['min_value'] = custom_dt['valueRange']['lower']
-                    result['max_value'] = custom_dt['valueRange']['upper']
-
-            return result
-
-        # Check for inline Datatype element
-        datatype_elem = var_elem.find('.//iodd:Datatype', self.NAMESPACES)
+        # Check for inline Datatype element FIRST (before DatatypeRef)
+        # This is important because RecordT variables with inline Datatype may have
+        # DatatypeRef elements inside their RecordItem children, which would incorrectly
+        # match './/iodd:DatatypeRef' if we check that first. Use direct child selector
+        # (not descendant) to find the Variable's own Datatype.
+        datatype_elem = var_elem.find('iodd:Datatype', self.NAMESPACES)
         if datatype_elem is not None:
             # Get type from xsi:type attribute
             type_str = datatype_elem.get('{http://www.w3.org/2001/XMLSchema-instance}type', 'OctetStringT')
@@ -582,6 +566,29 @@ class IODDParser:
                     element_fixed_length = simple_datatype.get('fixedLength')
                     if element_fixed_length:
                         result['array_element_fixed_length'] = int(element_fixed_length)
+
+            return result
+
+        # Check for DatatypeRef (reference to custom datatype)
+        # Only check direct child, not descendants - use 'iodd:DatatypeRef' not './/iodd:DatatypeRef'
+        datatype_ref = var_elem.find('iodd:DatatypeRef', self.NAMESPACES)
+        if datatype_ref is not None:
+            datatype_id = datatype_ref.get('datatypeId')
+            if datatype_id and datatype_id in self.datatype_lookup:
+                custom_dt = self.datatype_lookup[datatype_id]
+
+                # Map custom type to IODDDataType
+                type_str = custom_dt['type']
+                result['data_type'] = self._map_xsi_type_to_iodd_type(type_str)
+                result['bit_length'] = custom_dt.get('bitLength')
+                result['enumeration_values'] = custom_dt.get('singleValues', {})
+
+                # Handle value range
+                if custom_dt.get('valueRange'):
+                    result['min_value'] = custom_dt['valueRange']['lower']
+                    result['max_value'] = custom_dt['valueRange']['upper']
+
+            return result
 
         return result
 

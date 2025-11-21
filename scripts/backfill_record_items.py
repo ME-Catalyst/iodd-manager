@@ -37,6 +37,7 @@ def backfill_device(cursor, device_id: int, xml_content: str, dry_run: bool = Fa
     stats = {
         'param_record_items': 0,
         'record_item_info': 0,
+        'single_values': 0,
         'std_variable_refs': 0,
         'build_format': False,
         'errors': []
@@ -77,6 +78,21 @@ def backfill_device(cursor, device_id: int, xml_content: str, dry_run: bool = Fa
                     stats['param_record_items'] += len(param.record_items)
                     logger.debug(f"  Added {len(param.record_items)} record items to {param.id}")
 
+                # Also update data_type to RecordT if needed (parser fix)
+                if not dry_run:
+                    bit_length = getattr(param, 'bit_length', None)
+                    subindex_access = 1 if getattr(param, 'subindex_access_supported', None) else (
+                        0 if getattr(param, 'subindex_access_supported', None) is False else None
+                    )
+                    cursor.execute(
+                        '''UPDATE parameters
+                           SET data_type = 'RecordT',
+                               bit_length = COALESCE(?, bit_length),
+                               subindex_access_supported = COALESCE(?, subindex_access_supported)
+                           WHERE id = ?''',
+                        (bit_length, subindex_access, param_id)
+                    )
+
             # Also check for RecordItemInfo
             record_item_info = getattr(param, '_record_item_info', [])
             if record_item_info:
@@ -92,6 +108,21 @@ def backfill_device(cursor, device_id: int, xml_content: str, dry_run: bool = Fa
                         param_saver._save_record_item_info(param_id, record_item_info)
                     stats['record_item_info'] += len(record_item_info)
                     logger.debug(f"  Added {len(record_item_info)} record item info to {param.id}")
+
+            # Backfill single_values (Parameter enumeration values)
+            single_values = getattr(param, 'single_values', [])
+            if single_values:
+                cursor.execute(
+                    'SELECT COUNT(*) FROM parameter_single_values WHERE parameter_id = ?',
+                    (param_id,)
+                )
+                existing_sv_count = cursor.fetchone()[0]
+
+                if existing_sv_count == 0:
+                    if not dry_run:
+                        param_saver._save_single_values(param_id, single_values)
+                    stats['single_values'] = stats.get('single_values', 0) + len(single_values)
+                    logger.debug(f"  Added {len(single_values)} single values to {param.id}")
 
         # 2. Backfill std_variable_refs
         if hasattr(profile, 'std_variable_refs') and profile.std_variable_refs:
@@ -171,6 +202,7 @@ def main():
         'devices_processed': 0,
         'param_record_items': 0,
         'record_item_info': 0,
+        'single_values': 0,
         'std_variable_refs': 0,
         'build_format': 0,
         'errors': 0
@@ -188,14 +220,15 @@ def main():
         total_stats['devices_processed'] += 1
         total_stats['param_record_items'] += stats['param_record_items']
         total_stats['record_item_info'] += stats['record_item_info']
+        total_stats['single_values'] += stats.get('single_values', 0)
         total_stats['std_variable_refs'] += stats['std_variable_refs']
         total_stats['build_format'] += 1 if stats['build_format'] else 0
         total_stats['errors'] += len(stats['errors'])
 
-        if stats['param_record_items'] or stats['std_variable_refs'] or stats['build_format']:
-            logger.info(f"  Updated: {stats['param_record_items']} record items, "
-                       f"{stats['std_variable_refs']} std_var_refs, "
-                       f"format={'yes' if stats['build_format'] else 'no'}")
+        if stats['param_record_items'] or stats.get('single_values') or stats['std_variable_refs'] or stats['build_format']:
+            logger.info(f"  Updated: {stats['param_record_items']} record_items, "
+                       f"{stats.get('single_values', 0)} single_values, "
+                       f"{stats['std_variable_refs']} std_var_refs")
 
     if not args.dry_run:
         conn.commit()
@@ -206,6 +239,7 @@ def main():
     logger.info(f"Devices processed: {total_stats['devices_processed']}")
     logger.info(f"Parameter record items added: {total_stats['param_record_items']}")
     logger.info(f"RecordItemInfo added: {total_stats['record_item_info']}")
+    logger.info(f"SingleValues added: {total_stats['single_values']}")
     logger.info(f"StdVariableRefs added: {total_stats['std_variable_refs']}")
     logger.info(f"Build format metadata added: {total_stats['build_format']}")
     logger.info(f"Errors: {total_stats['errors']}")

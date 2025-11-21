@@ -119,12 +119,16 @@ class ParameterSaver(BaseSaver):
             datatype_ref = None
             simple_datatype = None
 
-            # If data_type looks like a custom datatype ID (e.g., DT_xxx), it's a ref
-            # Otherwise it's a simple type (e.g., UIntegerT)
-            if data_type and data_type.startswith('DT_'):
-                datatype_ref = data_type
-            elif data_type:
+            # Simple types end in 'T' (e.g., UIntegerT, BooleanT, StringT)
+            # Custom datatype IDs typically start with 'D_' or 'DT_'
+            simple_types = {'UIntegerT', 'IntegerT', 'StringT', 'BooleanT', 'Float32T',
+                           'OctetStringT', 'TimeT', 'RecordT', 'ArrayT'}
+
+            if data_type and data_type in simple_types:
                 simple_datatype = data_type
+            elif data_type:
+                # Treat as custom datatype reference
+                datatype_ref = data_type
 
             # Insert RecordItem
             query = """

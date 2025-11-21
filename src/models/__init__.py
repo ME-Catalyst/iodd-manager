@@ -108,6 +108,7 @@ class Parameter:
     datatype_ref: Optional[str] = None  # DatatypeRef datatypeId (e.g., D_Colors) for PQA reconstruction
     value_range_xsi_type: Optional[str] = None  # ValueRange xsi:type (e.g., UIntegerValueRangeT)
     value_range_name_text_id: Optional[str] = None  # ValueRange Name textId
+    xml_order: Optional[int] = None  # Original order in XML document (for PQA reconstruction)
 
 
 @dataclass

@@ -134,6 +134,29 @@ stored, or reconstructed. This affected ~271 issues across:
 
 ---
 
+### Fix #6: Variable@id/@index Ordering (400 issues) - COMMITTED
+
+**Commit**: `TBD` feat(pqa): preserve original XML order for Variables
+
+**Problem**: Variables were being reconstructed in `param_index` order (the index attribute value),
+not the original XML document order. This caused ~400 issues where Variable id/index appeared mismatched.
+
+**Root Cause**: The parser didn't track original XML order. Reconstruction sorted by `param_index`
+which doesn't match how Variables appear in the original IODD file.
+
+**Changes Made**:
+1. `src/models/__init__.py` - Added `xml_order: Optional[int]` to Parameter model
+2. `src/parsing/__init__.py` - Track xml_order when parsing Variable elements
+3. `src/storage/parameter.py` - Save xml_order to parameters table
+4. `src/utils/forensic_reconstruction_v2.py` - Order by xml_order (with fallback to param_index)
+5. `alembic/versions/049_add_parameter_xml_order.py` - Add xml_order column to parameters
+
+**Expected Impact**: ~400 issues resolved (requires re-import)
+
+**Status**: COMMITTED - Requires re-import to populate data
+
+---
+
 ## POST-REIMPORT RESULTS (CURRENT STATE)
 
 Re-import completed successfully with parser shadowing fix applied.

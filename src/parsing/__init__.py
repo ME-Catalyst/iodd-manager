@@ -298,11 +298,13 @@ class IODDParser:
         if not hasattr(self, 'datatype_lookup'):
             self.datatype_lookup = self._build_datatype_lookup()
 
-        # Find all Variable elements in VariableCollection
+        # Find all Variable elements in VariableCollection (preserve original XML order)
+        xml_order = 0
         for var_elem in self.root.findall('.//iodd:VariableCollection/iodd:Variable', self.NAMESPACES):
-            param = self._parse_variable_element(var_elem)
+            param = self._parse_variable_element(var_elem, xml_order)
             if param:
                 parameters.append(param)
+            xml_order += 1
 
         # Also parse StdVariableRef elements (standard IO-Link variables)
         # These are standardized variables defined by the IO-Link specification
@@ -316,7 +318,7 @@ class IODDParser:
         logger.info(f"Extracted {len(parameters)} parameters")
         return parameters
 
-    def _parse_variable_element(self, var_elem) -> Optional[Parameter]:
+    def _parse_variable_element(self, var_elem, xml_order: int = 0) -> Optional[Parameter]:
         """Parse a Variable element into a Parameter object"""
         # Get basic attributes
         var_id = var_elem.get('id')
@@ -410,6 +412,7 @@ class IODDParser:
             datatype_ref=datatype_info.get('datatype_ref'),  # DatatypeRef datatypeId
             value_range_xsi_type=datatype_info.get('value_range_xsi_type'),  # ValueRange xsi:type
             value_range_name_text_id=datatype_info.get('value_range_name_text_id'),  # ValueRange Name textId
+            xml_order=xml_order,  # Original order in XML document
         )
 
         # Store RecordItemInfo as an attribute (not in Parameter model, will be saved separately)

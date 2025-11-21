@@ -1223,7 +1223,7 @@ class IODDReconstructor:
 
         cursor.execute("""
             SELECT * FROM parameters WHERE device_id = ?
-            ORDER BY param_index
+            ORDER BY COALESCE(xml_order, param_index)
         """, (device_id,))
         parameters = cursor.fetchall()
 

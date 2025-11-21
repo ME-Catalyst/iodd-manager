@@ -50,8 +50,8 @@ class ParameterSaver(BaseSaver):
                     array_count, array_element_type, subindex_access_supported,
                     array_element_bit_length, array_element_fixed_length,
                     name_text_id, description_text_id, datatype_ref,
-                    value_range_xsi_type, value_range_name_text_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    value_range_xsi_type, value_range_name_text_id, xml_order
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
 
             self._execute(query, (
@@ -87,6 +87,7 @@ class ParameterSaver(BaseSaver):
                 getattr(param, 'datatype_ref', None),  # DatatypeRef datatypeId for Variables using DatatypeRef
                 getattr(param, 'value_range_xsi_type', None),  # ValueRange xsi:type
                 getattr(param, 'value_range_name_text_id', None),  # ValueRange Name textId
+                getattr(param, 'xml_order', None),  # Original XML order for PQA reconstruction
             ))
 
             parameter_id = self._get_lastrowid()

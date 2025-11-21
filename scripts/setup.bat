@@ -77,6 +77,16 @@ echo   Redis is ready.
 :redis_message_end
 echo.
 
+:: Update codebase statistics for overview page
+echo √ Updating codebase statistics...
+python -m src.utils.codebase_stats >nul 2>&1
+if %errorlevel% equ 0 (
+    echo   Statistics updated!
+) else (
+    echo   Warning: Could not update statistics (non-critical)
+)
+echo.
+
 :: Launch the application
 echo √ Launching GreenStack...
 echo.

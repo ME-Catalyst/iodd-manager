@@ -108,7 +108,7 @@ Reconstruction then output bitLength for all RecordItems, even when not in origi
 
 ### Fix #5: RecordItem/SimpleDatatype/ValueRange Missing (271 issues) - COMMITTED
 
-**Commit**: `TBD` feat(pqa): add ValueRange extraction and reconstruction for RecordItems
+**Commit**: `34ec9ab` feat(pqa): add ValueRange extraction and reconstruction for RecordItems
 
 **Problem**: `ValueRange` elements inside `RecordItem/SimpleDatatype` were not being extracted,
 stored, or reconstructed. This affected ~271 issues across:

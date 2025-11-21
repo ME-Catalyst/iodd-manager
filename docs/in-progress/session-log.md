@@ -327,6 +327,28 @@ extracted, stored, or reconstructed. Affected 456 issues across 9 devices.
 
 ---
 
+### Fix #14: SimpleDatatype Missing Attributes (295 issues) - COMMITTED
+
+**Commit**: `3cd2c58` feat(pqa): add SimpleDatatype fixedLength, encoding, id attributes
+
+**Problem**: RecordItem/SimpleDatatype elements missing attributes:
+- @fixedLength (106 issues) - String length for StringT types
+- @encoding (98 issues) - Character encoding (e.g., UTF-8)
+- @id (89 issues) - Unique identifier for the SimpleDatatype
+
+**Changes Made**:
+1. `src/models/__init__.py` - Add `fixed_length`, `encoding`, `datatype_id` to RecordItem
+2. `src/parsing/__init__.py` - Extract these from SimpleDatatype elements
+3. `src/storage/parameter.py` - Save new attributes to parameter_record_items
+4. `src/utils/forensic_reconstruction_v2.py` - Output attributes when present
+5. `alembic/versions/054_add_simple_datatype_attrs.py` - Add columns to record_items tables
+
+**Expected Impact**: ~295 issues resolved (requires re-import)
+
+**Status**: COMMITTED & PUSHED - Requires re-import to populate data
+
+---
+
 ## POST-REIMPORT RESULTS (CURRENT STATE)
 
 Re-import completed successfully with parser shadowing fix applied.

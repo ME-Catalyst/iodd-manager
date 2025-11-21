@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui';
-import { Button } from '@/components/ui';
 import { Badge } from '@/components/ui';
 import {
   Code, GitBranch, Users, Calendar, FileCode, Folder, Package,
-  TrendingUp, Activity, Zap, Database, Layers, Box, Terminal,
-  Sparkles, Award, Target, Rocket, GitCommit, Clock
+  TrendingUp, Activity, Layers, Terminal,
+  Sparkles, Target, Rocket, GitCommit, Clock, ChevronDown, ChevronUp
 } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { motion, AnimatePresence } from 'framer-motion';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import axios from 'axios';
+import TechStackMindMap from '@/components/TechStackMindMap';
+import ArchitectureDiagram from '@/components/ArchitectureDiagram';
 
 const COLORS = {
   primary: '#10b981',
@@ -23,6 +24,8 @@ const COLORS = {
 const OverviewPage = ({ onNavigate, API_BASE }) => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showTechStack, setShowTechStack] = useState(false);
+  const [showArchitecture, setShowArchitecture] = useState(false);
 
   useEffect(() => {
     fetchStats();
@@ -293,6 +296,86 @@ const OverviewPage = ({ onNavigate, API_BASE }) => {
           </Card>
         </motion.div>
       </div>
+
+      {/* Tech Stack Mind Map */}
+      <motion.div variants={itemVariants}>
+        <Card className="bg-card/80 backdrop-blur border-border overflow-hidden">
+          <CardHeader
+            className="cursor-pointer hover:bg-brand-green/5 transition-colors"
+            onClick={() => setShowTechStack(!showTechStack)}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Layers className="w-5 h-5 text-brand-green" />
+                  Technology Stack
+                </CardTitle>
+                <CardDescription>Interactive mind map of all technologies powering GreenStack</CardDescription>
+              </div>
+              <motion.div
+                animate={{ rotate: showTechStack ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronDown className="w-5 h-5 text-muted-foreground" />
+              </motion.div>
+            </div>
+          </CardHeader>
+          <AnimatePresence>
+            {showTechStack && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <CardContent className="pt-0">
+                  <TechStackMindMap />
+                </CardContent>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </Card>
+      </motion.div>
+
+      {/* Architecture Diagram */}
+      <motion.div variants={itemVariants}>
+        <Card className="bg-card/80 backdrop-blur border-border overflow-hidden">
+          <CardHeader
+            className="cursor-pointer hover:bg-purple-500/5 transition-colors"
+            onClick={() => setShowArchitecture(!showArchitecture)}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <GitBranch className="w-5 h-5 text-purple-400" />
+                  System Architecture
+                </CardTitle>
+                <CardDescription>Layered architecture diagram with data flow visualization</CardDescription>
+              </div>
+              <motion.div
+                animate={{ rotate: showArchitecture ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronDown className="w-5 h-5 text-muted-foreground" />
+              </motion.div>
+            </div>
+          </CardHeader>
+          <AnimatePresence>
+            {showArchitecture && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <CardContent className="pt-0">
+                  <ArchitectureDiagram />
+                </CardContent>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </Card>
+      </motion.div>
 
       {/* Language Details Table */}
       <motion.div variants={itemVariants}>

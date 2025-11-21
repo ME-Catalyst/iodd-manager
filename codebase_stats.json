@@ -1,12 +1,12 @@
 {
-  "generated_at": "2025-11-21T12:48:54.428932",
+  "generated_at": "2025-11-21T15:05:12.841291",
   "project_name": "GreenStack",
   "language_stats": {
     "Python": {
-      "files": 173,
-      "lines": 44721,
-      "blank": 7351,
-      "comments": 3071,
+      "files": 157,
+      "lines": 42696,
+      "blank": 7061,
+      "comments": 2983,
       "is_doc": false
     },
     "JSX": {
@@ -32,15 +32,15 @@
     },
     "JSON": {
       "files": 10,
-      "lines": 14938,
+      "lines": 14941,
       "blank": 0,
       "comments": 0,
       "is_doc": false
     },
     "Markdown": {
-      "files": 92,
-      "lines": 60320,
-      "blank": 13190,
+      "files": 91,
+      "lines": 59799,
+      "blank": 13069,
       "comments": 0,
       "is_doc": true
     },
@@ -74,93 +74,93 @@
     }
   },
   "git_stats": {
-    "total_commits": 247,
+    "total_commits": 259,
     "contributors": 3,
     "branches": 4,
     "days_active": 10,
-    "recent_commits_30d": 247,
+    "recent_commits_30d": 259,
     "recent_commit_details": [
       {
-        "hash": "7394d5b",
+        "hash": "b979f12",
         "author": "sys_eng",
         "email": "sys_eng@example.com",
-        "timestamp": 1763746838,
-        "message": "docs: add comprehensive PQA system documentation"
+        "timestamp": 1763753294,
+        "message": "feat(pqa): add MenuRef Condition support for accurate reconstruction"
       },
       {
-        "hash": "2a620f7",
+        "hash": "8456c81",
         "author": "sys_eng",
         "email": "sys_eng@example.com",
-        "timestamp": 1763746224,
-        "message": "feat: enhance IODD parser and reconstruction for PQA accuracy"
+        "timestamp": 1763753089,
+        "message": "fix(pqa): improve ProcessData ID transformation regex"
       },
       {
-        "hash": "35e9bf1",
+        "hash": "87a59a6",
         "author": "sys_eng",
         "email": "sys_eng@example.com",
-        "timestamp": 1763745090,
-        "message": "fix: improve IODD RecordItem and SingleValue extraction for PQA"
+        "timestamp": 1763752970,
+        "message": "feat(pqa): add Menu name_text_id for accurate reconstruction"
       },
       {
-        "hash": "f3f9523",
+        "hash": "bf65984",
         "author": "sys_eng",
         "email": "sys_eng@example.com",
-        "timestamp": 1763743637,
-        "message": "feat: improve IODD PQA system with whitespace handling and data backfill"
+        "timestamp": 1763752705,
+        "message": "fix(pqa): improve IODD reconstruction accuracy"
       },
       {
-        "hash": "4a13af2",
+        "hash": "1e055b6",
         "author": "sys_eng",
         "email": "sys_eng@example.com",
-        "timestamp": 1763737614,
-        "message": "feat: add interactive tech stack mind map and architecture diagrams"
+        "timestamp": 1763751478,
+        "message": "feat(pqa): implement Phase 3 - fix extra element generation"
       },
       {
-        "hash": "e5c05d7",
+        "hash": "383b8f2",
         "author": "sys_eng",
         "email": "sys_eng@example.com",
-        "timestamp": 1763737153,
-        "message": "fix: correct days_active calculation in codebase stats"
+        "timestamp": 1763750756,
+        "message": "feat(pqa): implement Phase 2 - preserve original textIds and ordering"
       },
       {
-        "hash": "5e8b940",
+        "hash": "93bfb1e",
         "author": "sys_eng",
         "email": "sys_eng@example.com",
-        "timestamp": 1763736748,
-        "message": "feat: enhance PQA reconstruction with improved enum and RecordT support"
+        "timestamp": 1763749550,
+        "message": "feat(pqa): implement Phase 1 - fix default attribute generation"
       },
       {
-        "hash": "4eb018e",
+        "hash": "8ffa12c",
         "author": "sys_eng",
         "email": "sys_eng@example.com",
-        "timestamp": 1763730545,
-        "message": "fix: replace existing PQA analysis instead of creating duplicates"
+        "timestamp": 1763747837,
+        "message": "chore: update codebase statistics"
       },
       {
-        "hash": "1e93324",
+        "hash": "820add3",
         "author": "sys_eng",
         "email": "sys_eng@example.com",
-        "timestamp": 1763730396,
-        "message": "fix: prevent duplicate PQA analyses"
+        "timestamp": 1763747828,
+        "message": "chore: add codebase stats update to setup script"
       },
       {
-        "hash": "989efdb",
+        "hash": "c9131f1",
         "author": "sys_eng",
         "email": "sys_eng@example.com",
-        "timestamp": 1763729692,
-        "message": "feat: improve IODD PQA reconstruction with RecordT support"
+        "timestamp": 1763747754,
+        "message": "feat: add NetworkConfigTab for advanced EDS network configuration"
       }
     ]
   },
   "file_counts": {
-    "total_files": 502,
+    "total_files": 475,
     "total_directories": 84
   },
   "project_structure": {
     "backend": 64,
     "frontend": 139,
-    "docs": 93,
-    "tests": 31,
+    "docs": 92,
+    "tests": 26,
     "scripts": 18,
     "config": 28
   },
@@ -171,22 +171,22 @@
     "npm_dev_dependencies": 10
   },
   "database_stats": {
-    "iodd_devices": 56,
-    "iodd_files": 56,
+    "iodd_devices": 149,
+    "iodd_files": 149,
     "eds_files": 0,
     "eds_variants": 0,
-    "total_parameters": 781,
+    "total_parameters": 3939,
     "total_assemblies": 0,
-    "pqa_analyses": 56
+    "pqa_analyses": 149
   },
   "totals": {
-    "total_code_lines": 104280,
-    "total_doc_lines": 47130,
-    "total_lines": 151410,
-    "total_code_files": 351,
-    "total_doc_files": 92,
-    "total_files_counted": 443,
-    "total_blank_lines": 25646,
-    "total_comment_lines": 3794
+    "total_code_lines": 102636,
+    "total_doc_lines": 46730,
+    "total_lines": 149366,
+    "total_code_files": 335,
+    "total_doc_files": 91,
+    "total_files_counted": 426,
+    "total_blank_lines": 25235,
+    "total_comment_lines": 3706
   }
 }

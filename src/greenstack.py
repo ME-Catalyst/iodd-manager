@@ -367,10 +367,15 @@ class DeviceProfile:
     checker_version: Optional[str] = None
 
 # ============================================================================
-# IODD Parser
+# IODD Parser (DEPRECATED)
+# ============================================================================
+# NOTE: This class is DEPRECATED. The enhanced parser is in src/parsing/__init__.py
+# and is imported at the top of this file. This class remains only for reference
+# and should be removed in a future cleanup. The IODDManager._parse_xml_content()
+# method now uses the enhanced parser from src.parsing.
 # ============================================================================
 
-class IODDParser:
+class _DeprecatedIODDParser:
     """Parse IODD XML files and extract device information"""
     
     NAMESPACES = {
@@ -1943,7 +1948,15 @@ class IODDIngester:
         return profile, asset_files
     
     def _parse_xml_content(self, xml_content: str) -> DeviceProfile:
-        """Parse XML content into DeviceProfile"""
+        """Parse XML content into DeviceProfile
+
+        Uses the enhanced IODDParser from src.parsing which handles:
+        - Proper NULL handling for boolean attributes (dynamic, excludedFromDataStorage, etc.)
+        - name_text_id and description_text_id extraction
+        - StdVariableRef storage
+        - All other PQA improvements
+        """
+        # IODDParser is imported from src.parsing at the top of this file
         parser = IODDParser(xml_content)
         return parser.parse()
     

@@ -461,26 +461,35 @@ async def clean_fk_violations():
         violations_by_table = {}
         for table, rowid, parent_table, fkid in violations:
             if table not in violations_by_table:
-                violations_by_table[table] = []
-            violations_by_table[table].append(rowid)
+                violations_by_table[table] = set()
+            violations_by_table[table].add(rowid)
 
-        # Delete orphaned records
+        # Delete orphaned records in batches to avoid SQLite variable limit
+        # SQLite has a default limit of 999 variables per query
+        BATCH_SIZE = 500
         total_deleted = 0
         deletion_summary = []
 
-        for table, rowids in violations_by_table.items():
-            # Delete the orphaned records
-            placeholders = ','.join('?' * len(rowids))
-            cursor.execute(f"DELETE FROM {table} WHERE rowid IN ({placeholders})", rowids)
-            deleted = cursor.rowcount
-            total_deleted += deleted
-            deletion_summary.append(f"{table}: {deleted} records")
+        for table, rowids_set in violations_by_table.items():
+            rowids = list(rowids_set)
+            table_deleted = 0
+
+            # Process in batches
+            for i in range(0, len(rowids), BATCH_SIZE):
+                batch = rowids[i:i + BATCH_SIZE]
+                placeholders = ','.join('?' * len(batch))
+                cursor.execute(f"DELETE FROM {table} WHERE rowid IN ({placeholders})", batch)
+                table_deleted += cursor.rowcount
+
+            total_deleted += table_deleted
+            deletion_summary.append(f"{table}: {table_deleted} records")
 
         conn.commit()
 
-        # Run VACUUM to clean up
-        cursor.execute("VACUUM")
-
+        # Run VACUUM to clean up (separate connection to avoid locking)
+        conn.close()
+        conn = sqlite3.connect(get_db_path())
+        conn.execute("VACUUM")
         conn.close()
 
         return {
@@ -762,7 +771,7 @@ async def delete_all_iodd_devices():
     Delete all IODD devices and related data
 
     WARNING: This is a destructive operation that cannot be undone.
-    Deletes all IODD devices, parameters, assets, and all related metadata.
+    Deletes all IODD devices, parameters, assets, PQA data, and all related metadata.
     """
     conn = sqlite3.connect(get_db_path())
     cursor = conn.cursor()
@@ -783,23 +792,50 @@ async def delete_all_iodd_devices():
             ticket_count = cursor.rowcount
             logger.info(f"Deleted {ticket_count} PQA tickets for IODD devices")
 
+        # Delete IODD PQA data
+        for table in [
+            "pqa_diff_details",
+            "pqa_quality_metrics",
+            "pqa_analysis_queue",
+            "pqa_file_archive",
+        ]:
+            _delete_all_rows(cursor, tables, table)
+
         # Delete ALL IODD-related data in correct order (respecting foreign keys)
         # Child tables first, parent tables last
         for table in [
+            "record_item_single_values",
+            "parameter_record_items",
             "parameter_single_values",
+            "std_variable_ref_single_values",
+            "std_record_item_refs",
+            "std_variable_refs",
             "parameters",
+            "process_data_conditions",
+            "process_data_ui_info",
             "process_data_record_items",
             "process_data_single_values",
             "process_data",
+            "variable_record_item_info",
+            "custom_datatype_record_items",
+            "custom_datatype_single_values",
+            "custom_datatypes",
             "error_types",
             "events",
             "communication_profile",
             "device_features",
+            "device_variants",
+            "device_test_event_triggers",
+            "device_test_config",
             "document_info",
+            "ui_menu_buttons",
             "ui_menu_items",
             "ui_menu_roles",
             "ui_menus",
             "generated_adapters",
+            "wire_configurations",
+            "iodd_build_format",
+            "iodd_text",
             "iodd_assets",
             "devices",
             "iodd_files",
@@ -847,18 +883,27 @@ async def delete_all_eds_files():
             ticket_count = cursor.rowcount
             logger.info(f"Deleted {ticket_count} PQA tickets for EDS files")
 
-        # Delete related data first (cascading) - child to parent
+        # Delete ALL EDS-related data in correct order (child to parent)
         for table in [
             "eds_connections",
             "eds_ports",
             "eds_variable_assemblies",
             "eds_modules",
             "eds_assemblies",
+            "eds_enum_values",
             "eds_parameters",
             "eds_diagnostics",
             "eds_groups",
             "eds_tspecs",
             "eds_capacity",
+            "eds_dlr_config",
+            "eds_ethernet_link",
+            "eds_lldp_management",
+            "eds_qos_config",
+            "eds_tcpip_interface",
+            "eds_object_metadata",
+            "eds_file_metadata",
+            "eds_package_files",
             "eds_package_metadata",
             "eds_files",
             "eds_packages",
@@ -927,7 +972,7 @@ async def delete_all_data():
     Delete ALL data from the database
 
     WARNING: This is an extremely destructive operation that cannot be undone.
-    Deletes all IODD devices, EDS files, parameters, tickets, and all related data.
+    Deletes all IODD devices, EDS files, parameters, tickets, PQA data, and all related data.
     The database structure (tables) will remain, but all content will be removed.
     """
     conn = sqlite3.connect(get_db_path())
@@ -940,52 +985,113 @@ async def delete_all_data():
         eds_count = _count_rows(cursor, tables, "eds_files")
         ticket_count = _count_rows(cursor, tables, "tickets")
 
-        # Delete all data in correct order to respect foreign keys
-        # Tickets and attachments
-        for table in ["ticket_attachments", "ticket_comments", "tickets"]:
-            _delete_all_rows(cursor, tables, table)
+        # Tables to preserve (system/config tables)
+        preserve_tables = {
+            "alembic_version",  # Migration tracking
+            "sqlite_sequence",  # SQLite internal
+            "user_themes",      # User preferences
+            "pqa_thresholds",   # PQA config
+        }
 
-        # EDS data (child to parent)
-        for table in [
+        # Delete ALL user data tables in dependency order
+        # Order matters: child tables first, parent tables last
+        deletion_order = [
+            # Tickets
+            "ticket_attachments",
+            "ticket_comments",
+            "tickets",
+
+            # PQA tables
+            "pqa_diff_details",
+            "pqa_quality_metrics",
+            "pqa_analysis_queue",
+            "pqa_file_archive",
+
+            # EDS data (child to parent)
             "eds_connections",
             "eds_ports",
             "eds_variable_assemblies",
             "eds_modules",
             "eds_assemblies",
+            "eds_enum_values",
             "eds_parameters",
             "eds_diagnostics",
             "eds_groups",
             "eds_tspecs",
             "eds_capacity",
+            "eds_dlr_config",
+            "eds_ethernet_link",
+            "eds_lldp_management",
+            "eds_qos_config",
+            "eds_tcpip_interface",
+            "eds_object_metadata",
+            "eds_file_metadata",
+            "eds_package_files",
             "eds_package_metadata",
             "eds_files",
             "eds_packages",
-        ]:
-            _delete_all_rows(cursor, tables, table)
 
-        # IODD data (child to parent)
-        for table in [
+            # IODD data (child to parent)
+            "record_item_single_values",
+            "parameter_record_items",
             "parameter_single_values",
+            "std_variable_ref_single_values",
+            "std_record_item_refs",
+            "std_variable_refs",
             "parameters",
+            "process_data_conditions",
+            "process_data_ui_info",
             "process_data_record_items",
             "process_data_single_values",
             "process_data",
+            "variable_record_item_info",
+            "custom_datatype_record_items",
+            "custom_datatype_single_values",
+            "custom_datatypes",
             "error_types",
             "events",
             "communication_profile",
             "device_features",
+            "device_variants",
+            "device_test_event_triggers",
+            "device_test_config",
             "document_info",
+            "ui_menu_buttons",
             "ui_menu_items",
             "ui_menu_roles",
             "ui_menus",
             "generated_adapters",
+            "wire_configurations",
+            "iodd_build_format",
+            "iodd_text",
             "iodd_assets",
             "devices",
             "iodd_files",
-        ]:
-            _delete_all_rows(cursor, tables, table)
+        ]
+
+        # Delete in specified order
+        deleted_tables = []
+        for table in deletion_order:
+            if table in tables and table not in preserve_tables:
+                _delete_all_rows(cursor, tables, table)
+                deleted_tables.append(table)
+
+        # Catch any remaining tables not in our list (except preserved)
+        remaining_tables = tables - set(deletion_order) - preserve_tables
+        for table in remaining_tables:
+            try:
+                _delete_all_rows(cursor, tables, table)
+                deleted_tables.append(table)
+            except Exception as e:
+                logger.warning(f"Could not delete from {table}: {e}")
 
         conn.commit()
+
+        # Run VACUUM to reclaim space (separate connection)
+        conn.close()
+        conn = sqlite3.connect(get_db_path())
+        conn.execute("VACUUM")
+        conn.close()
 
         # Delete attachment files from filesystem
         attachments_dir = Path("ticket_attachments")
@@ -998,13 +1104,15 @@ async def delete_all_data():
             "message": "All data deleted from database",
             "iodd_devices_deleted": iodd_count,
             "eds_files_deleted": eds_count,
-            "tickets_deleted": ticket_count
+            "tickets_deleted": ticket_count,
+            "tables_cleared": len(deleted_tables)
         }
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to delete all data: {str(e)}")
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
 
 @router.post("/database/delete-temp")

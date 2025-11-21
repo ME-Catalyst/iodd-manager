@@ -302,6 +302,31 @@ extracted, stored, or reconstructed. Affected 456 issues across 9 devices.
 
 ---
 
+### Fix #13: StdErrorTypeRef Issues (305 issues) - COMMITTED
+
+**Commit**: `9d5e782` feat(pqa): fix StdErrorTypeRef code attribute and ordering
+
+**Problem**: Two issues with StdErrorTypeRef elements:
+- extra_element (228): Always outputting `code` attribute even when not in original
+- incorrect_attribute (77): `additionalCode` values mismatched due to wrong ordering
+
+**Root Cause**:
+- Parser always stored code with default 128, didn't track if attribute existed
+- Reconstruction ordered by additionalCode instead of original XML order
+
+**Changes Made**:
+1. `src/models/__init__.py` - Add `has_code_attr`, `xml_order` fields to ErrorType
+2. `src/parsing/__init__.py` - Track whether code exists and element order
+3. `src/storage/event.py` - Save has_code_attr and xml_order
+4. `src/utils/forensic_reconstruction_v2.py` - Conditionally output code, order by xml_order
+5. `alembic/versions/053_add_error_type_pqa_fields.py` - Add columns
+
+**Expected Impact**: ~305 issues resolved (requires re-import)
+
+**Status**: COMMITTED & PUSHED - Requires re-import to populate data
+
+---
+
 ## POST-REIMPORT RESULTS (CURRENT STATE)
 
 Re-import completed successfully with parser shadowing fix applied.

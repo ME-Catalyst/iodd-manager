@@ -1376,7 +1376,10 @@ class IODDReconstructor:
 
         if test_configs:
             test_elem = ET.SubElement(comm_elem, 'Test')
-            test_elem.set('{http://www.w3.org/2001/XMLSchema-instance}type', 'IOLinkTestT')
+            # PQA Fix #23: Only add xsi:type if it was present in original
+            test_xsi_type = comm_profile['test_xsi_type'] if 'test_xsi_type' in comm_profile.keys() and comm_profile['test_xsi_type'] else None
+            if test_xsi_type:
+                test_elem.set('{http://www.w3.org/2001/XMLSchema-instance}type', test_xsi_type)
 
             for config in test_configs:
                 config_elem = ET.SubElement(test_elem, config['config_type'])

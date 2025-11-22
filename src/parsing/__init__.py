@@ -1608,6 +1608,12 @@ class IODDParser:
                     wire_function = wire_elem.get('function', 'Standard')
                     wire_config[f'Wire{i}'] = wire_function
 
+        # PQA Fix #23: Extract Test@xsi:type if present
+        test_elem = comm_profile_elem.find('.//iodd:Test', self.NAMESPACES)
+        test_xsi_type = None
+        if test_elem is not None:
+            test_xsi_type = test_elem.get('{http://www.w3.org/2001/XMLSchema-instance}type')
+
         return CommunicationProfile(
             iolink_revision=comm_profile_elem.get('iolinkRevision'),
             compatible_with=comm_profile_elem.get('compatibleWith'),
@@ -1617,7 +1623,8 @@ class IODDParser:
             sio_supported=sio_supported,
             connection_type=connection_type,
             wire_config=wire_config,
-            connection_symbol=connection_symbol  # PQA Fix #19b
+            connection_symbol=connection_symbol,  # PQA Fix #19b
+            test_xsi_type=test_xsi_type  # PQA Fix #23
         )
 
     def _extract_ui_menus(self) -> Optional[UserInterfaceMenus]:

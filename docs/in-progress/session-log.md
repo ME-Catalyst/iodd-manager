@@ -472,6 +472,7 @@ Current stats:
 | #20 | Variable/Datatype@fixedLength | 162 | COMMITTED |
 | #21 | RecordItem/SingleValue duplication | 98 | COMMITTED |
 | #22 | Wire/Name element | 140 | COMMITTED |
+| #23 | Test@xsi:type conditional | 112 | COMMITTED |
 
 ### Fix #20: Variable/Datatype@fixedLength Incorrect (169 issues) - COMMITTED
 
@@ -583,12 +584,34 @@ but didn't store the textId itself for reconstruction.
 
 ---
 
-### Remaining Top Issues (After Fix #22)
+### Fix #23: Test@xsi:type Conditional Output (112 issues) - COMMITTED
+
+**Commit**: `5bfd55e` feat(pqa): Fix #23 - conditional Test@xsi:type reconstruction
+
+**Problem**: CommNetworkProfile/Test element had `xsi:type="IOLinkTestT"` always added
+during reconstruction, but only 35 out of 148 files with Test elements have this attribute.
+
+**Root Cause**: Reconstruction hardcoded `xsi:type="IOLinkTestT"` on all Test elements
+without checking if the original had it.
+
+**Changes Made**:
+1. `src/models/__init__.py` - Added `test_xsi_type` to CommunicationProfile
+2. `src/parsing/__init__.py` - Extract Test@xsi:type if present
+3. `src/storage/communication.py` - Save test_xsi_type to communication_profile
+4. `src/utils/forensic_reconstruction_v2.py` - Conditionally output Test@xsi:type
+5. `alembic/versions/064_add_test_xsi_type.py` - Add test_xsi_type column
+
+**Result**: 112 extra_element:xsi:type issues resolved (1662 → 1550 total issues)
+
+**Status**: COMMITTED & PUSHED
+
+---
+
+### Remaining Top Issues (After Fix #23)
 
 | Count | Issue Pattern |
 |-------|---------------|
 | 114 | missing_attribute:xsi:type |
-| 112 | extra_element:xsi:type |
 | 97 | missing_element:ValueRange |
 | 64 | extra_element:RecordItem@bitOffset |
 | 63 | missing_element:Description |
@@ -599,9 +622,12 @@ but didn't store the textId itself for reconstruction.
 | 56 | missing_element:ProcessDataRefCollection |
 | 48 | incorrect_attribute:SingleValue@value |
 | 48 | incorrect_attribute:Name@textId |
-| 37 | missing_element:SingleValue |
+| 45 | incorrect_attribute:RecordItemRef@variableId |
+| 44 | incorrect_attribute:StdErrorTypeRef@additionalCode |
+| 41 | incorrect_attribute:VariableRef@variableId |
+| 39 | missing_element:IdentificationMenu |
 
-**Total Issues**: 1,662 (down from 1,802 - 140 fixed with Fix #22)
+**Total Issues**: 1,550 (down from 1,662 - 112 fixed with Fix #23)
 
 ---
 

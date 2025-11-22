@@ -467,15 +467,56 @@ Current stats:
 | #15 | Text/Language ordering | 4,063 | COMMITTED |
 | #16 | MenuRef Condition@subindex | 450 | COMMITTED |
 | #17 | Name@textId incorrect | 248 | COMMITTED |
+| #18 | ProcessData@id incorrect | 164 | COMMITTED |
+| #19 | Connection@connectionSymbol | 108 | COMMITTED |
 
-### Remaining Top Issues (After Fix #17)
+### Fix #18: ProcessData@id Incorrect (164 issues) - COMMITTED
+
+**Commit**: `6727d58` feat(pqa): add ProcessData wrapper_id
+
+**Problem**: ProcessData wrapper element ID was derived incorrectly from child ID.
+Example: Wrapper=`PD`, Child=`PDI`, but reconstruction output `PDI` instead of `PD`.
+
+**Root Cause**: Only storing child ProcessDataIn/Out ID, not wrapper ProcessData ID.
+
+**Changes Made**:
+1. `src/models/__init__.py` - Added `wrapper_id` to ProcessData model
+2. `src/parsing/__init__.py` - Build wrapper_id lookup, store wrapper ID
+3. `src/storage/process_data.py` - Save wrapper_id column
+4. `src/utils/forensic_reconstruction_v2.py` - Use stored wrapper_id
+5. `alembic/versions/059_add_process_data_wrapper_id.py` - Add wrapper_id column
+
+**Result**: 164 → 0 issues (100% resolved)
+
+---
+
+### Fix #19: Connection@connectionSymbol (108 issues) - COMMITTED
+
+**Commit**: `28f6bf9` feat(pqa): add Connection@connectionSymbol extraction and reconstruction
+
+**Problem**: Connection elements have `connectionSymbol` attribute that wasn't being stored or reconstructed.
+
+**Root Cause**: Parser extracted xsi:type but not connectionSymbol. Also, some Connection
+elements have no Wire children, so connectionSymbol wasn't stored at all.
+
+**Changes Made**:
+1. `src/models/__init__.py` - Added `connection_symbol` to WireConfiguration and CommunicationProfile
+2. `src/parsing/__init__.py` - Extract connectionSymbol in both wire config and comm profile parsing
+3. `src/storage/communication.py` - Save connection_symbol in both tables
+4. `src/utils/forensic_reconstruction_v2.py` - Output connectionSymbol with fallback
+5. `alembic/versions/060_add_connection_symbol.py` - Add to wire_configurations
+6. `alembic/versions/061_add_connection_symbol_to_comm_profile.py` - Add to communication_profile
+
+**Result**: 108 → 0 issues (100% resolved)
+
+---
+
+### Remaining Top Issues (After Fix #19)
 
 | Count | Issue Pattern |
 |-------|---------------|
 | 169 | incorrect_attribute:Datatype@fixedLength |
-| 165 | incorrect_attribute:ProcessData@id |
 | 112 | extra_element:xsi:type |
-| 109 | missing_attribute:Connection@connectionSymbol |
 | 98 | extra_element:SingleValue[unknown] |
 | 98 | missing_element:SingleValue[unknown] |
 | 67 | missing_element:ValueRange[unknown] |

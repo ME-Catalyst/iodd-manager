@@ -262,6 +262,7 @@ class MenuItem:
     # PQA: MenuRef Condition support
     condition_variable_id: Optional[str] = None
     condition_value: Optional[str] = None
+    condition_subindex: Optional[str] = None  # PQA: MenuRef Condition@subindex
 
 
 @dataclass

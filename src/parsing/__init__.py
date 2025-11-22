@@ -1675,13 +1675,16 @@ class IODDParser:
                     condition_elem = menu_ref.find('iodd:Condition', self.NAMESPACES)
                     condition_var_id = None
                     condition_value = None
+                    condition_subindex = None
                     if condition_elem is not None:
                         condition_var_id = condition_elem.get('variableId')
                         condition_value = condition_elem.get('value')
+                        condition_subindex = condition_elem.get('subindex')  # PQA: Extract subindex
                     items.append(MenuItem(
                         menu_ref=sub_menu_id,
                         condition_variable_id=condition_var_id,
-                        condition_value=condition_value
+                        condition_value=condition_value,
+                        condition_subindex=condition_subindex  # PQA: Pass subindex
                     ))
 
             menus.append(Menu(

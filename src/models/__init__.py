@@ -324,6 +324,7 @@ class WireConfiguration:
     wire_function: Optional[str] = None
     wire_description: Optional[str] = None
     connection_symbol: Optional[str] = None  # PQA: Connection@connectionSymbol attribute
+    name_text_id: Optional[str] = None  # PQA Fix #22: Wire/Name@textId attribute
 
 
 @dataclass

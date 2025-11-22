@@ -1857,7 +1857,8 @@ class IODDParser:
                         wire_color=wire_elem.get('color'),
                         wire_function=wire_elem.get('function'),
                         wire_description=wire_description,
-                        connection_symbol=connection_symbol  # PQA Fix #19
+                        connection_symbol=connection_symbol,  # PQA Fix #19
+                        name_text_id=name_text_id  # PQA Fix #22: Store Wire/Name@textId
                     ))
 
         logger.info(f"Extracted {len(wires)} wire configurations")

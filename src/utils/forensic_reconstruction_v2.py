@@ -1360,6 +1360,11 @@ class IODDReconstructor:
                     wire_elem.set('color', wire['wire_color'])
                 if wire['wire_function']:
                     wire_elem.set('function', wire['wire_function'])
+                # PQA Fix #22: Add Name element with textId
+                name_text_id = wire['name_text_id'] if 'name_text_id' in wire.keys() else None
+                if name_text_id:
+                    name_elem = ET.SubElement(wire_elem, 'Name')
+                    name_elem.set('textId', name_text_id)
 
         # Create Test section
         cursor.execute("""

@@ -80,8 +80,8 @@ class WireConfigSaver(BaseSaver):
         query = """
             INSERT INTO wire_configurations (
                 device_id, connection_type, wire_number, wire_color,
-                wire_function, wire_description, connection_symbol
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                wire_function, wire_description, connection_symbol, name_text_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """
 
         params_list = []
@@ -94,6 +94,7 @@ class WireConfigSaver(BaseSaver):
                 getattr(wire, 'wire_function', None),
                 getattr(wire, 'wire_description', None),
                 getattr(wire, 'connection_symbol', None),  # PQA Fix #19
+                getattr(wire, 'name_text_id', None),  # PQA Fix #22
             ))
 
         if params_list:

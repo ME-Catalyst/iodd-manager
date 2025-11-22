@@ -469,6 +469,27 @@ Current stats:
 | #17 | Name@textId incorrect | 248 | COMMITTED |
 | #18 | ProcessData@id incorrect | 164 | COMMITTED |
 | #19 | Connection@connectionSymbol | 108 | COMMITTED |
+| #20 | Variable/Datatype@fixedLength | 162 | COMMITTED |
+
+### Fix #20: Variable/Datatype@fixedLength Incorrect (169 issues) - COMMITTED
+
+**Commit**: `f63e938` feat(pqa): extract and store Variable/Datatype fixedLength and encoding
+
+**Problem**: StringT/OctetStringT Variable/Datatype elements had `fixedLength` and `encoding`
+attributes that weren't being stored - reconstruction hardcoded `fixedLength="32"` for all.
+
+**Root Cause**: Parser extracted these attributes but didn't store them. The Parameter model
+lacked `string_fixed_length` and `string_encoding` fields. Reconstruction hardcoded values.
+
+**Changes Made**:
+1. `src/models/__init__.py` - Added `string_fixed_length` and `string_encoding` to Parameter
+2. `src/parsing/__init__.py` - Extract fixedLength/encoding from Variable/Datatype elements
+3. `src/storage/parameter.py` - Save string_fixed_length and string_encoding columns
+4. `src/utils/forensic_reconstruction_v2.py` - Use stored values instead of hardcoding
+
+**Result**: 162 → 7 issues (96% resolved). Remaining 7 are in DatatypeCollection (different context)
+
+---
 
 ### Fix #18: ProcessData@id Incorrect (164 issues) - COMMITTED
 
@@ -511,19 +532,22 @@ elements have no Wire children, so connectionSymbol wasn't stored at all.
 
 ---
 
-### Remaining Top Issues (After Fix #19)
+### Remaining Top Issues (After Fix #20)
 
 | Count | Issue Pattern |
 |-------|---------------|
-| 169 | incorrect_attribute:Datatype@fixedLength |
+| 121 | missing_element:RecordItem/SimpleDatatype/SingleValue |
+| 114 | missing_attribute:xsi:type |
 | 112 | extra_element:xsi:type |
-| 98 | extra_element:SingleValue[unknown] |
-| 98 | missing_element:SingleValue[unknown] |
-| 67 | missing_element:ValueRange[unknown] |
-| 63 | missing_element:Description[unknown] |
-| 61 | incorrect_attribute:DeviceFamily@textId |
+| 100 | extra_element:DatatypeCollection/Datatype/SingleValue |
+| 67 | missing_element:DatatypeCollection/ValueRange |
+| 63 | missing_element:Connection/Description |
 | 61 | incorrect_attribute:VendorText@textId |
-| 48 | incorrect_attribute:Name@textId (DatatypeCollection/SingleValue ordering) |
+| 61 | incorrect_attribute:VendorUrl@textId |
+| 61 | incorrect_attribute:DeviceFamily@textId |
+| 58 | incorrect_attribute:RecordItemInfo@subindex |
+
+**Total Issues**: 2,023 (down from 2,330 - 307 fixed this session)
 
 ---
 

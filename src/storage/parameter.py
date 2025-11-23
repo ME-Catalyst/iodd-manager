@@ -51,8 +51,10 @@ class ParameterSaver(BaseSaver):
                     array_element_bit_length, array_element_fixed_length,
                     name_text_id, description_text_id, datatype_ref,
                     value_range_xsi_type, value_range_name_text_id, xml_order,
-                    string_fixed_length, string_encoding
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    string_fixed_length, string_encoding,
+                    array_element_min_value, array_element_max_value,
+                    array_element_value_range_xsi_type, array_element_value_range_name_text_id
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
 
             self._execute(query, (
@@ -92,6 +94,11 @@ class ParameterSaver(BaseSaver):
                 # PQA Fix #20: StringT/OctetStringT specific fields
                 getattr(param, 'string_fixed_length', None),
                 getattr(param, 'string_encoding', None),
+                # PQA Fix #30c: ArrayT SimpleDatatype ValueRange
+                getattr(param, 'array_element_min_value', None),
+                getattr(param, 'array_element_max_value', None),
+                getattr(param, 'array_element_value_range_xsi_type', None),
+                getattr(param, 'array_element_value_range_name_text_id', None),
             ))
 
             parameter_id = self._get_lastrowid()

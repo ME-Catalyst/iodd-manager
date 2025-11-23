@@ -438,6 +438,11 @@ class IODDParser:
             array_element_bit_length=datatype_info.get('array_element_bit_length'),
             array_element_fixed_length=datatype_info.get('array_element_fixed_length'),
             subindex_access_supported=datatype_info.get('subindex_access_supported'),
+            # PQA Fix #30c: ArrayT SimpleDatatype ValueRange
+            array_element_min_value=datatype_info.get('array_element_min_value'),
+            array_element_max_value=datatype_info.get('array_element_max_value'),
+            array_element_value_range_xsi_type=datatype_info.get('array_element_value_range_xsi_type'),
+            array_element_value_range_name_text_id=datatype_info.get('array_element_value_range_name_text_id'),
             # StringT/OctetStringT specific fields (PQA Fix #20)
             string_fixed_length=datatype_info.get('string_fixed_length'),
             string_encoding=datatype_info.get('string_encoding'),
@@ -675,6 +680,15 @@ class IODDParser:
                     element_fixed_length = simple_datatype.get('fixedLength')
                     if element_fixed_length:
                         result['array_element_fixed_length'] = int(element_fixed_length)
+
+                    # PQA Fix #30c: Extract ValueRange from ArrayT SimpleDatatype
+                    vr_elem = simple_datatype.find('iodd:ValueRange', self.NAMESPACES)
+                    if vr_elem is not None:
+                        result['array_element_min_value'] = vr_elem.get('lowerValue')
+                        result['array_element_max_value'] = vr_elem.get('upperValue')
+                        result['array_element_value_range_xsi_type'] = vr_elem.get('{http://www.w3.org/2001/XMLSchema-instance}type')
+                        vr_name_elem = vr_elem.find('iodd:Name', self.NAMESPACES)
+                        result['array_element_value_range_name_text_id'] = vr_name_elem.get('textId') if vr_name_elem is not None else None
 
             return result
 

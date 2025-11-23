@@ -1665,6 +1665,22 @@ class IODDReconstructor:
                             simple_dt.set('fixedLength', str(param['array_element_fixed_length']))
                         # Add SingleValues to SimpleDatatype for ArrayT (PQA reconstruction)
                         self._add_variable_single_values(conn, param['id'], simple_dt)
+                        # PQA Fix #30c: Add ValueRange to ArrayT SimpleDatatype if present
+                        ae_min = param.get('array_element_min_value')
+                        ae_max = param.get('array_element_max_value')
+                        if ae_min is not None or ae_max is not None:
+                            vr_elem = ET.SubElement(simple_dt, 'ValueRange')
+                            ae_vr_xsi_type = param.get('array_element_value_range_xsi_type')
+                            if ae_vr_xsi_type:
+                                vr_elem.set('{http://www.w3.org/2001/XMLSchema-instance}type', ae_vr_xsi_type)
+                            if ae_min is not None:
+                                vr_elem.set('lowerValue', str(ae_min))
+                            if ae_max is not None:
+                                vr_elem.set('upperValue', str(ae_max))
+                            ae_vr_name_text_id = param.get('array_element_value_range_name_text_id')
+                            if ae_vr_name_text_id:
+                                vr_name_elem = ET.SubElement(vr_elem, 'Name')
+                                vr_name_elem.set('textId', ae_vr_name_text_id)
 
                 # Handle RecordT specific attributes
                 elif param['data_type'] == 'RecordT':

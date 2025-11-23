@@ -314,14 +314,18 @@ class IODDReconstructor:
         if device['manufacturer']:
             device_identity.set('vendorName', device['manufacturer'])
 
-        # VendorText - look up actual textId from database (may be TI_ or TN_ prefix)
+        # VendorText - use stored textId (PQA Fix #24), fallback to lookup
         vendor_text = ET.SubElement(device_identity, 'VendorText')
-        vendor_text_id = self._lookup_textid(conn, device_id, None, ['TI_VendorText', 'TN_VendorText'])
+        vendor_text_id = device['vendor_text_text_id'] if 'vendor_text_text_id' in device.keys() and device['vendor_text_text_id'] else None
+        if not vendor_text_id:
+            vendor_text_id = self._lookup_textid(conn, device_id, None, ['TI_VendorText', 'TN_VendorText', 'T_VendorText'])
         vendor_text.set('textId', vendor_text_id)
 
-        # VendorUrl - look up actual textId from database
+        # VendorUrl - use stored textId (PQA Fix #24), fallback to lookup
         vendor_url = ET.SubElement(device_identity, 'VendorUrl')
-        vendor_url_id = self._lookup_textid(conn, device_id, None, ['TI_VendorUrl', 'TN_VendorUrl'])
+        vendor_url_id = device['vendor_url_text_id'] if 'vendor_url_text_id' in device.keys() and device['vendor_url_text_id'] else None
+        if not vendor_url_id:
+            vendor_url_id = self._lookup_textid(conn, device_id, None, ['TI_VendorUrl', 'TN_VendorUrl', 'T_VendorUrl'])
         vendor_url.set('textId', vendor_url_id)
 
         # VendorLogo - if logo file exists
@@ -339,9 +343,11 @@ class IODDReconstructor:
             device_name_id = self._lookup_textid(conn, device_id, None, ['TI_Device', 'TN_DeviceName', 'TN_Device'])
         device_name_elem.set('textId', device_name_id)
 
-        # DeviceFamily - look up actual textId
+        # DeviceFamily - use stored textId (PQA Fix #24), fallback to lookup
         device_family = ET.SubElement(device_identity, 'DeviceFamily')
-        device_family_id = self._lookup_textid(conn, device_id, None, ['TI_DeviceFamily', 'TN_DeviceFamily'])
+        device_family_id = device['device_family_text_id'] if 'device_family_text_id' in device.keys() and device['device_family_text_id'] else None
+        if not device_family_id:
+            device_family_id = self._lookup_textid(conn, device_id, None, ['TI_DeviceFamily', 'TN_DeviceFamily', 'T_DeviceFamily'])
         device_family.set('textId', device_family_id)
 
         # DeviceVariantCollection - device variants/models

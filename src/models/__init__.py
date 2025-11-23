@@ -51,6 +51,10 @@ class DeviceInfo:
     firmware_revision: Optional[str] = None
     software_revision: Optional[str] = None
     device_name_text_id: Optional[str] = None  # PQA: Store original DeviceName@textId
+    # PQA Fix #24: Store original DeviceIdentity textIds
+    vendor_text_text_id: Optional[str] = None  # VendorText@textId
+    vendor_url_text_id: Optional[str] = None  # VendorUrl@textId
+    device_family_text_id: Optional[str] = None  # DeviceFamily@textId
 
 
 @dataclass

@@ -631,6 +631,30 @@ without checking if the original had it.
 
 ---
 
+### Fix #24: DeviceIdentity textId Storage (141 issues) - COMMITTED
+
+**Commit**: (pending)
+
+**Problem**: VendorText@textId, VendorUrl@textId, and DeviceFamily@textId elements were using
+lookup-based textIds (TI_VendorText) instead of storing the original textIds from the IODD.
+This affected 47 devices with 141 issues total (3 elements x 47 devices).
+
+**Root Cause**: Parser didn't store original textIds for these DeviceIdentity elements.
+Reconstruction used `_lookup_textid()` which guesses based on common prefixes.
+
+**Changes Made**:
+1. `src/models/__init__.py` - Added `vendor_text_text_id`, `vendor_url_text_id`, `device_family_text_id` to DeviceInfo
+2. `src/parsing/__init__.py` - Extract textIds from VendorText, VendorUrl, DeviceFamily elements
+3. `src/storage/device.py` - Save new textId fields to devices table
+4. `src/utils/forensic_reconstruction_v2.py` - Use stored textIds with fallback to lookup
+5. `alembic/versions/065_add_device_identity_text_ids.py` - Add new columns
+
+**Expected Impact**: ~141 issues resolved (requires re-import)
+
+**Status**: COMMITTED & PUSHED - Requires re-import to populate data
+
+---
+
 ## POST-REIMPORT RESULTS (HISTORICAL)
 
 Re-import completed successfully with parser shadowing fix applied.

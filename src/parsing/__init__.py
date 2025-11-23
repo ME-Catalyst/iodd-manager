@@ -296,6 +296,16 @@ class IODDParser:
                     if not product_name:
                         product_name = variant_elem.get('productId', 'Unknown')
 
+            # PQA Fix #24: Extract DeviceIdentity textIds for reconstruction
+            vendor_text_elem = device_identity.find('.//iodd:VendorText', self.NAMESPACES)
+            vendor_text_text_id = vendor_text_elem.get('textId') if vendor_text_elem is not None else None
+
+            vendor_url_elem = device_identity.find('.//iodd:VendorUrl', self.NAMESPACES)
+            vendor_url_text_id = vendor_url_elem.get('textId') if vendor_url_elem is not None else None
+
+            device_family_elem = device_identity.find('.//iodd:DeviceFamily', self.NAMESPACES)
+            device_family_text_id = device_family_elem.get('textId') if device_family_elem is not None else None
+
             return DeviceInfo(
                 vendor_id=int(device_identity.get('vendorId', 0)),
                 device_id=int(device_identity.get('deviceId', 0)),
@@ -305,7 +315,10 @@ class IODDParser:
                 hardware_revision=device_identity.get('hardwareRevision'),
                 firmware_revision=device_identity.get('firmwareRevision'),
                 software_revision=device_identity.get('softwareRevision'),
-                device_name_text_id=device_name_id  # PQA: Store original textId
+                device_name_text_id=device_name_id,  # PQA: Store original textId
+                vendor_text_text_id=vendor_text_text_id,  # PQA Fix #24
+                vendor_url_text_id=vendor_url_text_id,  # PQA Fix #24
+                device_family_text_id=device_family_text_id  # PQA Fix #24
             )
         return DeviceInfo(vendor_id=0, device_id=0, product_name='Unknown')
 

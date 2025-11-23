@@ -48,8 +48,9 @@ class DeviceSaver(BaseSaver):
             INSERT INTO devices (
                 vendor_id, device_id, product_name, manufacturer,
                 iodd_version, import_date, checksum, vendor_logo_filename,
-                device_name_text_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                device_name_text_id, vendor_text_text_id, vendor_url_text_id,
+                device_family_text_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
 
         params = (
@@ -62,6 +63,9 @@ class DeviceSaver(BaseSaver):
             checksum,
             getattr(profile, 'vendor_logo_filename', None),
             getattr(profile.device_info, 'device_name_text_id', None),  # PQA
+            getattr(profile.device_info, 'vendor_text_text_id', None),  # PQA Fix #24
+            getattr(profile.device_info, 'vendor_url_text_id', None),  # PQA Fix #24
+            getattr(profile.device_info, 'device_family_text_id', None),  # PQA Fix #24
         )
 
         self._execute(query, params)

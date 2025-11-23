@@ -818,6 +818,30 @@ Only ValueRange inside RecordItem/SimpleDatatype was implemented.
 
 ---
 
+### Fix #30c: ArrayT Variable SimpleDatatype/ValueRange Missing (30 issues) - COMMITTED
+
+**Commit**: `8cf2291` feat(pqa): Fix #30c - add ArrayT SimpleDatatype ValueRange extraction
+
+**Problem**: ArrayT Variables have SimpleDatatype child elements that can contain ValueRange.
+These ValueRanges with lowerValue, upperValue, xsi:type, and Name@textId were not extracted.
+Affected 30 issues.
+
+**Root Cause**: Parser extracted ArrayT SimpleDatatype attributes (type, bitLength, fixedLength)
+but didn't extract ValueRange inside the SimpleDatatype.
+
+**Changes Made**:
+1. `src/models/__init__.py` - Added `array_element_min_value`, `array_element_max_value`, `array_element_value_range_xsi_type`, `array_element_value_range_name_text_id` to Parameter
+2. `src/parsing/__init__.py` - Extract ValueRange from ArrayT SimpleDatatype
+3. `src/storage/parameter.py` - Save ArrayT ValueRange fields to parameters table
+4. `src/utils/forensic_reconstruction_v2.py` - Output ValueRange with Name in ArrayT SimpleDatatype
+5. `alembic/versions/071_add_array_element_value_range.py` - Add columns to parameters
+
+**Expected Impact**: ~30 issues resolved (requires re-import)
+
+**Status**: COMMITTED & PUSHED - Requires re-import to populate data
+
+---
+
 ## POST-REIMPORT RESULTS (HISTORICAL)
 
 Re-import completed successfully with parser shadowing fix applied.

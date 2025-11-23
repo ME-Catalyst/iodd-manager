@@ -1702,6 +1702,7 @@ class IODDParser:
                     access_right_restriction=var_ref.get('accessRightRestriction'),
                     display_format=var_ref.get('displayFormat'),
                     unit_code=var_ref.get('unitCode'),
+                    button_value=var_ref.get('buttonValue'),  # PQA Fix #29: VariableRef@buttonValue
                     gradient=float(gradient) if gradient else None,
                     offset=float(offset) if offset else None,
                     gradient_str=gradient,  # PQA: preserve original string format

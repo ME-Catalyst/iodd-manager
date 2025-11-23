@@ -1177,6 +1177,9 @@ class IODDReconstructor:
                         var_ref.set('displayFormat', item['display_format'])
                     if item['unit_code']:
                         var_ref.set('unitCode', item['unit_code'])
+                    # PQA Fix #29: Output buttonValue attribute when present
+                    if item.get('button_value'):
+                        var_ref.set('buttonValue', item['button_value'])
                     # Use 'is not None' to handle 0 values correctly
                     # PQA: Use original string format if available, otherwise format the float
                     if item['gradient'] is not None:

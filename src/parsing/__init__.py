@@ -1757,8 +1757,9 @@ class IODDParser:
                 name_text_id=name_id  # PQA reconstruction
             ))
 
-        # Extract role menu sets
+        # Extract role menu sets with PQA Fix #27: Track xsi:type
         observer_menus = {}
+        observer_xsi_types = {}  # PQA Fix #27
         observer_set = ui_elem.find('.//iodd:ObserverRoleMenuSet', self.NAMESPACES)
         if observer_set is not None:
             for menu_ref in observer_set:
@@ -1766,8 +1767,12 @@ class IODDParser:
                 menu_id = menu_ref.get('menuId')
                 if menu_id:
                     observer_menus[menu_type] = menu_id
+                    # PQA Fix #27: Track xsi:type
+                    xsi_type = menu_ref.get('{http://www.w3.org/2001/XMLSchema-instance}type')
+                    observer_xsi_types[menu_type] = xsi_type is not None
 
         maintenance_menus = {}
+        maintenance_xsi_types = {}  # PQA Fix #27
         maintenance_set = ui_elem.find('.//iodd:MaintenanceRoleMenuSet', self.NAMESPACES)
         if maintenance_set is not None:
             for menu_ref in maintenance_set:
@@ -1775,8 +1780,12 @@ class IODDParser:
                 menu_id = menu_ref.get('menuId')
                 if menu_id:
                     maintenance_menus[menu_type] = menu_id
+                    # PQA Fix #27: Track xsi:type
+                    xsi_type = menu_ref.get('{http://www.w3.org/2001/XMLSchema-instance}type')
+                    maintenance_xsi_types[menu_type] = xsi_type is not None
 
         specialist_menus = {}
+        specialist_xsi_types = {}  # PQA Fix #27
         specialist_set = ui_elem.find('.//iodd:SpecialistRoleMenuSet', self.NAMESPACES)
         if specialist_set is not None:
             for menu_ref in specialist_set:
@@ -1784,12 +1793,18 @@ class IODDParser:
                 menu_id = menu_ref.get('menuId')
                 if menu_id:
                     specialist_menus[menu_type] = menu_id
+                    # PQA Fix #27: Track xsi:type
+                    xsi_type = menu_ref.get('{http://www.w3.org/2001/XMLSchema-instance}type')
+                    specialist_xsi_types[menu_type] = xsi_type is not None
 
         return UserInterfaceMenus(
             menus=menus,
             observer_role_menus=observer_menus,
             maintenance_role_menus=maintenance_menus,
-            specialist_role_menus=specialist_menus
+            specialist_role_menus=specialist_menus,
+            observer_role_menus_xsi_type=observer_xsi_types,  # PQA Fix #27
+            maintenance_role_menus_xsi_type=maintenance_xsi_types,  # PQA Fix #27
+            specialist_role_menus_xsi_type=specialist_xsi_types  # PQA Fix #27
         )
 
     def _extract_process_data_ui_info(self) -> List[ProcessDataUIInfo]:

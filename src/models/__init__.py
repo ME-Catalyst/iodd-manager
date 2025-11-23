@@ -296,6 +296,10 @@ class UserInterfaceMenus:
     observer_role_menus: Dict[str, str] = field(default_factory=dict)
     maintenance_role_menus: Dict[str, str] = field(default_factory=dict)
     specialist_role_menus: Dict[str, str] = field(default_factory=dict)
+    # PQA Fix #27: Track which role menus have xsi:type="UIMenuRefT"
+    observer_role_menus_xsi_type: Dict[str, bool] = field(default_factory=dict)
+    maintenance_role_menus_xsi_type: Dict[str, bool] = field(default_factory=dict)
+    specialist_role_menus_xsi_type: Dict[str, bool] = field(default_factory=dict)
 
 
 @dataclass

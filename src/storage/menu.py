@@ -124,26 +124,32 @@ class MenuSaver(BaseSaver):
     def _save_role_mappings(self, device_id: int, ui_menus):
         """Save role menu mappings (observer, maintenance, specialist)"""
         query = """
-            INSERT INTO ui_menu_roles (device_id, role_type, menu_type, menu_id)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO ui_menu_roles (device_id, role_type, menu_type, menu_id, has_xsi_type)
+            VALUES (?, ?, ?, ?, ?)
         """
 
         params_list = []
 
-        # Observer role menus
+        # Observer role menus - PQA Fix #27: Include xsi_type flag
         if hasattr(ui_menus, 'observer_role_menus'):
+            xsi_types = getattr(ui_menus, 'observer_role_menus_xsi_type', {})
             for menu_type, menu_id in ui_menus.observer_role_menus.items():
-                params_list.append((device_id, 'observer', menu_type, menu_id))
+                has_xsi = 1 if xsi_types.get(menu_type, False) else 0
+                params_list.append((device_id, 'observer', menu_type, menu_id, has_xsi))
 
-        # Maintenance role menus
+        # Maintenance role menus - PQA Fix #27: Include xsi_type flag
         if hasattr(ui_menus, 'maintenance_role_menus'):
+            xsi_types = getattr(ui_menus, 'maintenance_role_menus_xsi_type', {})
             for menu_type, menu_id in ui_menus.maintenance_role_menus.items():
-                params_list.append((device_id, 'maintenance', menu_type, menu_id))
+                has_xsi = 1 if xsi_types.get(menu_type, False) else 0
+                params_list.append((device_id, 'maintenance', menu_type, menu_id, has_xsi))
 
-        # Specialist role menus
+        # Specialist role menus - PQA Fix #27: Include xsi_type flag
         if hasattr(ui_menus, 'specialist_role_menus'):
+            xsi_types = getattr(ui_menus, 'specialist_role_menus_xsi_type', {})
             for menu_type, menu_id in ui_menus.specialist_role_menus.items():
-                params_list.append((device_id, 'specialist', menu_type, menu_id))
+                has_xsi = 1 if xsi_types.get(menu_type, False) else 0
+                params_list.append((device_id, 'specialist', menu_type, menu_id, has_xsi))
 
         if params_list:
             self._execute_many(query, params_list)

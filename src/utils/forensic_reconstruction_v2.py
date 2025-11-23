@@ -1261,9 +1261,9 @@ class IODDReconstructor:
             else:
                 continue  # Unknown role type
 
-            # Get menu types for this role
+            # Get menu types for this role (PQA Fix #27: include has_xsi_type)
             cursor.execute("""
-                SELECT menu_type, menu_id FROM ui_menu_roles
+                SELECT menu_type, menu_id, has_xsi_type FROM ui_menu_roles
                 WHERE device_id = ? AND role_type = ?
                 ORDER BY menu_type
             """, (device_id, role_type))
@@ -1272,19 +1272,23 @@ class IODDReconstructor:
             for role_menu in role_menus:
                 menu_type = role_menu['menu_type']
                 menu_id = role_menu['menu_id']
+                has_xsi_type = role_menu['has_xsi_type'] if 'has_xsi_type' in role_menu.keys() else 0
 
+                menu_elem = None
                 if menu_type == 'IdentificationMenu':
-                    id_menu = ET.SubElement(role_set, 'IdentificationMenu')
-                    id_menu.set('menuId', menu_id)
+                    menu_elem = ET.SubElement(role_set, 'IdentificationMenu')
                 elif menu_type == 'ParameterMenu':
-                    param_menu = ET.SubElement(role_set, 'ParameterMenu')
-                    param_menu.set('menuId', menu_id)
+                    menu_elem = ET.SubElement(role_set, 'ParameterMenu')
                 elif menu_type == 'ObservationMenu':
-                    obs_menu = ET.SubElement(role_set, 'ObservationMenu')
-                    obs_menu.set('menuId', menu_id)
+                    menu_elem = ET.SubElement(role_set, 'ObservationMenu')
                 elif menu_type == 'DiagnosisMenu':
-                    diag_menu = ET.SubElement(role_set, 'DiagnosisMenu')
-                    diag_menu.set('menuId', menu_id)
+                    menu_elem = ET.SubElement(role_set, 'DiagnosisMenu')
+
+                if menu_elem is not None:
+                    # PQA Fix #27: Add xsi:type if present in original
+                    if has_xsi_type:
+                        menu_elem.set('{http://www.w3.org/2001/XMLSchema-instance}type', 'UIMenuRefT')
+                    menu_elem.set('menuId', menu_id)
 
         return user_interface
 

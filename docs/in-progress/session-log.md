@@ -679,7 +679,7 @@ Expected values like `Wire1T`, `Wire3T`, `Wire4T`. Affected 33 issues across 10 
 
 ### Fix #26: Connection/ProductRef@productId (24 issues) - COMMITTED
 
-**Commit**: (pending)
+**Commit**: `89d2060`
 
 **Problem**: Connection/ProductRef@productId was using device_variants.product_id instead
 of the original productId from the IODD. This caused 24 issues across 24 devices where
@@ -696,6 +696,28 @@ which may have a different productId than what's in Connection/ProductRef.
 5. `alembic/versions/067_add_product_ref_id.py` - Add product_ref_id column
 
 **Expected Impact**: ~24 issues resolved (requires re-import)
+
+**Status**: COMMITTED & PUSHED - Requires re-import to populate data
+
+---
+
+### Fix #27: Menu xsi:type UIMenuRefT (78 issues) - COMMITTED
+
+**Commit**: (pending)
+
+**Problem**: Role menu elements (IdentificationMenu, ParameterMenu, DiagnosisMenu, ObservationMenu)
+inside RoleMenuSets were missing `xsi:type="UIMenuRefT"` attribute. Affected 78 issues across 13 devices.
+
+**Root Cause**: Parser didn't extract xsi:type from role menu elements. Reconstruction didn't output it.
+
+**Changes Made**:
+1. `src/models/__init__.py` - Added xsi_type tracking dicts to UserInterfaceMenus
+2. `src/parsing/__init__.py` - Extract xsi:type from role menu elements
+3. `src/storage/menu.py` - Save has_xsi_type flag to ui_menu_roles table
+4. `src/utils/forensic_reconstruction_v2.py` - Output xsi:type when has_xsi_type is true
+5. `alembic/versions/068_add_role_menu_xsi_type.py` - Add has_xsi_type column
+
+**Expected Impact**: ~78 issues resolved (requires re-import)
 
 **Status**: COMMITTED & PUSHED - Requires re-import to populate data
 

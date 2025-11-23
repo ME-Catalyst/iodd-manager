@@ -1757,13 +1757,20 @@ class IODDParser:
                 name_text_id=name_id  # PQA reconstruction
             ))
 
+        # Helper function to extract local name from tag (Fix #28: handle any namespace)
+        def get_local_name(tag):
+            """Extract local name from namespaced tag (e.g., '{...}IdentificationMenu' -> 'IdentificationMenu')"""
+            if '}' in tag:
+                return tag.split('}')[1]
+            return tag
+
         # Extract role menu sets with PQA Fix #27: Track xsi:type
         observer_menus = {}
         observer_xsi_types = {}  # PQA Fix #27
         observer_set = ui_elem.find('.//iodd:ObserverRoleMenuSet', self.NAMESPACES)
         if observer_set is not None:
             for menu_ref in observer_set:
-                menu_type = menu_ref.tag.replace('{http://www.io-link.com/IODD/2010/10}', '')
+                menu_type = get_local_name(menu_ref.tag)  # PQA Fix #28: Handle any namespace
                 menu_id = menu_ref.get('menuId')
                 if menu_id:
                     observer_menus[menu_type] = menu_id
@@ -1776,7 +1783,7 @@ class IODDParser:
         maintenance_set = ui_elem.find('.//iodd:MaintenanceRoleMenuSet', self.NAMESPACES)
         if maintenance_set is not None:
             for menu_ref in maintenance_set:
-                menu_type = menu_ref.tag.replace('{http://www.io-link.com/IODD/2010/10}', '')
+                menu_type = get_local_name(menu_ref.tag)  # PQA Fix #28: Handle any namespace
                 menu_id = menu_ref.get('menuId')
                 if menu_id:
                     maintenance_menus[menu_type] = menu_id
@@ -1789,7 +1796,7 @@ class IODDParser:
         specialist_set = ui_elem.find('.//iodd:SpecialistRoleMenuSet', self.NAMESPACES)
         if specialist_set is not None:
             for menu_ref in specialist_set:
-                menu_type = menu_ref.tag.replace('{http://www.io-link.com/IODD/2010/10}', '')
+                menu_type = get_local_name(menu_ref.tag)  # PQA Fix #28: Handle any namespace
                 menu_id = menu_ref.get('menuId')
                 if menu_id:
                     specialist_menus[menu_type] = menu_id

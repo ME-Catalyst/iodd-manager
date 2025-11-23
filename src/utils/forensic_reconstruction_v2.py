@@ -1271,6 +1271,9 @@ class IODDReconstructor:
 
             for role_menu in role_menus:
                 menu_type = role_menu['menu_type']
+                # PQA Fix #28: Handle namespace prefix in menu_type (legacy data)
+                if '}' in menu_type:
+                    menu_type = menu_type.split('}')[1]
                 menu_id = role_menu['menu_id']
                 has_xsi_type = role_menu['has_xsi_type'] if 'has_xsi_type' in role_menu.keys() else 0
 
